@@ -1,0 +1,46 @@
+# --------------- Models ---------------
+
+type User {
+  id: ID!
+  name: String!
+  email: String
+}
+
+type Todo {
+  id: ID!
+  userId: String!
+  text: String!
+  color: String
+  done: Boolean!
+}
+
+# type Board {
+#   id: ID!
+#   user: User!
+#   name: String!
+#   todos: [Todo!]!
+# }
+
+# --------------- Inputs ---------------
+
+input NewUser {
+  name: String!
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
+# --------- Queries & Mutations ---------
+
+type Query {
+  todos(userId: String!): [Todo!]!
+  todo(userId: String!, todoId: String!): Todo
+  users: [User!]!
+}
+
+type Mutation {
+  createUser(input: NewUser!): User!
+  createTodo(input: NewTodo!): Todo!
+}
