@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetTodo  func(childComplexity int, userID string, todoID string) int
+		GetTodo  func(childComplexity int, todoID string) int
 		GetTodos func(childComplexity int, userID string) int
 		GetUsers func(childComplexity int) int
 	}
@@ -76,7 +76,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetTodos(ctx context.Context, userID string) ([]*model.Todo, error)
-	GetTodo(ctx context.Context, userID string, todoID string) (*model.Todo, error)
+	GetTodo(ctx context.Context, todoID string) (*model.Todo, error)
 	GetUsers(ctx context.Context) ([]*model.User, error)
 }
 
@@ -129,7 +129,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetTodo(childComplexity, args["userId"].(string), args["todoId"].(string)), true
+		return e.complexity.Query.GetTodo(childComplexity, args["todoId"].(string)), true
 
 	case "Query.getTodos":
 		if e.complexity.Query.GetTodos == nil {
@@ -315,7 +315,7 @@ input NewTodo {
 
 type Query {
   getTodos(userId: String!): [Todo!]!
-  getTodo(userId: String!, todoId: String!): Todo
+  getTodo(todoId: String!): Todo
   getUsers: [User!]!
 }
 
@@ -380,23 +380,14 @@ func (ec *executionContext) field_Query_getTodo_args(ctx context.Context, rawArg
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+	if tmp, ok := rawArgs["todoId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("todoId"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["todoId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("todoId"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["todoId"] = arg1
+	args["todoId"] = arg0
 	return args, nil
 }
 
@@ -664,7 +655,7 @@ func (ec *executionContext) _Query_getTodo(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetTodo(rctx, fc.Args["userId"].(string), fc.Args["todoId"].(string))
+		return ec.resolvers.Query().GetTodo(rctx, fc.Args["todoId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

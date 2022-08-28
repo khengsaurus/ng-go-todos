@@ -4,7 +4,7 @@ package model
 
 type NewTodo struct {
 	Text   string `json:"text" bson:"text"`
-	UserID string `json:"userId" bson:"objectId"`
+	UserID string `json:"userId" bson:"userId"`
 }
 
 type NewUser struct {
@@ -14,7 +14,7 @@ type NewUser struct {
 
 type Todo struct {
 	ID     string  `json:"id" bson:"_id"`
-	UserID string  `json:"userId" bson:"objectId"`
+	UserID string  `json:"userId" bson:"userId"`
 	Text   string  `json:"text" bson:"text"`
 	Color  *string `json:"color" bson:"color"`
 	Done   bool    `json:"done" bson:"done"`

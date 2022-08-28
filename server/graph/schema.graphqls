@@ -37,7 +37,7 @@ input NewTodo {
 
 type Query {
   getTodos(userId: String!): [Todo!]!
-  getTodo(userId: String!, todoId: String!): Todo
+  getTodo(todoId: String!): Todo
   getUsers: [User!]!
 }
 

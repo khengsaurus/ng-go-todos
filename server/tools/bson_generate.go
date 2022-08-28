@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -23,9 +22,9 @@ func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 			if name == "id" {
 				name = "_id"
 			}
-			if strings.HasSuffix(name, "Id") {
-				name = "objectId"
-			}
+			// if strings.HasSuffix(name, "Id") {
+			// 	name = "objectId"
+			// }
 			field.Tag += ` bson:"` + name + `"`
 		}
 	}

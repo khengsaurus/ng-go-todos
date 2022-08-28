@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/khengsaurus/ng-gql-todos/consts"
@@ -29,7 +30,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, collectionErr
 	}
 
-	result, err := usersColl.InsertOne(context.TODO(), input)
+	result, err := usersColl.InsertOne(ctx, input)
 
 	if err != nil {
 		fmt.Printf("Failed to insert document into %s collection", consts.UsersCollection)
@@ -43,28 +44,122 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		}, err
 	}
 
-	return nil, nil
+	return nil, errors.New("failed to insert user document")
 }
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	// db := store.GetStoreFromContext(ctx)
-	// newTodo, err := db.AddTodo(&input)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	mongoClient, connectErr := database.GetClient(ctx, true)
+	if connectErr != nil {
+		return nil, connectErr
+	}
+	defer mongoClient.Disconnect()
 
-	return nil, nil
+	todosColl, collectionErr := mongoClient.GetCollection(consts.TodosCollection)
+	if collectionErr != nil {
+		return nil, collectionErr
+	}
+
+	userId, userIdErr := primitive.ObjectIDFromHex(input.UserID)
+	if userIdErr != nil {
+		return nil, userIdErr
+	}
+
+	result, err := todosColl.InsertOne(ctx, bson.D{
+		{
+			Key:   "userId",
+			Value: userId,
+		},
+		{
+			Key:   "text",
+			Value: input.Text,
+		},
+		{
+			Key:   "color",
+			Value: "",
+		},
+		{
+			Key:   "done",
+			Value: false,
+		},
+	})
+
+	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
+		return &model.Todo{
+			ID:     oid.Hex(),
+			UserID: input.UserID,
+			Text:   input.Text,
+			Color:  nil,
+			Done:   false,
+		}, err
+	}
+
+	return nil, errors.New("failed to insert todo document")
 }
 
 // GetTodos is the resolver for the getTodos field.
 func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.Todo, error) {
-	return nil, nil
+	mongoClient, connectErr := database.GetClient(ctx, true)
+	if connectErr != nil {
+		return nil, connectErr
+	}
+	defer mongoClient.Disconnect()
+
+	todosColl, collectionErr := mongoClient.GetCollection(consts.TodosCollection)
+	if collectionErr != nil {
+		return nil, collectionErr
+	}
+
+	userId, userIdErr := primitive.ObjectIDFromHex(userID)
+	if userIdErr != nil {
+		return nil, userIdErr
+	}
+
+	filter := bson.D{{Key: "userId", Value: userId}}
+	cur, findErr := todosColl.Find(ctx, filter)
+	if findErr != nil {
+		return nil, findErr
+	}
+	defer cur.Close(context.TODO())
+
+	var todos []*model.Todo
+	for cur.Next(ctx) {
+		var todo model.Todo
+		err := cur.Decode(&todo)
+		if err != nil {
+			fmt.Println("Failed to decode todo document")
+		} else {
+			todos = append(todos, &todo)
+		}
+	}
+
+	return todos, nil
 }
 
 // GetTodo is the resolver for the getTodo field.
-func (r *queryResolver) GetTodo(ctx context.Context, userID string, todoID string) (*model.Todo, error) {
-	return nil, nil
+func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
+	mongoClient, connectErr := database.GetClient(ctx, true)
+	if connectErr != nil {
+		return nil, connectErr
+	}
+	defer mongoClient.Disconnect()
+
+	todosColl, collectionErr := mongoClient.GetCollection(consts.TodosCollection)
+	if collectionErr != nil {
+		return nil, collectionErr
+	}
+
+	todoId, todoIdErr := primitive.ObjectIDFromHex(todoID)
+	if todoIdErr != nil {
+		return nil, todoIdErr
+	}
+
+	result := todosColl.FindOne(ctx, bson.M{"_id": todoId})
+	var todo model.Todo
+	if err := result.Decode(&todo); err != nil {
+		return nil, err
+	}
+	return &todo, nil
 }
 
 // GetUsers is the resolver for the getUsers field.
@@ -83,7 +178,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 
 	findOptions := options.Find()
 	findOptions.SetLimit(10)
-	cur, findErr := usersColl.Find(context.TODO(), bson.M{}, findOptions)
+	cur, findErr := usersColl.Find(ctx, bson.M{}, findOptions)
 	if findErr != nil {
 		fmt.Printf("%v", findErr)
 		return nil, findErr
@@ -91,7 +186,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	defer cur.Close(context.TODO())
 
 	var users []*model.User
-	for cur.Next(context.TODO()) {
+	for cur.Next(ctx) {
 		var user model.User
 		err := cur.Decode(&user)
 		if err != nil {
