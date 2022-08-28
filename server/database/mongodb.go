@@ -29,9 +29,9 @@ func InitMongoClient(connect bool) *MongoClient {
 func (mongoClient *MongoClient) Ping(disconnect bool) {
 	pingErr := mongoClient.instance.Ping(context.TODO(), nil)
 	if pingErr != nil {
-		fmt.Printf("Mongo client ping failed: %v\n", pingErr)
+		fmt.Printf("MongoDB client ping failed: %v\n", pingErr)
 	} else {
-		fmt.Println("Mongo client ping success 🍀")
+		fmt.Println("MongoDB client ping success 🍀")
 	}
 	if disconnect {
 		mongoClient.Disconnect()
@@ -55,7 +55,7 @@ func (mongoClient *MongoClient) Connect() error {
 
 func (mongoClient *MongoClient) Disconnect() {
 	if err := mongoClient.instance.Disconnect(context.TODO()); err != nil {
-		fmt.Println("Failed to disconnect mongo client")
+		fmt.Println("Failed to disconnect MongoDB client")
 	}
 }
 
@@ -75,7 +75,7 @@ func GetClient(ctx context.Context, connect bool) (*MongoClient, error) {
 	if connect {
 		err := mongoClient.Connect()
 		if err != nil {
-			return mongoClient, fmt.Errorf("failed to connect to MongoDB: %v", err)
+			return mongoClient, fmt.Errorf("failed to connect MongoDB client: %v", err)
 		}
 	}
 	return mongoClient, nil

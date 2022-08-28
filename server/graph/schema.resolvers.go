@@ -11,7 +11,6 @@ import (
 	"github.com/khengsaurus/ng-gql-todos/database"
 	"github.com/khengsaurus/ng-gql-todos/graph/generated"
 	"github.com/khengsaurus/ng-gql-todos/graph/model"
-	"github.com/khengsaurus/ng-gql-todos/store"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -38,9 +37,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
 		return &model.User{
-			ID:    oid.Hex(),
-			Name:  input.Name,
-			Email: input.Email,
+			ID:       oid.Hex(),
+			Username: input.Username,
+			Email:    input.Email,
 		}, err
 	}
 
@@ -49,42 +48,27 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	db := store.GetStoreFromContext(ctx)
-	newTodo, err := db.AddTodo(&input)
-	if err != nil {
-		return nil, err
-	}
-
-	return newTodo, nil
-}
-
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context, userID string) ([]*model.Todo, error) {
-	db := store.GetStoreFromContext(ctx)
-	todos := make([]*model.Todo, 0)
-	for _, _todo := range db.Todos {
-		if _todo.UserID == userID {
-			todos = append(todos, _todo)
-		}
-	}
-
-	return todos, nil
-}
-
-// Todo is the resolver for the todo field.
-func (r *queryResolver) Todo(ctx context.Context, userID string, todoID string) (*model.Todo, error) {
-	db := store.GetStoreFromContext(ctx)
-	for _, todo := range db.Todos {
-		if todo.ID == todoID && todo.UserID == userID {
-			return todo, nil
-		}
-	}
+	// db := store.GetStoreFromContext(ctx)
+	// newTodo, err := db.AddTodo(&input)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return nil, nil
 }
 
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+// GetTodos is the resolver for the getTodos field.
+func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.Todo, error) {
+	return nil, nil
+}
+
+// GetTodo is the resolver for the getTodo field.
+func (r *queryResolver) GetTodo(ctx context.Context, userID string, todoID string) (*model.Todo, error) {
+	return nil, nil
+}
+
+// GetUsers is the resolver for the getUsers field.
+func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	defer mongoClient.Disconnect()
 

@@ -2,7 +2,7 @@
 
 type User {
   id: ID!
-  name: String!
+  username: String!
   email: String
 }
 
@@ -17,14 +17,14 @@ type Todo {
 # type Board {
 #   id: ID!
 #   user: User!
-#   name: String!
+#   username: String!
 #   todos: [Todo!]!
 # }
 
 # --------------- Inputs ---------------
 
 input NewUser {
-  name: String!
+  username: String!
   email: String
 }
 
@@ -36,9 +36,9 @@ input NewTodo {
 # --------- Queries & Mutations ---------
 
 type Query {
-  todos(userId: String!): [Todo!]!
-  todo(userId: String!, todoId: String!): Todo
-  users: [User!]!
+  getTodos(userId: String!): [Todo!]!
+  getTodo(userId: String!, todoId: String!): Todo
+  getUsers: [User!]!
 }
 
 type Mutation {
