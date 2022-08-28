@@ -25,6 +25,7 @@ type Todo {
 
 input NewUser {
   name: String!
+  email: String
 }
 
 input NewTodo {

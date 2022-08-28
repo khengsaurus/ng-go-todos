@@ -3,24 +3,25 @@
 package model
 
 type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+	Text   string `json:"text" bson:"text"`
+	UserID string `json:"userId" bson:"objectId"`
 }
 
 type NewUser struct {
-	Name string `json:"name"`
+	Name  string  `json:"name" bson:"name"`
+	Email *string `json:"email" bson:"email"`
 }
 
 type Todo struct {
-	ID     string  `json:"id"`
-	UserID string  `json:"userId"`
-	Text   string  `json:"text"`
-	Color  *string `json:"color"`
-	Done   bool    `json:"done"`
+	ID     string  `json:"id" bson:"_id"`
+	UserID string  `json:"userId" bson:"objectId"`
+	Text   string  `json:"text" bson:"text"`
+	Color  *string `json:"color" bson:"color"`
+	Done   bool    `json:"done" bson:"done"`
 }
 
 type User struct {
-	ID    string  `json:"id"`
-	Name  string  `json:"name"`
-	Email *string `json:"email"`
+	ID    string  `json:"id" bson:"_id"`
+	Name  string  `json:"name" bson:"name"`
+	Email *string `json:"email" bson:"email"`
 }
