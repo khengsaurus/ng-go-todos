@@ -18,7 +18,7 @@ import (
 )
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error) {
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -30,7 +30,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, collectionErr
 	}
 
-	result, err := usersColl.InsertOne(ctx, input)
+	result, err := usersColl.InsertOne(ctx, newUser)
 
 	if err != nil {
 		fmt.Printf("Failed to insert document into %s collection", consts.UsersCollection)
@@ -39,16 +39,16 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
 		return &model.User{
 			ID:       oid.Hex(),
-			Username: input.Username,
-			Email:    input.Email,
+			Username: newUser.Username,
+			Email:    newUser.Email,
 		}, err
 	}
 
-	return nil, errors.New("failed to insert user document")
+	return nil, errors.New("failed to create user")
 }
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error) {
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -60,41 +60,121 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 		return nil, collectionErr
 	}
 
-	userId, userIdErr := primitive.ObjectIDFromHex(input.UserID)
+	userId, userIdErr := primitive.ObjectIDFromHex(newTodo.UserID)
 	if userIdErr != nil {
 		return nil, userIdErr
 	}
 
+	tag := new(string)
+	if newTodo.Tag == nil {
+		*tag = "white"
+	} else {
+		tag = newTodo.Tag
+	}
+
+	priority := new(int)
+	if newTodo.Priority == nil {
+		*priority = 2
+	} else {
+		priority = newTodo.Priority
+	}
+
 	result, err := todosColl.InsertOne(ctx, bson.D{
-		{
-			Key:   "userId",
-			Value: userId,
-		},
-		{
-			Key:   "text",
-			Value: input.Text,
-		},
-		{
-			Key:   "color",
-			Value: "",
-		},
-		{
-			Key:   "done",
-			Value: false,
-		},
+		{Key: "userId", Value: userId},
+		{Key: "text", Value: newTodo.Text},
+		{Key: "priority", Value: priority},
+		{Key: "tag", Value: tag},
+		{Key: "done", Value: false},
 	})
 
 	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
 		return &model.Todo{
-			ID:     oid.Hex(),
-			UserID: input.UserID,
-			Text:   input.Text,
-			Color:  nil,
-			Done:   false,
+			ID:       oid.Hex(),
+			UserID:   newTodo.UserID,
+			Text:     newTodo.Text,
+			Priority: priority,
+			Tag:      tag,
+			Done:     false,
 		}, err
 	}
 
-	return nil, errors.New("failed to insert todo document")
+	return nil, errors.New("failed to create todo")
+}
+
+// UpdateTodo is the resolver for the updateTodo field.
+func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (*model.Todo, error) {
+	mongoClient, connectErr := database.GetClient(ctx, true)
+	if connectErr != nil {
+		return nil, connectErr
+	}
+	defer mongoClient.Disconnect()
+
+	todosColl, collectionErr := mongoClient.GetCollection(consts.TodosCollection)
+	if collectionErr != nil {
+		return nil, collectionErr
+	}
+
+	todoId, todoIdErr := primitive.ObjectIDFromHex(updateTodo.ID)
+	if todoIdErr != nil {
+		return nil, todoIdErr
+	}
+
+	userId, userIdErr := primitive.ObjectIDFromHex(updateTodo.UserID)
+	if userIdErr != nil {
+		return nil, userIdErr
+	}
+
+	filter := bson.D{{Key: "_id", Value: todoId}}
+	update := bson.D{{
+		Key: "$set",
+		Value: bson.D{
+			{Key: "userId", Value: userId},
+			{Key: "text", Value: updateTodo.Text},
+			{Key: "priority", Value: updateTodo.Priority},
+			{Key: "tag", Value: updateTodo.Tag},
+			{Key: "done", Value: updateTodo.Done},
+		}}}
+
+	_, updateTodoErr := todosColl.UpdateOne(context.TODO(), filter, update)
+	if updateTodoErr != nil {
+		return nil, updateTodoErr
+	}
+
+	return &model.Todo{
+		ID:       todoId.String(),
+		UserID:   updateTodo.UserID,
+		Text:     updateTodo.Text,
+		Priority: &updateTodo.Priority,
+		Tag:      &updateTodo.Tag,
+		Done:     false,
+	}, nil
+}
+
+// DeleteTodo is the resolver for the deleteTodo field.
+func (r *mutationResolver) DeleteTodo(ctx context.Context, todoID string) (string, error) {
+	mongoClient, connectErr := database.GetClient(ctx, true)
+	if connectErr != nil {
+		return "", connectErr
+	}
+	defer mongoClient.Disconnect()
+
+	todosColl, collectionErr := mongoClient.GetCollection(consts.TodosCollection)
+	if collectionErr != nil {
+		return "", collectionErr
+	}
+
+	todoId, todoIdErr := primitive.ObjectIDFromHex(todoID)
+	if todoIdErr != nil {
+		return "", todoIdErr
+	}
+	filter := bson.D{{Key: "_id", Value: todoId}}
+
+	_, deleteErr := todosColl.DeleteOne(context.TODO(), filter)
+	if deleteErr != nil {
+		return "", deleteErr
+	}
+
+	return todoId.String(), nil
 }
 
 // GetTodos is the resolver for the getTodos field.
