@@ -1,4 +1,226 @@
-/* You can add global styles to this file, and also import other style files */
-:root {
-  background-color: rgb(20, 22, 24);
+// For more information on Theming for Angular Material: https://material.angular.io/guide/theming
+@use "@angular/material" as mat;
+@include mat.core();
+
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap");
+@import "./mixins.scss";
+
+$custom-blue: (
+  50: #e8f0f8,
+  100: #c5daee,
+  200: #9ec2e3,
+  300: #77aad7,
+  400: #5a97cf,
+  500: #3d85c6,
+  600: #377dc0,
+  700: #2f72b9,
+  800: #2768b1,
+  900: #1a55a4,
+  A100: #dae9ff,
+  A200: #a7caff,
+  A400: #74abff,
+  A700: #5b9cff,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$custom-green: (
+  50: #edf5ea,
+  100: #d2e5ca,
+  200: #b5d4a7,
+  300: #97c284,
+  400: #80b569,
+  500: #6aa84f,
+  600: #62a048,
+  700: #57973f,
+  800: #4d8d36,
+  900: #3c7d26,
+  A100: #cdffbe,
+  A200: #a6ff8b,
+  A400: #7fff58,
+  A700: #6cff3f,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$custom-magenta: (
+  50: #f4eaef,
+  100: #e4cad7,
+  200: #d3a6bc,
+  300: #c182a1,
+  400: #b3688d,
+  500: #a64d79,
+  600: #9e4671,
+  700: #953d66,
+  800: #8b345c,
+  900: #7b2549,
+  A100: #ffbcd7,
+  A200: #ff89b8,
+  A400: #ff5699,
+  A700: #ff3c8a,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #ffffff,
+  ),
+);
+
+$custom-orange: (
+  50: #fef6ed,
+  100: #fce8d3,
+  200: #fbd9b5,
+  300: #f9c997,
+  400: #f7be81,
+  500: #f6b26b,
+  600: #f5ab63,
+  700: #f3a258,
+  800: #f2994e,
+  900: #ef8a3c,
+  A100: #ffffff,
+  A200: #ffffff,
+  A400: #ffe7d5,
+  A700: #ffd8bc,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #000000,
+    800: #000000,
+    900: #000000,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$custom-red: (
+  50: #fbeded,
+  100: #f6d1d1,
+  200: #f0b3b3,
+  300: #e99494,
+  400: #e57d7d,
+  500: #e06666,
+  600: #dc5e5e,
+  700: #d85353,
+  800: #d34949,
+  900: #cb3838,
+  A100: #ffffff,
+  A200: #ffe2e2,
+  A400: #ffafaf,
+  A700: #ff9696,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$ng-fire-kanban-primary: mat.define-palette($custom-blue);
+$ng-fire-kanban-accent: mat.define-palette($custom-green);
+
+// The warn palette is optional (defaults to red).
+$ng-fire-kanban-warn: mat.define-palette($custom-red);
+$ng-fire-kanban-error: mat.define-palette($custom-red);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$ng-fire-kanban-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: $ng-fire-kanban-primary,
+      accent: $ng-fire-kanban-accent,
+      warn: $ng-fire-kanban-warn,
+    ),
+  )
+);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($ng-fire-kanban-theme);
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.row {
+  @include flex-(row);
+}
+
+.column {
+  @include flex-(column);
+}
+
+.centered {
+  @include center;
+}
+
+.spaced {
+  justify-content: space-between;
+}
+
+// ------------------------- Overrides -------------------------
+
+.mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(170, 170, 170, 0.4);
 }

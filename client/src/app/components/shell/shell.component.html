@@ -1,0 +1,34 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    position="end"
+    fixedInViewport
+    [opened]="false"
+  >
+    <mat-toolbar>Menu</mat-toolbar>
+    <mat-nav-list *ngFor="let link of sideLinks">
+      <a
+        *ngIf="link"
+        mat-list-item
+        routerLink="{{ link.route }}"
+        (click)="drawer.close()"
+        >{{ link.label }}</a
+      >
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar>
+      <span class="logo" routerLink="/">Kanban 🔥</span>
+
+      <span class="fill-space"></span>
+
+      <button mat-icon-button (click)="drawer.toggle()">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <ng-content> </ng-content>
+  </mat-sidenav-content>
+</mat-sidenav-container>

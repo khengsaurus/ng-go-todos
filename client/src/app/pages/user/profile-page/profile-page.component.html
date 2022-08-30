@@ -1,0 +1,24 @@
+<main>
+  <div *ngIf="!authService.userLoggedIn">
+    <button mat-raised-button (click)="authService.signinWithGoogle()">
+      <img src="/assets/logos/google.svg" /> Login with Google
+    </button>
+    <br />
+    <br />
+    <h3>OR</h3>
+    <app-email-login></app-email-login>
+  </div>
+  <div *ngIf="authService.user as user">
+    <p>
+      Logged in as <strong>{{ user.email }}</strong>
+    </p>
+  </div>
+
+  <button
+    *ngIf="authService.userLoggedIn"
+    mat-stroked-button
+    (click)="authService.logout()"
+  >
+    Logout
+  </button>
+</main>

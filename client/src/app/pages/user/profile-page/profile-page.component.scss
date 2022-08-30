@@ -1,0 +1,18 @@
+main {
+  margin-top: 50px;
+}
+
+button {
+  img {
+    height: 50px;
+    width: 50px;
+  }
+}
+
+:host {
+  text-align: center;
+}
+
+.logout {
+  padding-top: 5em;
+}
