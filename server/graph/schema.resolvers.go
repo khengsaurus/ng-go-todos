@@ -19,6 +19,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error) {
+	fmt.Println("CreateUser called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -36,11 +37,18 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 		fmt.Printf("Failed to insert document into %s collection", consts.UsersCollection)
 	}
 
+	username := ""
+	if newUser.Username == nil {
+		username = newUser.Email
+	} else {
+		username = *newUser.Username
+	}
+
 	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
 		return &model.User{
 			ID:       oid.Hex(),
-			Username: newUser.Username,
-			Email:    newUser.Email,
+			Username: username,
+			Email:    &newUser.Email,
 		}, err
 	}
 
@@ -49,6 +57,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error) {
+	fmt.Println("CreateTodo called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -103,6 +112,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 
 // UpdateTodo is the resolver for the updateTodo field.
 func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (*model.Todo, error) {
+	fmt.Println("UpdateTodo called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -152,6 +162,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 
 // DeleteTodo is the resolver for the deleteTodo field.
 func (r *mutationResolver) DeleteTodo(ctx context.Context, todoID string) (string, error) {
+	fmt.Println("DeleteTodo called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return "", connectErr
@@ -179,6 +190,7 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, todoID string) (strin
 
 // GetTodos is the resolver for the getTodos field.
 func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.Todo, error) {
+	fmt.Println("GetTodos called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -218,6 +230,7 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.T
 
 // GetTodo is the resolver for the getTodo field.
 func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
+	fmt.Println("GetTodo called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
@@ -244,6 +257,7 @@ func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo
 
 // GetUsers is the resolver for the getUsers field.
 func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
+	fmt.Println("GetUsers called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	defer mongoClient.Disconnect()
 
@@ -277,6 +291,28 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	}
 
 	return users, nil
+}
+
+// GetUser is the resolver for the getUser field.
+func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
+	fmt.Println("GetUser called")
+	mongoClient, connectErr := database.GetClient(ctx, true)
+	if connectErr != nil {
+		return nil, connectErr
+	}
+	defer mongoClient.Disconnect()
+
+	usersColl, collectionErr := mongoClient.GetCollection(consts.UsersCollection)
+	if collectionErr != nil {
+		return nil, collectionErr
+	}
+
+	result := usersColl.FindOne(ctx, bson.M{"email": email})
+	var user model.User
+	if err := result.Decode(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

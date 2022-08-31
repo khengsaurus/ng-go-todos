@@ -10,8 +10,8 @@ type NewTodo struct {
 }
 
 type NewUser struct {
-	Username string  `json:"username" bson:"username"`
-	Email    *string `json:"email" bson:"email"`
+	Email    string  `json:"email" bson:"email"`
+	Username *string `json:"username" bson:"username"`
 }
 
 type Todo struct {

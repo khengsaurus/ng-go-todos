@@ -25,8 +25,8 @@ type Todo {
 # --------------- Inputs ---------------
 
 input NewUser {
-  username: String!
-  email: String
+  email: String!
+  username: String
 }
 
 input NewTodo {
@@ -51,6 +51,7 @@ type Query {
   getTodos(userId: String!): [Todo!]!
   getTodo(todoId: String!): Todo
   getUsers: [User!]!
+  getUser(email: String!): User
 }
 
 type Mutation {

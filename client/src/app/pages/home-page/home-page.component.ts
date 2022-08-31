@@ -12,7 +12,7 @@ export class HomePageComponent implements OnInit {
   users: IUser[] = [];
 
   ngOnInit(): void {
-    this.gqlService.users().subscribe((result: any) => {
+    this.gqlService.getUsers().subscribe((result: any) => {
       const users = (result?.data?.getUsers || []) as IUser[];
       this.users = users;
     });

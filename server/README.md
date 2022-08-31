@@ -51,7 +51,7 @@ mutation deleteTodo($todoId: String!) {
 }
 ```
 
-Variables for createUser & createTodo
+Request variables
 
 ```json
 {
