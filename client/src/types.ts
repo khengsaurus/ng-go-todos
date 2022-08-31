@@ -1,7 +1,9 @@
 import { Route } from './enums';
 
 export interface IUser {
-  email: string;
+  id: string;
+  username: string;
+  email?: string;
 }
 
 export interface ILink {

@@ -1,12 +1,13 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 	"github.com/khengsaurus/ng-gql-todos/database"
 	"github.com/khengsaurus/ng-gql-todos/graph"
@@ -14,7 +15,12 @@ import (
 	"github.com/khengsaurus/ng-gql-todos/middlewares"
 )
 
-const defaultPort = "8080"
+const (
+	defaultPort = "8080"
+	api         = "/api"
+	test        = "/test"
+	pg          = "/playground"
+)
 
 func main() {
 	envErr := godotenv.Load("local.env")
@@ -27,13 +33,23 @@ func main() {
 		port = defaultPort
 	}
 
-	mongoClient := database.InitMongoClient(true)
-	mongoClient.Ping(true)
+	router := chi.NewRouter()
+	router.Use(middlewares.EnableCors)
 
+	mongoClient := database.InitMongoClient(true)
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	http.Handle("/playground", playground.Handler("GraphQL playground", "/api"))
-	http.Handle("/api", middlewares.WithMongoClient(mongoClient, server))
+	router.HandleFunc(test, testHandler)
+	router.Handle(pg, playground.Handler("GraphQL playground", api))
+	router.Handle(api, middlewares.WithMongoClient(mongoClient, server))
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	err := http.ListenAndServe(fmt.Sprintf(":%s", defaultPort), router)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func testHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Success"))
 }

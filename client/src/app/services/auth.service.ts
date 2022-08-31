@@ -3,9 +3,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { IUser } from 'src/types';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   user: IUser | null;
   userLoggedIn: boolean;
@@ -14,7 +12,8 @@ export class AuthService {
     this.user = null;
     this.userLoggedIn = true;
     this.afAuth.authState.subscribe((user) => {
-      this.user = user?.email ? { email: user.email } : null;
+      // TODO: get user doc on login
+      // this.user = user?.email ? { email: user.email } : null;
       this.userLoggedIn = Boolean(user);
     });
   }

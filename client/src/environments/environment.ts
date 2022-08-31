@@ -7,6 +7,8 @@ import { firebase } from './config';
 export const environment = {
   production: false,
   firebase,
+  devApiURL: 'http://localhost:8080/api',
+  prodApiURL: 'http://localhost:8080/api',
 };
 
 /*
