@@ -1,5 +1,8 @@
-<h2>Users:</h2>
-<div *ngFor="let user of users; index as i">
-  <h3>User {{ i + 1 }}</h3>
-  <br />
+<div *ngIf="!authService.userLoggedIn">
+  <h2>Welcome</h2>
+  <h3>Log in to use this website's features</h3>
+</div>
+
+<div *ngIf="authService.currentUser as user">
+  <h2>Welcome, {{ user.username }}</h2>
 </div>

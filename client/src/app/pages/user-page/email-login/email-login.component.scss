@@ -1,3 +1,5 @@
+@import "../../../../mixins.scss";
+
 mat-card {
   min-width: 150px;
   max-width: 500px;
@@ -18,13 +20,19 @@ mat-form-field {
 
 input {
   height: 2em;
-  div.mat-form-field-infix {
+  .mat-form-field-infix {
     padding: 0.3em 0;
     input.mat-input-element {
       vertical-align: top;
     }
   }
 }
-div.mat-form-field-wrapper {
+
+.mat-form-field-wrapper {
   padding-bottom: 1.15em;
+}
+
+.footer-buttons {
+  @include flex-(row);
+  justify-content: space-between;
 }

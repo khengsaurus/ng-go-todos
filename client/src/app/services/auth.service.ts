@@ -6,28 +6,35 @@ import { GQLService } from './gql.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  user: IUser | null;
+  currentUser: IUser | null;
   userLoggedIn: boolean;
 
   constructor(public afAuth: AngularFireAuth, private gqlService: GQLService) {
-    this.user = null;
-    this.userLoggedIn = true;
+    this.currentUser = null;
+    this.userLoggedIn = false;
     this.initAuthListener();
   }
 
-  initAuthListener() {
+  private initAuthListener() {
     this.afAuth.authState.subscribe(async (user) => {
       const hasUser = Boolean(user);
       this.userLoggedIn = hasUser;
       if (hasUser && user?.email) {
+        let _user: IUser | null = null;
         this.gqlService
           .getUser(user.email)
-          .then((res: any) => {
-            if (!res?.data?.getUser) {
-              this.gqlService.createUser(user.email!);
+          .then(async (res: any) => {
+            const existUser = res?.data?.getUser;
+            if (existUser) {
+              _user = existUser;
+            } else {
+              await this.gqlService
+                .createUser(user.email!)
+                .then((res) => (_user = res?.data?.createUser || null));
             }
           })
-          .catch(console.error);
+          .catch(console.error)
+          .finally(() => (this.currentUser = _user));
       }
     });
   }
@@ -50,5 +57,7 @@ export class AuthService {
 
   logout() {
     this.afAuth.signOut();
+    this.currentUser = null;
+    this.userLoggedIn = true;
   }
 }

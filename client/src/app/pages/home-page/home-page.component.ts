@@ -1,20 +1,21 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from 'src/app/services/auth.service';
 import { GQLService } from 'src/app/services/gql.service';
 import { IUser } from 'src/types';
 
 @Component({
-  selector: 'app-home-page',
+  selector: 'app-home',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
 })
-export class HomePageComponent implements OnInit {
-  constructor(private gqlService: GQLService) {}
-  users: IUser[] = [];
+export class HomePageComponent {
+  isLoggedIn = false;
 
-  ngOnInit(): void {
-    this.gqlService.getUsers().subscribe((result: any) => {
-      const users = (result?.data?.getUsers || []) as IUser[];
-      this.users = users;
-    });
-  }
+  constructor(public authService: AuthService) {}
+
+  // ngOnInit(): void {
+  //   this.authService.currentUser.subscribe(
+  //     (user) => (this.isLoggedIn = Boolean(user))
+  //   );
+  // }
 }

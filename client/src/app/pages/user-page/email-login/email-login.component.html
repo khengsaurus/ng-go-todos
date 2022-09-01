@@ -1,21 +1,10 @@
 <mat-card>
   <div *ngIf="isSignup">
     <h3>Create Account</h3>
-
-    <button mat-stroked-button (click)="changeType(LoginFormType.LOGIN)">
-      Returning user?
-    </button>
   </div>
 
   <div *ngIf="isLogin">
     <h3>Sign In</h3>
-    <button
-      size="small"
-      mat-stroked-button
-      (click)="changeType(LoginFormType.SIGNUP)"
-    >
-      New user?
-    </button>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -58,20 +47,41 @@
         autocomplete="off"
       />
 
-      <!-- TODO: How to detect field focus? -->
       <mat-error *ngIf="passwordConfirm?.dirty && !passwordsMatch">
         Passwords do not match
       </mat-error>
     </mat-form-field>
 
     <mat-error class="server-error">{{ serverMessage }}</mat-error>
-    <button
-      mat-raised-button
-      color="accent"
-      type="submit"
-      [disabled]="form.invalid || !passwordsMatch || loading"
-    >
-      Submit
-    </button>
+
+    <div class="footer-buttons">
+      <div *ngIf="isSignup">
+        <button
+          size="small"
+          mat-stroked-button
+          (click)="changeType(LoginFormType.LOGIN)"
+        >
+          Returning user?
+        </button>
+      </div>
+      <div *ngIf="isLogin">
+        <button
+          size="small"
+          mat-stroked-button
+          (click)="changeType(LoginFormType.SIGNUP)"
+        >
+          New user?
+        </button>
+      </div>
+
+      <button
+        mat-raised-button
+        color="accent"
+        type="submit"
+        [disabled]="form.invalid || !passwordsMatch || loading"
+      >
+        Submit
+      </button>
+    </div>
   </form>
 </mat-card>

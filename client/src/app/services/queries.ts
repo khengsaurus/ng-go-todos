@@ -5,7 +5,6 @@ export const GET_USER = gql`
     getUser(email: $email) {
       email
       username
-      id
     }
   }
 `;
@@ -13,8 +12,8 @@ export const GET_USER = gql`
 export const GET_USERS = gql`
   query GetUsers {
     getUsers {
+      email
       username
-      id
     }
   }
 `;
@@ -22,7 +21,8 @@ export const GET_USERS = gql`
 export const CREATE_USER = gql`
   mutation CreateUser($newUser: NewUser!) {
     createUser(newUser: $newUser) {
-      id
+      email
+      username
     }
   }
 `;

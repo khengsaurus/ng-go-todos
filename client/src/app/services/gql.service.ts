@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Apollo } from 'apollo-angular';
-import { first, firstValueFrom, Observable } from 'rxjs';
+import { Apollo, MutationResult } from 'apollo-angular';
+import { firstValueFrom, Observable } from 'rxjs';
+import { IUser } from 'src/types';
 import { CREATE_USER, GET_USER, GET_USERS } from './queries';
 
 @Injectable({ providedIn: 'root' })
@@ -14,7 +15,7 @@ export class GQLService {
       this.apollo.mutate({
         mutation: CREATE_USER,
         variables: { newUser: { email, username: username || email } },
-      })
+      }) as Observable<MutationResult<{ createUser: IUser }>>
     );
   }
 
