@@ -26,7 +26,7 @@ export class ShellComponent {
 
   profileOption: ILink = {
     route: Route.USER_PROFILE,
-    label: this.authService.userLoggedIn ? 'Profile' : 'Login',
+    label: this.authService.currentUserEmail ? 'Profile' : 'Login',
   };
 
   sideLinks: Array<ILink | null> = [

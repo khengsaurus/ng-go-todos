@@ -1,21 +1,28 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
-import { GQLService } from 'src/app/services/gql.service';
-import { IUser } from 'src/types';
+import { TodoService } from 'src/app/services/todos.service';
+import { UserService } from 'src/app/services/user.service';
+import { ITodo } from 'src/types';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
 })
-export class HomePageComponent {
+export class HomePageComponent implements OnInit {
   isLoggedIn = false;
+  todos$: Observable<ITodo[]>;
 
-  constructor(public authService: AuthService) {}
+  constructor(
+    public authService: AuthService,
+    public userService: UserService,
+    public todosService: TodoService
+  ) {
+    this.todos$ = new Observable();
+  }
 
-  // ngOnInit(): void {
-  //   this.authService.currentUser.subscribe(
-  //     (user) => (this.isLoggedIn = Boolean(user))
-  //   );
-  // }
+  ngOnInit(): void {
+    this.userService.initUsers();
+  }
 }

@@ -12,6 +12,15 @@ export interface IUser {
   email?: string;
 }
 
+export interface ITodo {
+  id: string;
+  userId: string;
+  text: string;
+  priority: number;
+  tag: string;
+  done: boolean;
+}
+
 export interface ILink {
   route: Route | string;
   label: string;
