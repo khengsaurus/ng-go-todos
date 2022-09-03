@@ -1,5 +1,7 @@
 import { Route } from './enums';
 
+export type Nullable<T> = T | null;
+
 export interface IResponse<T> {
   data: {
     [key: string]: T;
@@ -24,4 +26,9 @@ export interface ITodo {
 export interface ILink {
   route: Route | string;
   label: string;
+}
+
+export interface ITodos {
+  userId: string;
+  todos: ITodo[];
 }

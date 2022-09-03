@@ -2,29 +2,26 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { map, Observable } from 'rxjs';
+import { Nullable } from 'src/types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  currentUserEmail$: Observable<string>;
-  currentUserEmail: string;
+  currentFbUser$: Observable<Nullable<firebase.default.User>>;
+  currentFbUserEmail: string;
   userLoggedIn: boolean;
 
   constructor(public afAuth: AngularFireAuth) {
-    this.currentUserEmail$ = new Observable();
-    this.currentUserEmail = '';
+    this.currentFbUserEmail = '';
     this.userLoggedIn = false;
-    this.initAuthListener();
-  }
-
-  private initAuthListener() {
-    this.currentUserEmail$ = this.afAuth.authState.pipe(
-      map((user) => user?.email || '')
+    this.currentFbUser$ = this.afAuth.authState.pipe(
+      map((user) => {
+        const email = user?.email || '';
+        this.currentFbUserEmail = email;
+        this.userLoggedIn = Boolean(email);
+        return user;
+      })
     );
-    this.currentUserEmail$.subscribe((email) => {
-      console.log('should set ' + email);
-      this.currentUserEmail = email;
-      this.userLoggedIn = Boolean(email);
-    });
+    this.currentFbUser$.subscribe();
   }
 
   signinWithGoogle() {

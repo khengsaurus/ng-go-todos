@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Route } from 'src/enums';
-import { ProfilePageComponent } from './profile-page/profile-page.component';
+import { ProfilePage } from './profile-page/profile-page.component';
 
 const routes: Routes = [
-  { path: '', component: ProfilePageComponent },
-  { path: Route.PROFILE, component: ProfilePageComponent },
+  { path: '', component: ProfilePage },
+  { path: Route.PROFILE, component: ProfilePage },
   //
 ];
 

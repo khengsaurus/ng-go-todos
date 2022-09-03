@@ -3,7 +3,7 @@
   <h3>Log in to use this website's features</h3>
 </div>
 
-<div *ngIf="userService.currentUser as user">
+<div *ngIf="userService.currentUser$ | async as user">
   <h2>Welcome, {{ user.username }}</h2>
 </div>
 

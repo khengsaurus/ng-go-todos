@@ -12,7 +12,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ComponentsModule } from './components/components.module';
 import { GraphQLModule } from './graphql.module';
-import { HomePageComponent } from './pages/home-page/home-page.component';
+import { HomePage } from './pages/home-page/home-page.component';
 
 const uri = environment.production
   ? environment.prodApiURL
@@ -21,7 +21,7 @@ const uri = environment.production
 @NgModule({
   declarations: [
     AppComponent,
-    HomePageComponent,
+    HomePage,
     //
   ],
   imports: [

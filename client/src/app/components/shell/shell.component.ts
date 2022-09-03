@@ -2,9 +2,9 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from 'src/app/services';
 import { Route } from 'src/enums';
-import { ILink } from '../../../types';
+import { ILink, Nullable } from 'src/types';
 
 @Component({
   selector: 'app-shell',
@@ -26,10 +26,10 @@ export class ShellComponent {
 
   profileOption: ILink = {
     route: Route.USER_PROFILE,
-    label: this.authService.currentUserEmail ? 'Profile' : 'Login',
+    label: this.authService.currentFbUserEmail ? 'Profile' : 'Login',
   };
 
-  sideLinks: Array<ILink | null> = [
+  sideLinks: Array<Nullable<ILink>> = [
     this.profileOption,
     //
   ];

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { firstValueFrom, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
-import { IUser } from 'src/types';
+import { firstValueFrom, Observable, of } from 'rxjs';
+import { map, share, switchMap } from 'rxjs/operators';
+import { IUser, Nullable } from 'src/types';
 import { AuthService } from './auth.service';
 import {
   CREATE_USER,
@@ -14,32 +14,32 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  currentUser: IUser | undefined = undefined;
-  users$: Observable<IUser[]> | undefined = undefined;
+  currentUser$: Observable<Nullable<IUser>>;
+  users$: Observable<IUser[]> = of([]);
 
   constructor(private apollo: Apollo, private authService: AuthService) {
     /**
-     * To-be flow:
-     * - subscribe to currentUserEmail$
-     * - if currentUserEmail$
-     *     get user doc or create if non exists
-     *     set as currentUser
-     * - else set currentUser as undefined
+     * subscribe to currentFbUser$
+     * if currentFbUser$
+     *   get user doc or create if non exists
+     *   set as currentUser
+     * else set currentUser as null
      */
-    this.authService.currentUserEmail$
-      .pipe(
-        tap(async (email) => {
-          if (email) {
-            await this.getUserPromise(email).then(async (user) => {
-              const _user = user || (await this.createUserPromise(email));
-              this.currentUser = _user;
-            });
-          } else {
-            this.currentUser = undefined;
+    this.currentUser$ = this.authService.currentFbUser$.pipe(
+      map((firebaseUser) => firebaseUser?.email || ''),
+      switchMap(async (email) => {
+        let user: Nullable<IUser> = null;
+        if (email) {
+          user = await this.getUserPromise(email);
+          if (!user || user?.email !== email) {
+            user = await this.createUserPromise(email);
           }
-        })
-      )
-      .subscribe();
+        }
+        return user;
+      }),
+      share() // required to 'flatten' async to one output
+    );
+    this.currentUser$.subscribe();
   }
 
   createUser(email: string, username = '') {
@@ -49,8 +49,7 @@ export class UserService {
     });
   }
 
-  createUserPromise(email: string, username = ''): Promise<IUser | undefined> {
-    console.log('-> createUserPromise');
+  createUserPromise(email: string, username = ''): Promise<Nullable<IUser>> {
     return new Promise((resolve) => {
       firstValueFrom(
         this.apollo.mutate<ICREATE_USER>({
@@ -58,10 +57,10 @@ export class UserService {
           variables: { newUser: { email, username: username || email } },
         })
       )
-        .then((res) => resolve(res?.data?.createUser || undefined))
+        .then((res) => resolve(res?.data?.createUser || null))
         .catch((err) => {
           console.error(err);
-          resolve(undefined);
+          resolve(null);
         });
     });
   }
@@ -73,8 +72,7 @@ export class UserService {
     }).valueChanges;
   }
 
-  getUserPromise(email: string): Promise<IUser | undefined> {
-    console.log('-> getUserPromise');
+  getUserPromise(email: string): Promise<Nullable<IUser>> {
     return new Promise((resolve) => {
       firstValueFrom(
         this.apollo.query<IGET_USER>({
@@ -82,11 +80,11 @@ export class UserService {
           variables: { email },
         })
       )
-        .then((res) => resolve(res?.data?.getUser || undefined))
+        .then((res) => resolve(res?.data?.getUser || null))
         .catch((err) => {
           if (err?.message !== 'mongo: no documents in result')
             console.error(err);
-          resolve(undefined);
+          resolve(null);
         });
     });
   }

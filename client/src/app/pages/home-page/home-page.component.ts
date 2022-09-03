@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AuthService } from 'src/app/services/auth.service';
-import { TodoService } from 'src/app/services/todos.service';
-import { UserService } from 'src/app/services/user.service';
+import { AuthService, TodosService, UserService } from 'src/app/services';
 import { ITodo } from 'src/types';
 
 @Component({
@@ -10,14 +8,14 @@ import { ITodo } from 'src/types';
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
 })
-export class HomePageComponent implements OnInit {
+export class HomePage implements OnInit {
   isLoggedIn = false;
   todos$: Observable<ITodo[]>;
 
   constructor(
     public authService: AuthService,
     public userService: UserService,
-    public todosService: TodoService
+    public todosService: TodosService
   ) {
     this.todos$ = new Observable();
   }
