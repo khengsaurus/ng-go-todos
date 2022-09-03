@@ -8,6 +8,7 @@ export interface IGET_USER {
 export const GET_USER = gql`
   query GetUser($email: String!) {
     getUser(email: $email) {
+      id
       email
       username
     }

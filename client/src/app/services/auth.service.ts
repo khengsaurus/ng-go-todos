@@ -7,16 +7,13 @@ import { Nullable } from 'src/types';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   currentFbUser$: Observable<Nullable<firebase.default.User>>;
-  currentFbUserEmail: string;
   userLoggedIn: boolean;
 
   constructor(public afAuth: AngularFireAuth) {
-    this.currentFbUserEmail = '';
     this.userLoggedIn = false;
     this.currentFbUser$ = this.afAuth.authState.pipe(
       map((user) => {
         const email = user?.email || '';
-        this.currentFbUserEmail = email;
         this.userLoggedIn = Boolean(email);
         return user;
       })

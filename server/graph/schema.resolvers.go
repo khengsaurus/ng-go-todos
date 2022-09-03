@@ -223,7 +223,7 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, todoID string) (strin
 }
 
 // GetTodos is the resolver for the getTodos field.
-func (r *queryResolver) GetTodos(ctx context.Context, email string) ([]*model.Todo, error) {
+func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.Todo, error) {
 	fmt.Println("GetTodos called")
 	mongoClient, connectErr := database.GetClient(ctx, true)
 	if connectErr != nil {
@@ -236,7 +236,12 @@ func (r *queryResolver) GetTodos(ctx context.Context, email string) ([]*model.To
 		return nil, collectionErr
 	}
 
-	filter := bson.D{{Key: "email", Value: email}}
+	userId, userIdErr := primitive.ObjectIDFromHex(userID)
+	if userIdErr != nil {
+		return nil, userIdErr
+	}
+
+	filter := bson.D{{Key: "userId", Value: userId}}
 	cur, findErr := todosColl.Find(ctx, filter)
 	if findErr != nil {
 		return nil, findErr

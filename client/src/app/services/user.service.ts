@@ -90,10 +90,8 @@ export class UserService {
   }
 
   initUsers() {
-    if (!this.users$) {
-      this.users$ = this.apollo
-        .watchQuery<{ getUsers: IUser[] }>({ query: GET_USERS })
-        .valueChanges.pipe(map(({ data }) => data?.getUsers || []));
-    }
+    this.users$ = this.apollo
+      .watchQuery<{ getUsers: IUser[] }>({ query: GET_USERS })
+      .valueChanges.pipe(map(({ data }) => data?.getUsers || []));
   }
 }

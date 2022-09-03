@@ -48,7 +48,7 @@ input UpdateTodo {
 # --------- Queries & Mutations ---------
 
 type Query {
-  getTodos(email: String!): [Todo!]!
+  getTodos(userId: String!): [Todo!]!
   getTodo(todoId: String!): Todo
   getUsers: [User!]!
   getUser(email: String!): User
@@ -56,8 +56,8 @@ type Query {
 
 type Mutation {
   createUser(newUser: NewUser!): User!
-  deleteUser(userId: String!): Boolean
   createTodo(newTodo: NewTodo!): Todo!
   updateTodo(updateTodo: UpdateTodo!): Todo!
+  deleteUser(userId: String!): Boolean
   deleteTodo(todoId: String!): String!
 }

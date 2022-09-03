@@ -54,7 +54,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetTodo  func(childComplexity int, todoID string) int
-		GetTodos func(childComplexity int, email string) int
+		GetTodos func(childComplexity int, userID string) int
 		GetUser  func(childComplexity int, email string) int
 		GetUsers func(childComplexity int) int
 	}
@@ -83,7 +83,7 @@ type MutationResolver interface {
 	DeleteTodo(ctx context.Context, todoID string) (string, error)
 }
 type QueryResolver interface {
-	GetTodos(ctx context.Context, email string) ([]*model.Todo, error)
+	GetTodos(ctx context.Context, userID string) ([]*model.Todo, error)
 	GetTodo(ctx context.Context, todoID string) (*model.Todo, error)
 	GetUsers(ctx context.Context) ([]*model.User, error)
 	GetUser(ctx context.Context, email string) (*model.User, error)
@@ -186,7 +186,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetTodos(childComplexity, args["email"].(string)), true
+		return e.complexity.Query.GetTodos(childComplexity, args["userId"].(string)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -391,7 +391,7 @@ input UpdateTodo {
 # --------- Queries & Mutations ---------
 
 type Query {
-  getTodos(email: String!): [Todo!]!
+  getTodos(userId: String!): [Todo!]!
   getTodo(todoId: String!): Todo
   getUsers: [User!]!
   getUser(email: String!): User
@@ -521,14 +521,14 @@ func (ec *executionContext) field_Query_getTodos_args(ctx context.Context, rawAr
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["email"] = arg0
+	args["userId"] = arg0
 	return args, nil
 }
 
@@ -907,7 +907,7 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetTodos(rctx, fc.Args["email"].(string))
+		return ec.resolvers.Query().GetTodos(rctx, fc.Args["userId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
