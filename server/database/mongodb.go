@@ -67,7 +67,7 @@ func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, e
 	return database.Collection(name), nil
 }
 
-func GetClient(ctx context.Context, connect bool) (*MongoClient, error) {
+func GetMongoClient(ctx context.Context, connect bool) (*MongoClient, error) {
 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
 	if !ok {
 		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)

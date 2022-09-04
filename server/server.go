@@ -15,11 +15,10 @@ import (
 	"github.com/khengsaurus/ng-gql-todos/middlewares"
 )
 
-const (
-	defaultPort = "8080"
-	api         = "/api"
-	test        = "/test"
-	pg          = "/playground"
+var (
+	route_api  = "/api"
+	route_test = "/test"
+	route_pg   = "/playground"
 )
 
 func main() {
@@ -28,22 +27,21 @@ func main() {
 		panic(envErr)
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
-
 	router := chi.NewRouter()
 	router.Use(middlewares.EnableCors)
 
+	redisClient := database.InitRedisClient()
 	mongoClient := database.InitMongoClient(true)
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	// middlewares.WithMongoClient(mongoClient, server)
+	// middlewares.WithRedisClient(redisClient, server)
+	wrappedServer := middlewares.WithRedisClient(redisClient, middlewares.WithMongoClient(mongoClient, server))
 
-	router.HandleFunc(test, testHandler)
-	router.Handle(pg, playground.Handler("GraphQL playground", api))
-	router.Handle(api, middlewares.WithMongoClient(mongoClient, server))
+	router.HandleFunc(route_test, testHandler)
+	router.Handle(route_pg, playground.Handler("GraphQL playground", route_api))
+	router.Handle(route_api, wrappedServer)
 
-	err := http.ListenAndServe(fmt.Sprintf(":%s", defaultPort), router)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router)
 	if err != nil {
 		panic(err)
 	}

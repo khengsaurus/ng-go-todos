@@ -12,6 +12,7 @@ import (
 	"github.com/khengsaurus/ng-gql-todos/database"
 	"github.com/khengsaurus/ng-gql-todos/graph/generated"
 	"github.com/khengsaurus/ng-gql-todos/graph/model"
+	"github.com/khengsaurus/ng-gql-todos/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,7 +21,7 @@ import (
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error) {
 	fmt.Println("CreateUser called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
 	}
@@ -59,40 +60,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 	return nil, errors.New("failed to create user")
 }
 
-// DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
-	fmt.Println("DeleteUser called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
-	if connectErr != nil {
-		return nil, connectErr
-	}
-	defer mongoClient.Disconnect(ctx)
-
-	usersColl, collectionErr := mongoClient.GetCollection(consts.UsersCollection)
-	if collectionErr != nil {
-		return nil, collectionErr
-	}
-
-	userId, userIdErr := primitive.ObjectIDFromHex(userID)
-	if userIdErr != nil {
-		return nil, userIdErr
-	}
-
-	filter := bson.D{{Key: "_id", Value: userId}}
-
-	_, err := usersColl.DeleteOne(ctx, filter)
-	if err != nil {
-		v := false
-		return &v, err
-	}
-	v := true
-	return &v, nil
-}
-
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error) {
 	fmt.Println("CreateTodo called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
 	}
@@ -129,7 +100,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 		{Key: "tag", Value: tag},
 		{Key: "done", Value: false},
 	})
-
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(newTodo.UserID))
 	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
 		return &model.Todo{
 			ID:       oid.Hex(),
@@ -147,7 +118,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 // UpdateTodo is the resolver for the updateTodo field.
 func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (*model.Todo, error) {
 	fmt.Println("UpdateTodo called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
 	}
@@ -183,7 +154,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 	if updateTodoErr != nil {
 		return nil, updateTodoErr
 	}
-
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateTodo.UserID))
 	return &model.Todo{
 		ID:       todoId.String(),
 		UserID:   updateTodo.UserID,
@@ -194,10 +165,40 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 	}, nil
 }
 
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
+	fmt.Println("DeleteUser called")
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
+	if connectErr != nil {
+		return nil, connectErr
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	usersColl, collectionErr := mongoClient.GetCollection(consts.UsersCollection)
+	if collectionErr != nil {
+		return nil, collectionErr
+	}
+
+	userId, userIdErr := primitive.ObjectIDFromHex(userID)
+	if userIdErr != nil {
+		return nil, userIdErr
+	}
+
+	filter := bson.D{{Key: "_id", Value: userId}}
+
+	_, err := usersColl.DeleteOne(ctx, filter)
+	if err != nil {
+		v := false
+		return &v, err
+	}
+	v := true
+	return &v, nil
+}
+
 // DeleteTodo is the resolver for the deleteTodo field.
-func (r *mutationResolver) DeleteTodo(ctx context.Context, todoID string) (string, error) {
+func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (string, error) {
 	fmt.Println("DeleteTodo called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return "", connectErr
 	}
@@ -218,14 +219,24 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, todoID string) (strin
 	if deleteErr != nil {
 		return "", deleteErr
 	}
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
 
 	return todoId.String(), nil
 }
 
 // GetTodos is the resolver for the getTodos field.
-func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.Todo, error) {
+func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool) ([]*model.Todo, error) {
 	fmt.Println("GetTodos called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	redisClient, redisClientErr := database.GetRedisClient(ctx)
+	if !fresh && redisClient != nil {
+		cachedTodos, _ := redisClient.GetTodos(ctx, userID)
+		if cachedTodos != nil {
+			fmt.Println("Retrieved todos from redis cache")
+			return cachedTodos, nil
+		}
+	}
+
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
 	}
@@ -259,13 +270,17 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string) ([]*model.T
 		}
 	}
 
+	if redisClient != nil && redisClientErr == nil {
+		redisClient.SetTodos(ctx, userID, todos)
+	}
+
 	return todos, nil
 }
 
 // GetTodo is the resolver for the getTodo field.
 func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
 	fmt.Println("GetTodo called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
 	}
@@ -292,15 +307,17 @@ func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo
 // GetUsers is the resolver for the getUsers field.
 func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	fmt.Println("GetUsers called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	defer mongoClient.Disconnect(ctx)
 
 	if connectErr != nil {
+		fmt.Println(1)
 		return nil, connectErr
 	}
 
 	usersColl, collectionErr := mongoClient.GetCollection(consts.UsersCollection)
 	if collectionErr != nil {
+		fmt.Println(2)
 		return nil, collectionErr
 	}
 
@@ -308,7 +325,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	findOptions.SetLimit(10)
 	cur, findErr := usersColl.Find(ctx, bson.M{}, findOptions)
 	if findErr != nil {
-		fmt.Printf("%v", findErr)
+		fmt.Println(3)
 		return nil, findErr
 	}
 	defer cur.Close(context.TODO())
@@ -330,7 +347,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
 	fmt.Println("GetUser called")
-	mongoClient, connectErr := database.GetClient(ctx, true)
+	mongoClient, connectErr := database.GetMongoClient(ctx, true)
 	if connectErr != nil {
 		return nil, connectErr
 	}
