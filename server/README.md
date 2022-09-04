@@ -4,6 +4,14 @@
 query getUsers {
   getUsers {
     username
+    email
+    id
+  }
+}
+
+query getUser($email: String!) {
+  getUser(email: $email) {
+    username
     id
   }
 }
@@ -13,6 +21,10 @@ mutation createUser($newUser: NewUser!) {
     username
     id
   }
+}
+
+mutation deleteUser($userId: String!) {
+  deleteUser(userId: $userId)
 }
 
 query getTodos($userId: String!) {
@@ -55,19 +67,21 @@ Request variables
 
 ```json
 {
-  "userId": "630b894f0006a7c19851aacd",
-  "todoId": "630b748f1db5dad99438895f",
+  "userId": "",
+  "todoId": "",
+  "email": "",
   "newUser": {
-    "username": "user-3"
+    "email": "",
+    "username": ""
   },
   "newTodo": {
-    "userId": "630b40ec107712837bff76ae",
-    "text": "user-1-todo-2"
+    "userId": "",
+    "text": ""
   },
   "updateTodo": {
-    "id": "630b748f1db5dad99438895f",
-    "userId": "630b894f0006a7c19851aacd",
-    "text": "user-2 from user-1",
+    "id": "",
+    "userId": "",
+    "text": "",
     "tag": "white",
     "priority": 2,
     "done": false

@@ -13,6 +13,7 @@ import { AppComponent } from './app.component';
 import { ComponentsModule } from './components/components.module';
 import { GraphQLModule } from './graphql.module';
 import { HomePage } from './pages/home-page/home-page.component';
+import { TodosPage } from './pages/todos-page/todos-page.component';
 
 const uri = environment.production
   ? environment.prodApiURL
@@ -22,6 +23,7 @@ const uri = environment.production
   declarations: [
     AppComponent,
     HomePage,
+    TodosPage,
     //
   ],
   imports: [

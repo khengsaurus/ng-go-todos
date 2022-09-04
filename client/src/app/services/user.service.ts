@@ -1,30 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, merge, Observable, of } from 'rxjs';
 import { map, share, switchMap } from 'rxjs/operators';
 import { IUser, Nullable } from 'src/types';
 import { AuthService } from './auth.service';
-import {
-  CREATE_USER,
-  GET_USER,
-  GET_USERS,
-  ICREATE_USER,
-  IGET_USER,
-} from './queries';
+import { CREATE_USER, GET_USER, ICREATE_USER, IGET_USER } from './queries';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  currentUser$: Observable<Nullable<IUser>>;
-  users$: Observable<IUser[]> = of([]);
+  private currentUser: Nullable<IUser>;
+  private currentUser$: Observable<Nullable<IUser>>;
 
   constructor(private apollo: Apollo, private authService: AuthService) {
-    /**
-     * subscribe to currentFbUser$
-     * if currentFbUser$
-     *   get user doc or create if non exists
-     *   set as currentUser
-     * else set currentUser as null
-     */
+    this.currentUser = null;
     this.currentUser$ = this.authService.currentFbUser$.pipe(
       map((firebaseUser) => firebaseUser?.email || ''),
       switchMap(async (email) => {
@@ -35,11 +23,16 @@ export class UserService {
             user = await this.createUserPromise(email);
           }
         }
+        this.currentUser = user;
         return user;
       }),
       share() // required to 'flatten' async to one output
     );
     this.currentUser$.subscribe();
+  }
+
+  getCurrentUser(): Observable<Nullable<IUser>> {
+    return merge(of(this.currentUser), this.currentUser$);
   }
 
   createUser(email: string, username = '') {
@@ -87,11 +80,5 @@ export class UserService {
           resolve(null);
         });
     });
-  }
-
-  initUsers() {
-    this.users$ = this.apollo
-      .watchQuery<{ getUsers: IUser[] }>({ query: GET_USERS })
-      .valueChanges.pipe(map(({ data }) => data?.getUsers || []));
   }
 }

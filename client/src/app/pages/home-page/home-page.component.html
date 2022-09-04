@@ -1,21 +1,8 @@
-<div *ngIf="!authService.userLoggedIn">
+<div *ngIf="!currentUser">
   <h2>Welcome</h2>
   <h3>Log in to use this website's features</h3>
 </div>
 
-<div *ngIf="userService.currentUser$ | async as user">
+<div *ngIf="currentUser as user">
   <h2>Welcome, {{ user.username }}</h2>
-</div>
-
-<h2>Users:</h2>
-<div *ngFor="let user of userService.users$ | async; index as i">
-  <h3>{{ user.email }}</h3>
-  <br />
-</div>
-
-<h2>{{ (todosService.todos$ | async)?.length || 0 }} Todos:</h2>
-<div *ngFor="let todo of todosService.todos$ | async; index as i">
-  <h3>Todo {{ i + 1 }}:</h3>
-  <h4>{{ todo.text }}</h4>
-  <br />
 </div>

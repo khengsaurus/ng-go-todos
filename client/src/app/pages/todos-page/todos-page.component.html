@@ -1,1 +1,5 @@
-<p>Todos page</p>
+<h2>Todos:</h2>
+<div *ngFor="let todo of todos$ | async; index as i">
+  <h4>Todo {{ i + 1 }}: {{ todo.text }}</h4>
+  <br />
+</div>
