@@ -20,7 +20,7 @@ export class TodosService {
           return this.apollo
             .watchQuery<IGET_TODOS>({
               query: GET_TODOS,
-              variables: { userId },
+              variables: { userId, fresh: false },
             })
             .valueChanges.pipe(
               map(({ data }) => {

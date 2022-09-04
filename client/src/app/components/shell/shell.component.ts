@@ -1,10 +1,10 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { AuthService } from 'src/app/services';
 import { Route } from 'src/enums';
-import { ILink, Nullable } from 'src/types';
+import { ILink } from 'src/types';
 
 @Component({
   selector: 'app-shell',

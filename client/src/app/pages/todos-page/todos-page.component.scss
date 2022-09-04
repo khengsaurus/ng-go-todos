@@ -1,0 +1,15 @@
+@import "../../../scss/variables.scss";
+
+.todos-sidenav-container {
+  height: calc(100% - $top-navbar-height);
+  .todos-sidenav {
+    width: 200px;
+  }
+  .todos-sidenav-toggle {
+    background-color: orange;
+    transition: 300ms ease-in-out;
+    &.open {
+      transform: translateX(-50%);
+    }
+  }
+}

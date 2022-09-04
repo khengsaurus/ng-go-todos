@@ -3,7 +3,7 @@
 @include mat.core();
 
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap");
-@import "./mixins.scss";
+@import "./scss/mixins.scss";
 
 $custom-blue: (
   50: #e8f0f8,

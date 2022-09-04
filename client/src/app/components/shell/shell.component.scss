@@ -1,3 +1,5 @@
+@import "../../../scss/variables.scss";
+
 .sidenav-container {
   height: 100%;
 }
@@ -30,7 +32,7 @@
     z-index: 1;
   }
   &-single-row {
-    height: 56px;
+    height: $top-navbar-height;
   }
 }
 

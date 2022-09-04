@@ -46,11 +46,14 @@ export interface IGET_TODOS {
 }
 
 export const GET_TODOS = gql`
-  query GetTodos($userId: String!) {
-    getTodos(userId: $userId) {
-      text
-      userId
+  query GetTodos($userId: String!, $fresh: Boolean!) {
+    getTodos(userId: $userId, fresh: $fresh) {
       id
+      userId
+      text
+      priority
+      tag
+      done
     }
   }
 `;

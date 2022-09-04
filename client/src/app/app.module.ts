@@ -2,6 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InMemoryCache } from '@apollo/client/core';
@@ -14,6 +15,7 @@ import { ComponentsModule } from './components/components.module';
 import { GraphQLModule } from './graphql.module';
 import { HomePage } from './pages/home-page/home-page.component';
 import { TodosPage } from './pages/todos-page/todos-page.component';
+import { MatSelectModule } from '@angular/material/select';
 
 const uri = environment.production
   ? environment.prodApiURL
@@ -34,8 +36,10 @@ const uri = environment.production
     BrowserModule,
     BrowserAnimationsModule,
     ComponentsModule,
-    HttpClientModule,
     GraphQLModule,
+    HttpClientModule,
+    MatSidenavModule,
+    MatSelectModule,
   ],
   providers: [
     {

@@ -9,10 +9,12 @@ import { ITodo } from 'src/types';
   styleUrls: ['./todos-page.component.scss'],
 })
 export class TodosPage implements OnInit, OnDestroy {
+  sidenavOpen: boolean;
   todos$: Observable<ITodo[]>;
   private todosSub: Subscription;
 
   constructor(private todosService: TodosService) {
+    this.sidenavOpen = true;
     this.todosSub = new Subscription();
     this.todos$ = this.todosService.getCurrentUserTodos();
   }
@@ -23,5 +25,9 @@ export class TodosPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.todosSub.unsubscribe();
+  }
+
+  toggleSidenav() {
+    this.sidenavOpen = !this.sidenavOpen;
   }
 }

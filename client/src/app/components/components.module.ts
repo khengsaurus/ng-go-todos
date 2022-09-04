@@ -14,11 +14,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { ShellComponent } from './shell/shell.component';
+import { TodoComponent } from './todo/todo.component';
 
-const components = [
-  ShellComponent,
-  //
-];
+const components = [ShellComponent, TodoComponent];
 
 const modules = [
   CommonModule,
