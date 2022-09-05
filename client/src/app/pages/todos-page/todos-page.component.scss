@@ -1,15 +1,32 @@
 @import "../../../scss/variables.scss";
+@import "../../../scss/mixins.scss";
 
 .todos-sidenav-container {
   height: calc(100% - $top-navbar-height);
+  h3 {
+    margin: $gap-m $gap-l;
+  }
   .todos-sidenav {
     width: 200px;
   }
   .todos-sidenav-toggle {
-    background-color: orange;
-    transition: 300ms ease-in-out;
-    &.open {
-      transform: translateX(-50%);
+    @include icon-buttons;
+    mat-icon.rotate-right {
+      opacity: 0;
+      transition: 200ms;
+      // transform: rotate(180deg);
+    }
+    &-secondary {
+      @include icon-buttons;
+      position: absolute;
+      top: 4px;
+      left: 0px;
+      transform: translateY(-1px);
+      animation: 300ms ease-out;
+      &.hide {
+        transform: translate(-40px, -1px);
+        transition: 100ms ease-in;
+      }
     }
   }
 }

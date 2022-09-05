@@ -20,11 +20,13 @@
 
   <mat-sidenav-content>
     <mat-toolbar>
-      <span class="logo" routerLink="/">Kanban 🔥</span>
+      <span routerLink="/" class="link">
+        <h1 class="nav-title">看板</h1>
+      </span>
 
       <span class="fill-space"></span>
 
-      <button mat-icon-button (click)="drawer.toggle()">
+      <button mat-icon-button class="link" (click)="drawer.toggle()">
         <mat-icon>more_vert</mat-icon>
       </button>
     </mat-toolbar>

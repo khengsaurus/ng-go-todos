@@ -219,6 +219,14 @@ body {
   justify-content: space-between;
 }
 
+.link {
+  transition: 200ms;
+  &:hover {
+    cursor: pointer;
+    color: orange;
+  }
+}
+
 // ------------------------- Overrides -------------------------
 
 .mat-drawer-backdrop.mat-drawer-shown {

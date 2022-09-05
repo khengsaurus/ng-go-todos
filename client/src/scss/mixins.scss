@@ -7,3 +7,9 @@
   justify-content: center;
   align-items: center;
 }
+
+@mixin icon-buttons {
+  color: orange;
+  transition: 300ms ease-in-out;
+  transform: translateY(-1px);
+}

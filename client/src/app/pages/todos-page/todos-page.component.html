@@ -5,19 +5,30 @@
     [mode]="'side'"
     [opened]="sidenavOpen"
   >
-    <h3>Todos</h3>
+    <div class="row centered spaced">
+      <h3>Your Todos</h3>
+      <button
+        mat-icon-button
+        [class]="'todos-sidenav-toggle'"
+        (click)="toggleSidenav()"
+        disableRipple="true"
+      >
+        <mat-icon [class.rotate-right]="!sidenavOpen">chevron_left</mat-icon>
+      </button>
+    </div>
     <div *ngFor="let todo of currentUserTodos$ | async; index as i">
       <app-todo [todo]="todo"> </app-todo>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <!-- <button
-      mat-mini-fab
-      [class]="'todos-sidenav-toggle'"
-      [class.open]="sidenavOpen"
+    <button
+      mat-icon-button
+      [class]="'todos-sidenav-toggle-secondary'"
+      [class.hide]="sidenavOpen"
       (click)="toggleSidenav()"
+      disableRipple="true"
     >
-      <mat-icon>list</mat-icon>
-    </button> -->
+      <mat-icon>chevron_right</mat-icon>
+    </button>
   </mat-sidenav-content>
 </mat-sidenav-container>
