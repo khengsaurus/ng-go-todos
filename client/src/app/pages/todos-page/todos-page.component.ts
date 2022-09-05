@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { TodosService } from 'src/app/services';
+import { Observable, Subscription, switchMap } from 'rxjs';
+import { TodosService, UserService } from 'src/app/services';
 import { ITodo } from 'src/types';
 
 @Component({
@@ -9,22 +9,27 @@ import { ITodo } from 'src/types';
   styleUrls: ['./todos-page.component.scss'],
 })
 export class TodosPage implements OnInit, OnDestroy {
+  currentUserTodos$: Observable<ITodo[]>;
   sidenavOpen: boolean;
-  todos$: Observable<ITodo[]>;
-  private todosSub: Subscription;
+  private _userTodosSub: Subscription;
 
-  constructor(private todosService: TodosService) {
+  constructor(
+    private todosService: TodosService,
+    private userService: UserService
+  ) {
     this.sidenavOpen = true;
-    this.todosSub = new Subscription();
-    this.todos$ = this.todosService.getCurrentUserTodos();
+    this._userTodosSub = new Subscription();
+    this.currentUserTodos$ = this.userService.currentUser$.pipe(
+      switchMap((user) => this.todosService.getTodos$(user?.id))
+    );
   }
 
   ngOnInit(): void {
-    this.todosSub = this.todos$.subscribe();
+    this._userTodosSub = this.currentUserTodos$.subscribe();
   }
 
   ngOnDestroy(): void {
-    this.todosSub.unsubscribe();
+    this._userTodosSub.unsubscribe();
   }
 
   toggleSidenav() {

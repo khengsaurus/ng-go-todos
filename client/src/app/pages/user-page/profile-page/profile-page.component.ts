@@ -1,9 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Subscription, tap } from 'rxjs';
 import { TrackCurrentUserDirective } from 'src/app/directives/track-current-user.directive';
 import { AuthService, UserService } from 'src/app/services';
-import { IUser, Nullable } from 'src/types';
 
 @Component({
   selector: 'app-profile-page',

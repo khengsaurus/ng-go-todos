@@ -1,5 +1,5 @@
 <main>
-  <div *ngIf="!currentUser">
+  <div *ngIf="!this.currentUser">
     <button mat-raised-button (click)="authService.signinWithGoogle()">
       <img src="/assets/logos/google.svg" /> Login with Google
     </button>
@@ -8,13 +8,17 @@
     <h3>Or</h3>
     <app-email-login></app-email-login>
   </div>
-  <div *ngIf="currentUser">
+  <div *ngIf="this.currentUser as user">
     <p>
-      Logged in as <strong>{{ currentUser.email }}</strong>
+      Logged in as <strong>{{ user.email }}</strong>
     </p>
   </div>
 
-  <button *ngIf="currentUser" mat-stroked-button (click)="authService.logout()">
+  <button
+    *ngIf="this.currentUser"
+    mat-stroked-button
+    (click)="authService.logout()"
+  >
     Logout
   </button>
 </main>
