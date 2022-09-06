@@ -1,8 +1,10 @@
 @import "../../../scss/variables.scss";
 @import "../../../scss/mixins.scss";
 
+$full-height: calc(100vh - $top-navbar-height);
+
 .todos-sidenav-container {
-  height: calc(100% - $top-navbar-height);
+  height: $full-height;
   h3 {
     margin: $gap-m $gap-l;
   }
@@ -11,10 +13,10 @@
   }
   .todos-sidenav-toggle {
     @include icon-buttons;
-    mat-icon.rotate-right {
+    transition: 300ms ease-in;
+    mat-icon.hide {
       opacity: 0;
-      transition: 200ms;
-      // transform: rotate(180deg);
+      transition: 150ms ease-in;
     }
     &-secondary {
       @include icon-buttons;
@@ -24,9 +26,27 @@
       transform: translateY(-1px);
       animation: 300ms ease-out;
       &.hide {
+        opacity: 0;
         transform: translate(-40px, -1px);
-        transition: 100ms ease-in;
+        transition: 50ms;
       }
     }
   }
+}
+
+textarea.todo-editor {
+  background-color: transparent;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+  color: white;
+  padding: $gap-l;
+  height: calc($full-height - 2 * $gap-l - 5px);
+  width: calc(100% - 2 * $gap-l);
+  resize: none;
+
+  border: none;
+  overflow: auto;
+  outline: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 }

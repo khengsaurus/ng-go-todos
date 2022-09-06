@@ -13,11 +13,11 @@
         (click)="toggleSidenav()"
         disableRipple="true"
       >
-        <mat-icon [class.rotate-right]="!sidenavOpen">chevron_left</mat-icon>
+        <mat-icon [class.hide]="!sidenavOpen">chevron_left</mat-icon>
       </button>
     </div>
     <div *ngFor="let todo of currentUserTodos$ | async; index as i">
-      <app-todo [todo]="todo"> </app-todo>
+      <app-todo [todo]="todo" (click)="selectTodo(todo)"> </app-todo>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -30,5 +30,12 @@
     >
       <mat-icon>chevron_right</mat-icon>
     </button>
+    <textarea
+      class="todo-editor"
+      value="{{ this.selectedTodo?.text || '' }}"
+      #todoInput
+      [value]="todoText"
+      (input)="updateTodoText($event)"
+    ></textarea>
   </mat-sidenav-content>
 </mat-sidenav-container>
