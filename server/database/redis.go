@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	container  = os.Getenv("CONTAINER") == "true"
 	defaultTTL = time.Second * 1800 // 30 mins
 )
 
@@ -26,8 +25,8 @@ type RedisClient struct {
 func InitRedisClient() *RedisClient {
 	var opts *redis.Options
 
-	if container {
-		fmt.Printf("Redis config: local\n")
+	if consts.Container {
+		fmt.Println("Redis config: local")
 		redisAddress := fmt.Sprintf("%s:6379", os.Getenv("REDIS_SERVICE"))
 		opts = (&redis.Options{
 			Addr:     redisAddress,
@@ -35,7 +34,7 @@ func InitRedisClient() *RedisClient {
 			DB:       0,
 		})
 	} else {
-		fmt.Printf("Redis config: remote\n")
+		fmt.Println("Redis config: remote")
 		opts = (&redis.Options{
 			Addr:     os.Getenv("REDIS_URL"),
 			Password: os.Getenv("REDIS_PW"),

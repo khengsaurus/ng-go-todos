@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -32,9 +33,9 @@ func main() {
 
 	redisClient := database.InitRedisClient()
 	mongoClient := database.InitMongoClient(true)
+	mongoClient.Ping(context.TODO(), true)
+
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	// middlewares.WithMongoClient(mongoClient, server)
-	// middlewares.WithRedisClient(redisClient, server)
 	wrappedServer := middlewares.WithRedisClient(redisClient, middlewares.WithMongoClient(mongoClient, server))
 
 	router.HandleFunc(route_test, testHandler)

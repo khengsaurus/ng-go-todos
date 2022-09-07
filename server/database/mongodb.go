@@ -16,6 +16,12 @@ type MongoClient struct {
 }
 
 func InitMongoClient(connect bool) *MongoClient {
+	if consts.Container {
+		fmt.Println("Mongo config: local")
+	} else {
+		fmt.Println("Mongo config: remote")
+	}
+
 	client := &MongoClient{instance: nil}
 	if connect {
 		err := client.Connect()
@@ -39,9 +45,14 @@ func (mongoClient *MongoClient) Ping(ctx context.Context, disconnect bool) {
 }
 
 func (mongoClient *MongoClient) Connect() error {
-	uri := os.Getenv("MONGODB_URI")
+	var uri string
+	if consts.Container {
+		uri = os.Getenv("MONGO_SERVICE")
+	} else {
+		uri = os.Getenv("MONGODB_URI")
+	}
 	if uri == "" {
-		log.Fatal("'MONGODB_URI' environmental variable not found.\n")
+		log.Fatal("MongoDB URI not found.\n")
 	}
 
 	client, connectErr := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
