@@ -5,21 +5,18 @@ import { UserService } from '../services';
 
 @Directive({ selector: '[appTrackCurrentUser]' })
 export class TrackCurrentUserDirective implements OnInit, OnDestroy {
-  currentUser: Nullable<IUser>;
-  private _userSub: Subscription;
+  currentUser: Nullable<IUser> = null;
+  private userSub: Nullable<Subscription> = null;
 
-  constructor(public userService: UserService) {
-    this.currentUser = null;
-    this._userSub = new Subscription();
-  }
+  constructor(public userService: UserService) {}
 
   ngOnInit(): void {
-    this._userSub = this.userService.currentUser$
+    this.userSub = this.userService.currentUser$
       .pipe(tap((user) => (this.currentUser = user)))
       .subscribe();
   }
 
   ngOnDestroy(): void {
-    this._userSub.unsubscribe();
+    this.userSub?.unsubscribe();
   }
 }

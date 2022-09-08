@@ -156,7 +156,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateTodo.UserID))
 	return &model.Todo{
-		ID:       todoId.String(),
+		ID:       updateTodo.ID,
 		UserID:   updateTodo.UserID,
 		Text:     updateTodo.Text,
 		Priority: &updateTodo.Priority,

@@ -57,3 +57,36 @@ export const GET_TODOS = gql`
     }
   }
 `;
+
+export interface ICREATE_TODO {
+  createTodo: ITodo;
+}
+
+export const CREATE_TODO = gql`
+  mutation createTodo($newTodo: NewTodo!) {
+    createTodo(newTodo: $newTodo) {
+      id
+      userId
+      text
+      priority
+      tag
+      done
+    }
+  }
+`;
+
+export interface IUPDATE_TODO {
+  updateTodo: ITodo;
+}
+
+export const UPDATE_TODO = gql`
+  mutation updateTodo($updateTodo: UpdateTodo!) {
+    updateTodo(updateTodo: $updateTodo) {
+      id
+      text
+      priority
+      tag
+      done
+    }
+  }
+`;

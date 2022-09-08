@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { map, share, switchMap } from 'rxjs/operators';
+import { map, share, switchMap, tap } from 'rxjs/operators';
 import { IUser, Nullable } from 'src/types';
 import { AuthService } from './auth.service';
 import { CREATE_USER, GET_USER, ICREATE_USER, IGET_USER } from './queries';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
+  currentUser: Nullable<IUser> = null;
   currentUser$: Subject<Nullable<IUser>>;
 
   constructor(private apollo: Apollo, private authService: AuthService) {
@@ -24,6 +25,7 @@ export class UserService {
         }
         return user;
       }),
+      tap((user) => (this.currentUser = user)),
       share() // required to 'flatten' async to one output
     );
     _userObserver$.subscribe(this.currentUser$);

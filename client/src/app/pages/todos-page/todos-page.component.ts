@@ -13,7 +13,7 @@ export class TodosPage implements OnInit, OnDestroy {
   selectedTodo: Nullable<ITodo>;
   currentUserTodos$: Observable<ITodo[]>;
   todoText: string;
-  private _userTodosSub: Subscription;
+  private userTodosSub: Nullable<Subscription> = null;
 
   constructor(
     private todosService: TodosService,
@@ -25,15 +25,14 @@ export class TodosPage implements OnInit, OnDestroy {
     this.currentUserTodos$ = this.userService.currentUser$.pipe(
       switchMap((user) => this.todosService.getTodos$(user?.id))
     );
-    this._userTodosSub = new Subscription();
   }
 
   ngOnInit(): void {
-    this._userTodosSub = this.currentUserTodos$.subscribe();
+    this.userTodosSub = this.currentUserTodos$.subscribe();
   }
 
   ngOnDestroy(): void {
-    this._userTodosSub.unsubscribe();
+    this.userTodosSub?.unsubscribe();
   }
 
   toggleSidenav() {
@@ -43,11 +42,5 @@ export class TodosPage implements OnInit, OnDestroy {
   selectTodo(todo: ITodo) {
     this.selectedTodo = todo;
     this.todoText = todo?.text || '';
-  }
-
-  updateTodoText(event: Event) {
-    this.todoText = (event.target as any)?.value;
-    // Save
-    // Optimistic update
   }
 }

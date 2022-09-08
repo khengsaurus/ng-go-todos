@@ -1,0 +1,8 @@
+<form [formGroup]="todoForm" class="todo-container size-{{ size }}">
+  <textarea class="todo-editor" formControlName="text"></textarea>
+  <div *ngIf="todo !== null" class="todo-footer">
+    <mat-checkbox formControlName="done" disableRipple="true">
+      Done
+    </mat-checkbox>
+  </div>
+</form>

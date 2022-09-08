@@ -4,6 +4,7 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap");
 @import "./scss/mixins.scss";
+@import "./scss/variables.scss";
 
 $custom-blue: (
   50: #e8f0f8,
@@ -170,21 +171,21 @@ $custom-red: (
   ),
 );
 
-$ng-fire-kanban-primary: mat.define-palette($custom-blue);
-$ng-fire-kanban-accent: mat.define-palette($custom-green);
+$ng-go-todos-primary: mat.define-palette($custom-blue);
+$ng-go-todos-accent: mat.define-palette($custom-green);
 
 // The warn palette is optional (defaults to red).
-$ng-fire-kanban-warn: mat.define-palette($custom-red);
-$ng-fire-kanban-error: mat.define-palette($custom-red);
+$ng-go-todos-warn: mat.define-palette($custom-red);
+$ng-go-todos-error: mat.define-palette($custom-red);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$ng-fire-kanban-theme: mat.define-dark-theme(
+$ng-go-todos-theme: mat.define-dark-theme(
   (
     color: (
-      primary: $ng-fire-kanban-primary,
-      accent: $ng-fire-kanban-accent,
-      warn: $ng-fire-kanban-warn,
+      primary: $ng-go-todos-primary,
+      accent: $ng-go-todos-accent,
+      warn: $ng-go-todos-warn,
     ),
   )
 );
@@ -192,7 +193,7 @@ $ng-fire-kanban-theme: mat.define-dark-theme(
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include mat.all-component-themes($ng-fire-kanban-theme);
+@include mat.all-component-themes($ng-go-todos-theme);
 
 html,
 body {

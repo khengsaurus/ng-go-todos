@@ -30,12 +30,9 @@
     >
       <mat-icon>chevron_right</mat-icon>
     </button>
-    <textarea
-      class="todo-editor"
-      value="{{ this.selectedTodo?.text || '' }}"
-      #todoInput
-      [value]="todoText"
-      (input)="updateTodoText($event)"
-    ></textarea>
+    <app-editor
+      [todo]="this.selectedTodo"
+      [size]="this.sidenavOpen ? 2 : 3"
+    ></app-editor>
   </mat-sidenav-content>
 </mat-sidenav-container>

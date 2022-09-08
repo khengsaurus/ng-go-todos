@@ -1,0 +1,37 @@
+@import "../../../styles.scss";
+
+form.todo-container {
+  transition: 300ms ease-out;
+  &.size-2 {
+    padding-top: $gap-xs;
+  }
+  &.size-3 {
+    padding: $gap-xs 30px;
+  }
+  textarea.todo-editor {
+    background-color: transparent;
+    font-family: "Roboto", "Helvetica Neue", sans-serif;
+    color: white;
+    padding: $gap-l;
+    height: calc($content-height - 2 * $gap-l - 5px);
+    width: calc(100% - 2 * $gap-l);
+    resize: none;
+
+    border: none;
+    overflow: auto;
+    outline: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+  }
+
+  .todo-footer {
+    @include flex-(row);
+    align-items: center;
+    position: absolute;
+    bottom: 0px;
+    height: 4 * $gap-l;
+    width: 100%;
+    margin-left: $gap-l;
+  }
+}
