@@ -1,8 +1,13 @@
 <form [formGroup]="todoForm" class="todo-container size-{{ size }}">
   <textarea class="todo-editor" formControlName="text"></textarea>
   <div *ngIf="todo !== null" class="todo-footer">
-    <mat-checkbox formControlName="done" disableRipple="true">
+    <mat-checkbox class="btn-m" formControlName="done" disableRipple="true">
       Done
     </mat-checkbox>
+    <confirm-button
+      (action)="this.deleteTodo()"
+      [icon]="'delete'"
+      [label]="'Delete'"
+    ></confirm-button>
   </div>
 </form>

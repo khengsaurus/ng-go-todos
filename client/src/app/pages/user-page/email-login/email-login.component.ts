@@ -10,11 +10,11 @@ const emailFormGroup = {
 };
 
 @Component({
-  selector: 'app-email-login',
+  selector: 'email-login',
   templateUrl: './email-login.component.html',
   styleUrls: ['./email-login.component.scss'],
 })
-export class EmailLoginComponent {
+export class EmailLogin {
   form: FormGroup;
   type: LoginFormType = LoginFormType.LOGIN;
   loading = false;

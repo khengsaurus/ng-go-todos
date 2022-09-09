@@ -4,7 +4,7 @@ import { TrackCurrentUserDirective } from 'src/app/directives/track-current-user
 import { AuthService, UserService } from 'src/app/services';
 
 @Component({
-  selector: 'app-profile-page',
+  selector: 'profile-page',
   templateUrl: './profile-page.component.html',
   styleUrls: ['./profile-page.component.scss'],
 })

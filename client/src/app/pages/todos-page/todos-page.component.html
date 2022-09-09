@@ -17,7 +17,7 @@
       </button>
     </div>
     <div *ngFor="let todo of currentUserTodos$ | async; index as i">
-      <app-todo [todo]="todo" (click)="selectTodo(todo)"> </app-todo>
+      <todo-card [todo]="todo" (click)="selectTodo(todo)"> </todo-card>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -30,9 +30,9 @@
     >
       <mat-icon>chevron_right</mat-icon>
     </button>
-    <app-editor
+    <todo-editor
       [todo]="this.selectedTodo"
       [size]="this.sidenavOpen ? 2 : 3"
-    ></app-editor>
+    ></todo-editor>
   </mat-sidenav-content>
 </mat-sidenav-container>

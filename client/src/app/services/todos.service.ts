@@ -11,13 +11,15 @@ import {
   UPDATE_TODO,
   ICREATE_TODO,
   CREATE_TODO,
+  DELETE_TODO,
+  IDELETE_TODO,
 } from './queries';
 
 @Injectable({ providedIn: 'root' })
 export class TodosService {
   todos$: Subject<ITodo[]>;
   // Hacky way to update subject value https://stackoverflow.com/questions/51037295/
-  _todoCopy: ITodo[] = [];
+  _todosCopy: ITodo[] = [];
 
   constructor(private apollo: Apollo, private userService: UserService) {
     this.todos$ = new BehaviorSubject<ITodo[]>([]);
@@ -40,7 +42,7 @@ export class TodosService {
           return of([]);
         }
       }),
-      tap((todos) => (this._todoCopy = todos)),
+      tap((todos) => (this._todosCopy = todos)),
       share()
     );
     _todosObserver$.subscribe(this.todos$);
@@ -64,12 +66,10 @@ export class TodosService {
         variables: { newTodo },
       })
       .pipe(
-        tap((res) => {
-          const todo = res.data?.createTodo;
+        map((res) => res.data?.createTodo),
+        tap((todo) => {
           if (todo) {
-            const __todoCopy = [todo, ...this._todoCopy];
-            this.todos$.next(__todoCopy);
-            this._todoCopy = __todoCopy;
+            this.updateTodos([todo, ...this._todosCopy]);
           }
         })
       );
@@ -80,25 +80,44 @@ export class TodosService {
       .mutate<IUPDATE_TODO>({
         mutation: UPDATE_TODO,
         variables: { updateTodo: todo },
-        optimisticResponse: {
-          updateTodo: todo,
-        },
+        optimisticResponse: { updateTodo: todo },
       })
       .pipe(
         tap((res) => {
           const updatedTodo = res.data?.updateTodo;
           if (updatedTodo) {
-            const __todoCopy = [...this._todoCopy];
-            for (let i = 0; i < __todoCopy?.length; i++) {
-              if (__todoCopy[i].id === updatedTodo.id) {
-                __todoCopy[i] = updatedTodo;
+            const __todosCopy = [...this._todosCopy];
+            for (let i = 0; i < __todosCopy?.length; i++) {
+              if (__todosCopy[i].id === updatedTodo.id) {
+                __todosCopy[i] = updatedTodo;
                 break;
               }
             }
-            this._todoCopy = __todoCopy;
-            this.todos$.next(__todoCopy);
+            this.updateTodos(__todosCopy);
           }
         })
       );
+  }
+
+  deleteTodo$(userId: string, todoId: string) {
+    return this.apollo
+      .mutate<IDELETE_TODO>({
+        mutation: DELETE_TODO,
+        variables: { userId, todoId },
+      })
+      .pipe(
+        tap((res) => {
+          if (res.data?.deleteTodo === todoId) {
+            this.updateTodos(
+              this._todosCopy.filter((todo) => todo.id !== todoId)
+            );
+          }
+        })
+      );
+  }
+
+  private updateTodos(todos: ITodo[]) {
+    this._todosCopy = todos;
+    this.todos$.next(todos);
   }
 }

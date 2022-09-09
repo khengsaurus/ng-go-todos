@@ -14,11 +14,12 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
-import { EditorComponent } from './editor/editor.component';
-import { ShellComponent } from './shell/shell.component';
-import { TodoComponent } from './todo/todo.component';
+import { ConfirmButton } from './confirm-button.component';
+import { TodoEditor } from './todo-editor/todo-editor.component';
+import { AppShell } from './shell/shell.component';
+import { TodoCard } from './todo-card.component';
 
-const components = [EditorComponent, ShellComponent, TodoComponent];
+const components = [ConfirmButton, TodoEditor, AppShell, TodoCard];
 
 const modules = [
   CommonModule,

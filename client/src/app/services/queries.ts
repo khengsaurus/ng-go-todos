@@ -90,3 +90,13 @@ export const UPDATE_TODO = gql`
     }
   }
 `;
+
+export interface IDELETE_TODO {
+  deleteTodo: string;
+}
+
+export const DELETE_TODO = gql`
+  mutation deleteTodo($userId: String!, $todoId: String!) {
+    deleteTodo(userId: $userId, todoId: $todoId)
+  }
+`;

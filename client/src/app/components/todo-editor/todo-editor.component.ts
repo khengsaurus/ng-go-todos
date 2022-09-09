@@ -7,18 +7,18 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { debounce, interval, Subscription, takeWhile, tap } from 'rxjs';
+import { debounce, interval, Subscription, tap } from 'rxjs';
 import { TodosService, UserService } from 'src/app/services';
 import { ITodo, Nullable } from 'src/types';
 
 const autoDelay = 1000;
 
 @Component({
-  selector: 'app-editor',
-  templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.scss'],
+  selector: 'todo-editor',
+  templateUrl: './todo-editor.component.html',
+  styleUrls: ['./todo-editor.component.scss'],
 })
-export class EditorComponent implements OnInit, OnChanges, OnDestroy {
+export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   @Input() size: number = 2;
   @Input() todo: Nullable<ITodo> = null;
   todoForm: FormGroup;
@@ -76,6 +76,19 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     } else if (this.userService.currentUser?.id) {
       this.todoService
         .createTodo$(text, this.userService.currentUser.id)
+        .pipe(
+          tap((todo) => {
+            if (todo) this.todo = todo;
+          })
+        )
+        .subscribe();
+    }
+  }
+
+  deleteTodo() {
+    if (this.userService.currentUser && this.todo) {
+      this.todoService
+        .deleteTodo$(this.userService.currentUser.id, this.todo.id)
         .subscribe();
     }
   }

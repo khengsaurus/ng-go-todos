@@ -4,7 +4,7 @@ import { TodosService, UserService } from 'src/app/services';
 import { ITodo, Nullable } from 'src/types';
 
 @Component({
-  selector: 'app-todos-page',
+  selector: 'todo-cards-page',
   templateUrl: './todos-page.component.html',
   styleUrls: ['./todos-page.component.scss'],
 })
@@ -12,14 +12,12 @@ export class TodosPage implements OnInit, OnDestroy {
   sidenavOpen: boolean;
   selectedTodo: Nullable<ITodo>;
   currentUserTodos$: Observable<ITodo[]>;
-  todoText: string;
   private userTodosSub: Nullable<Subscription> = null;
 
   constructor(
     private todosService: TodosService,
     private userService: UserService
   ) {
-    this.todoText = '';
     this.sidenavOpen = true;
     this.selectedTodo = null;
     this.currentUserTodos$ = this.userService.currentUser$.pipe(
@@ -41,6 +39,5 @@ export class TodosPage implements OnInit, OnDestroy {
 
   selectTodo(todo: ITodo) {
     this.selectedTodo = todo;
-    this.todoText = todo?.text || '';
   }
 }

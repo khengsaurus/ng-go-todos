@@ -228,8 +228,19 @@ body {
   }
 }
 
+.btn-m {
+  @include flex-(row);
+  @include center;
+  min-width: 110px !important;
+}
+
 // ------------------------- Overrides -------------------------
 
 .mat-drawer-backdrop.mat-drawer-shown {
   background-color: rgba(170, 170, 170, 0.4);
+}
+
+mat-card.todo {
+  margin: $gap-m;
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }

@@ -3,7 +3,7 @@ import { TrackCurrentUserDirective } from 'src/app/directives/track-current-user
 import { UserService } from 'src/app/services';
 
 @Component({
-  selector: 'app-home',
+  selector: 'home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
 })

@@ -11,7 +11,7 @@ import { ILink } from 'src/types';
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss'],
 })
-export class ShellComponent {
+export class AppShell {
   sideLinks: Array<ILink>;
 
   constructor(

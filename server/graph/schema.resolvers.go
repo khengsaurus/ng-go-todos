@@ -155,6 +155,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 		return nil, updateTodoErr
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateTodo.UserID))
+
 	return &model.Todo{
 		ID:       updateTodo.ID,
 		UserID:   updateTodo.UserID,
@@ -192,6 +193,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool
 		return &v, err
 	}
 	v := true
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
+
 	return &v, nil
 }
 
@@ -221,7 +224,7 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
 
-	return todoId.String(), nil
+	return todoID, nil
 }
 
 // GetTodos is the resolver for the getTodos field.
