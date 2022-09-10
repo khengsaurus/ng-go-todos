@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ITodo, Nullable } from 'src/types';
 
 @Component({
@@ -6,15 +6,21 @@ import { ITodo, Nullable } from 'src/types';
   template: `
     <div *ngIf="todo">
       <mat-card class="todo" [class]="todo.tag">
-        <mat-card-subtitle>{{ todo.text }}</mat-card-subtitle>
+        <mat-card-subtitle>{{ todoTitle }}</mat-card-subtitle>
       </mat-card>
     </div>
   `,
 })
-export class TodoCard implements OnInit {
+export class TodoCard implements OnChanges {
   @Input() todo: Nullable<ITodo> = null;
+  todoTitle: string = '';
 
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnChanges(changes: SimpleChanges): void {
+    // Get first line
+    this.todoTitle = (changes['todo'].currentValue?.text || '').split(
+      /\r?\n|\r|\n/g
+    )[0];
+  }
 }

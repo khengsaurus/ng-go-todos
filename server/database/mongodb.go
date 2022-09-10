@@ -15,36 +15,39 @@ type MongoClient struct {
 	instance *mongo.Client
 }
 
-func InitMongoClient(connect bool) *MongoClient {
+func InitMongoClient(ping bool) *MongoClient {
+	var uri string
 	if consts.Container {
 		fmt.Println("Mongo config: local")
+		uri = os.Getenv("MONGO_SERVICE")
 	} else {
 		fmt.Println("Mongo config: remote")
+		uri = os.Getenv("MONGODB_URI")
+	}
+	if uri == "" {
+		log.Fatal("MongoDB URI not found.\n")
 	}
 
-	client := &MongoClient{instance: nil}
-	if connect {
-		err := client.Connect()
+	// TODO is it possible to do instance = mongo.NewClient(...) and just call instance.Connect() :/
+	instance, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer instance.Disconnect(context.TODO())
+
+	if ping {
+		err = instance.Ping(context.TODO(), nil)
 		if err != nil {
-			fmt.Print(err)
+			fmt.Printf("MongoDB client ping failed: %v\n", err)
+		} else {
+			fmt.Println("MongoDB client ping success 🍀")
 		}
 	}
-	return client
+
+	return &MongoClient{instance: instance}
 }
 
-func (mongoClient *MongoClient) Ping(ctx context.Context, disconnect bool) {
-	pingErr := mongoClient.instance.Ping(context.TODO(), nil)
-	if pingErr != nil {
-		fmt.Printf("MongoDB client ping failed: %v\n", pingErr)
-	} else {
-		fmt.Println("MongoDB client ping success 🍀")
-	}
-	if disconnect {
-		mongoClient.Disconnect(ctx)
-	}
-}
-
-func (mongoClient *MongoClient) Connect() error {
+func (mongoClient *MongoClient) Connect(ctx context.Context) error {
 	var uri string
 	if consts.Container {
 		uri = os.Getenv("MONGO_SERVICE")
@@ -55,9 +58,9 @@ func (mongoClient *MongoClient) Connect() error {
 		log.Fatal("MongoDB URI not found.\n")
 	}
 
-	client, connectErr := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if connectErr != nil {
-		return fmt.Errorf("failed to connect to MongoDB: %v", connectErr)
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		return fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
 
 	mongoClient.instance = client
@@ -67,6 +70,7 @@ func (mongoClient *MongoClient) Connect() error {
 func (mongoClient *MongoClient) Disconnect(ctx context.Context) {
 	if err := mongoClient.instance.Disconnect(ctx); err != nil {
 		fmt.Println("Failed to disconnect MongoDB client")
+		fmt.Printf("%v\n", err)
 	}
 }
 
@@ -84,7 +88,7 @@ func GetMongoClient(ctx context.Context, connect bool) (*MongoClient, error) {
 		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
 	}
 	if connect {
-		err := mongoClient.Connect()
+		err := mongoClient.Connect(ctx)
 		if err != nil {
 			return mongoClient, fmt.Errorf("failed to connect MongoDB client: %v", err)
 		}

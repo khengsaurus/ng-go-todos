@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -33,7 +32,6 @@ func main() {
 
 	redisClient := database.InitRedisClient()
 	mongoClient := database.InitMongoClient(true)
-	mongoClient.Ping(context.TODO(), true)
 
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	wrappedServer := middlewares.WithRedisClient(redisClient, middlewares.WithMongoClient(mongoClient, server))

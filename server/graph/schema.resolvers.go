@@ -314,13 +314,11 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	defer mongoClient.Disconnect(ctx)
 
 	if connectErr != nil {
-		fmt.Println(1)
 		return nil, connectErr
 	}
 
 	usersColl, collectionErr := mongoClient.GetCollection(consts.UsersCollection)
 	if collectionErr != nil {
-		fmt.Println(2)
 		return nil, collectionErr
 	}
 
@@ -328,7 +326,6 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	findOptions.SetLimit(10)
 	cur, findErr := usersColl.Find(ctx, bson.M{}, findOptions)
 	if findErr != nil {
-		fmt.Println(3)
 		return nil, findErr
 	}
 	defer cur.Close(context.TODO())

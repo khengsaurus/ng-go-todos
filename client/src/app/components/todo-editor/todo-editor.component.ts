@@ -7,7 +7,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { debounce, interval, Subscription, tap } from 'rxjs';
+import { debounce, firstValueFrom, interval, Subscription, tap } from 'rxjs';
 import { TodosService, UserService } from 'src/app/services';
 import { ITodo, Nullable } from 'src/types';
 
@@ -73,7 +73,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   updateTodoText(text: string) {
     if (this.todo) {
       this.todoService.updateTodo$({ ...this.todo, text }).subscribe();
-    } else if (this.userService.currentUser?.id) {
+    } else if (text && this.userService.currentUser?.id) {
       this.todoService
         .createTodo$(text, this.userService.currentUser.id)
         .pipe(
@@ -87,9 +87,27 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
 
   deleteTodo() {
     if (this.userService.currentUser && this.todo) {
-      this.todoService
-        .deleteTodo$(this.userService.currentUser.id, this.todo.id)
-        .subscribe();
+      firstValueFrom(
+        this.todoService.deleteTodo$(
+          this.userService.currentUser.id,
+          this.todo.id
+        )
+      )
+        .then(() => {
+          // inline call doesn't work
+          this.resetTodo();
+        })
+        .catch(console.error);
     }
+  }
+
+  resetTodo() {
+    this.todo = null;
+    this.todoForm.patchValue({
+      text: '',
+      tag: '',
+      priority: 2,
+      done: false,
+    });
   }
 }

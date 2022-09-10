@@ -195,6 +195,10 @@ $ng-go-todos-theme: mat.define-dark-theme(
 // that you are using.
 @include mat.all-component-themes($ng-go-todos-theme);
 
+:root {
+  background-color: $black;
+}
+
 html,
 body {
   height: 100%;
@@ -232,9 +236,20 @@ body {
   @include flex-(row);
   @include center;
   min-width: 110px !important;
+  height: 37px;
 }
 
 // ------------------------- Overrides -------------------------
+
+mat-sidenav-content.todo-content {
+  overflow-y: hidden;
+}
+
+mat-card-subtitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .mat-drawer-backdrop.mat-drawer-shown {
   background-color: rgba(170, 170, 170, 0.4);

@@ -9,24 +9,14 @@ import { ITodo, Nullable } from 'src/types';
   styleUrls: ['./todos-page.component.scss'],
 })
 export class TodosPage implements OnInit, OnDestroy {
-  sidenavOpen: boolean;
-  selectedTodo: Nullable<ITodo>;
-  currentUserTodos$: Observable<ITodo[]>;
+  sidenavOpen: boolean = true;
+  selectedTodo: Nullable<ITodo> = null;
   private userTodosSub: Nullable<Subscription> = null;
 
-  constructor(
-    private todosService: TodosService,
-    private userService: UserService
-  ) {
-    this.sidenavOpen = true;
-    this.selectedTodo = null;
-    this.currentUserTodos$ = this.userService.currentUser$.pipe(
-      switchMap((user) => this.todosService.getTodos$(user?.id))
-    );
-  }
+  constructor(public todosService: TodosService) {}
 
   ngOnInit(): void {
-    this.userTodosSub = this.currentUserTodos$.subscribe();
+    this.userTodosSub = this.todosService.currentUserTodos$.subscribe();
   }
 
   ngOnDestroy(): void {

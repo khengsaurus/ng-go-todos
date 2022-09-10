@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { map, share, switchMap, tap } from 'rxjs/operators';
 import { ITodo } from 'src/types';
 import { UserService } from '.';
@@ -17,12 +17,12 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class TodosService {
-  todos$: Subject<ITodo[]>;
+  currentUserTodos$: Subject<ITodo[]>;
   // Hacky way to update subject value https://stackoverflow.com/questions/51037295/
   _todosCopy: ITodo[] = [];
 
   constructor(private apollo: Apollo, private userService: UserService) {
-    this.todos$ = new BehaviorSubject<ITodo[]>([]);
+    this.currentUserTodos$ = new BehaviorSubject<ITodo[]>([]);
     const _todosObserver$ = this.userService.currentUser$.pipe(
       switchMap((user) => {
         const userId = user?.id || '';
@@ -45,10 +45,10 @@ export class TodosService {
       tap((todos) => (this._todosCopy = todos)),
       share()
     );
-    _todosObserver$.subscribe(this.todos$);
+    _todosObserver$.subscribe(this.currentUserTodos$);
   }
 
-  getTodos$(userId?: string) {
+  getcurrentUserTodos$(userId?: string) {
     if (!userId) return of([]);
     return this.apollo
       .watchQuery<IGET_TODOS>({
@@ -67,9 +67,9 @@ export class TodosService {
       })
       .pipe(
         map((res) => res.data?.createTodo),
-        tap((todo) => {
-          if (todo) {
-            this.updateTodos([todo, ...this._todosCopy]);
+        tap((_newTodo) => {
+          if (_newTodo) {
+            this.updateTodos([_newTodo, ...this._todosCopy]);
           }
         })
       );
@@ -106,18 +106,21 @@ export class TodosService {
         variables: { userId, todoId },
       })
       .pipe(
-        tap((res) => {
-          if (res.data?.deleteTodo === todoId) {
+        map((res) => res.data?.deleteTodo),
+        map((deletedTodoId) => {
+          if (deletedTodoId === todoId) {
             this.updateTodos(
               this._todosCopy.filter((todo) => todo.id !== todoId)
             );
+            return true;
           }
+          throw new Error('Failed to delete');
         })
       );
   }
 
   private updateTodos(todos: ITodo[]) {
     this._todosCopy = todos;
-    this.todos$.next(todos);
+    this.currentUserTodos$.next(todos);
   }
 }

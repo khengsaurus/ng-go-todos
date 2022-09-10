@@ -16,11 +16,13 @@
         <mat-icon [class.hide]="!sidenavOpen">chevron_left</mat-icon>
       </button>
     </div>
-    <div *ngFor="let todo of currentUserTodos$ | async; index as i">
+    <div
+      *ngFor="let todo of todosService.currentUserTodos$ | async; index as i"
+    >
       <todo-card [todo]="todo" (click)="selectTodo(todo)"> </todo-card>
     </div>
   </mat-sidenav>
-  <mat-sidenav-content>
+  <mat-sidenav-content class="todo-content">
     <button
       mat-icon-button
       [class]="'todos-sidenav-toggle-secondary'"
