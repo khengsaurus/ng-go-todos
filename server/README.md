@@ -1,3 +1,10 @@
+### gqlgen
+
+```bash
+go run github.com/99designs/gqlgen && go run tools/bson_generate.go
+```
+NB: Running this after schema changes may result in gqlgen failing and bson_generate not being executed. Resolve the issues in `schema.resolvers.go` and run again to generate bson tags.
+
 ### Sample queries
 
 ```gql
@@ -27,17 +34,21 @@ mutation deleteUser($userId: String!) {
   deleteUser(userId: $userId)
 }
 
-query getTodos($userId: String!) {
-  getTodos(userId: $userId) {
+query getTodos($userId: String!, $fresh: Boolean!) {
+  getTodos(userId: $userId, fresh: $fresh) {
     text
     userId
     id
+    createdAt
+    updatedAt
   }
 }
 
 query getTodo($todoId: String!) {
   getTodo(todoId: $todoId) {
     text
+    createdAt
+    updatedAt
   }
 }
 
@@ -58,8 +69,8 @@ mutation updateTodo($updateTodo: UpdateTodo!) {
   }
 }
 
-mutation deleteTodo($todoId: String!) {
-  deleteTodo(todoId: $todoId)
+mutation deleteTodo($userId: String!, $todoId: String!) {
+  deleteTodo(userId: $userId, todoId: $todoId)
 }
 ```
 
@@ -70,6 +81,7 @@ Request variables
   "userId": "",
   "todoId": "",
   "email": "",
+  "fresh": false,
   "newUser": {
     "email": "",
     "username": ""
@@ -82,7 +94,7 @@ Request variables
     "id": "",
     "userId": "",
     "text": "",
-    "tag": "white",
+    "tag": "",
     "priority": 2,
     "done": false
   }

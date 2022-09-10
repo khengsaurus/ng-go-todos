@@ -69,8 +69,8 @@ func (mongoClient *MongoClient) Connect(ctx context.Context) error {
 
 func (mongoClient *MongoClient) Disconnect(ctx context.Context) {
 	if err := mongoClient.instance.Disconnect(ctx); err != nil {
-		fmt.Println("Failed to disconnect MongoDB client")
-		fmt.Printf("%v\n", err)
+		fmt.Println("Failed to disconnect MongoDB client:")
+		fmt.Println(fmt.Printf("%v", err))
 	}
 }
 

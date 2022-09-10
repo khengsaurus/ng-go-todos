@@ -1,11 +1,5 @@
 package main
 
-/*
- * Script to add bson tags to generated models.
- * Will add `bson: "objectId"` for fields ending with "Id".
- * Adapted from https://github.com/99designs/gqlgen/issues/865#issuecomment-573043996
- */
-
 import (
 	"fmt"
 	"os"
@@ -22,9 +16,6 @@ func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 			if name == "id" {
 				name = "_id"
 			}
-			// if strings.HasSuffix(name, "Id") {
-			// 	name = "objectId"
-			// }
 			field.Tag += ` bson:"` + name + `"`
 		}
 	}

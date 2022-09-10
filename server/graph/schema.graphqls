@@ -1,3 +1,5 @@
+scalar Time
+
 # --------------- Models ---------------
 
 type User {
@@ -10,9 +12,11 @@ type Todo {
   id: ID!
   userId: String!
   text: String!
-  priority: Int
-  tag: String
   done: Boolean!
+  priority: Int!
+  tag: String!
+  createdAt: Time!
+  updatedAt: Time!
 }
 
 # type Board {
@@ -32,17 +36,15 @@ input NewUser {
 input NewTodo {
   text: String!
   userId: String!
-  tag: String
-  priority: Int
 }
 
 input UpdateTodo {
   id: String!
   userId: String! # change to assign to another user
   text: String!
+  done: Boolean!
   priority: Int!
   tag: String!
-  done: Boolean!
 }
 
 # --------- Queries & Mutations ---------
