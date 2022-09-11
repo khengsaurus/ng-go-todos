@@ -75,29 +75,35 @@ export class TodosService {
       );
   }
 
-  updateTodo$(todo: Partial<ITodo>) {
+  updateTodo$(updateTodo: Partial<ITodo>) {
     return this.apollo
       .mutate<IUPDATE_TODO>({
         mutation: UPDATE_TODO,
-        variables: { updateTodo: todo },
-        optimisticResponse: { updateTodo: todo.id || '' },
+        variables: { updateTodo },
+        optimisticResponse: { updateTodo: updateTodo.id || '' },
       })
       .pipe(
         tap((res) => {
           const updatedTodoId = res.data?.updateTodo;
-          if (updatedTodoId === todo.id) {
-            let __todosCopy = [];
-            if (Object.keys(todo).includes('text')) {
+          if (updatedTodoId === updateTodo.id) {
+            let __todosCopy = [...this._todosCopy];
+            if (updateTodo.text) {
               // unshift if text changed
-              let _updatedTodo = this._todosCopy.find((t) => t.id === todo.id)!;
-              _updatedTodo = { ..._updatedTodo, ...todo };
-              __todosCopy = this._todosCopy.filter((t) => t.id !== todo.id);
-              __todosCopy.unshift(_updatedTodo);
-            } else {
-              __todosCopy = [...this._todosCopy];
+              let _updatedTodo: ITodo;
               for (let i = 0; i < __todosCopy.length; i++) {
-                if (__todosCopy[i].id === todo.id) {
-                  __todosCopy[i] = { ...__todosCopy[i], ...todo };
+                if (__todosCopy[i].id === updateTodo.id) {
+                  _updatedTodo = {
+                    ...__todosCopy.splice(i, 1)[0],
+                    ...updateTodo,
+                  };
+                  break;
+                }
+              }
+              __todosCopy.unshift(_updatedTodo!);
+            } else {
+              for (let i = 0; i < __todosCopy.length; i++) {
+                if (__todosCopy[i].id === updateTodo.id) {
+                  __todosCopy[i] = { ...__todosCopy[i], ...updateTodo };
                   break;
                 }
               }

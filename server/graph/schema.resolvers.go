@@ -61,6 +61,38 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 	return nil, errors.New("failed to create user")
 }
 
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
+	fmt.Println("DeleteUser called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	userId, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{Key: "_id", Value: userId}}
+
+	_, err = usersColl.DeleteOne(ctx, filter)
+	if err != nil {
+		v := false
+		return &v, err
+	}
+	v := true
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
+
+	return &v, nil
+}
+
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error) {
 	fmt.Println("CreateTodo called")
@@ -152,45 +184,13 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 		Value: updateVals,
 	}}
 
-	_, updateErr := todosColl.UpdateOne(ctx, filter, update)
-	if updateErr != nil {
-		return "", updateErr
+	_, err = todosColl.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return "", err
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateTodo.UserID))
 
 	return updateTodo.ID, nil
-}
-
-// DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
-	fmt.Println("DeleteUser called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
-	if err != nil {
-		return nil, err
-	}
-	defer mongoClient.Disconnect(ctx)
-
-	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
-	if err != nil {
-		return nil, err
-	}
-
-	userId, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	filter := bson.D{{Key: "_id", Value: userId}}
-
-	_, deleteErr := usersColl.DeleteOne(ctx, filter)
-	if deleteErr != nil {
-		v := false
-		return &v, deleteErr
-	}
-	v := true
-	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
-
-	return &v, nil
 }
 
 // DeleteTodo is the resolver for the deleteTodo field.
@@ -213,13 +213,214 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 	}
 	filter := bson.D{{Key: "_id", Value: todoId}}
 
-	_, deleteErr := todosColl.DeleteOne(ctx, filter)
-	if deleteErr != nil {
-		return "", deleteErr
+	_, err = todosColl.DeleteOne(ctx, filter)
+	if err != nil {
+		return "", err
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
 
 	return todoID, nil
+}
+
+// CreateBoard is the resolver for the createBoard field.
+func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
+	fmt.Println("CreateBoard called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	userId, err := primitive.ObjectIDFromHex(newBoard.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	todos := make([]*primitive.ObjectID, 0)
+	for _, s := range newBoard.TodoIds {
+		todoId, err := primitive.ObjectIDFromHex(*s)
+		if err == nil {
+			todos = append(todos, &todoId)
+		}
+	}
+
+	currTime := time.Now()
+	result, err := boardsColl.InsertOne(ctx, bson.D{
+		{Key: "userId", Value: userId},
+		{Key: "name", Value: newBoard.Name},
+		{Key: "todos", Value: todos},
+		{Key: "createdAt", Value: currTime},
+		{Key: "updatedAt", Value: currTime},
+	})
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(newBoard.UserID))
+	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
+		return &model.Board{
+			ID:      oid.Hex(),
+			Name:    newBoard.Name,
+			UserID:  newBoard.UserID,
+			TodoIds: newBoard.TodoIds,
+		}, err
+	}
+
+	return nil, errors.New("failed to create board")
+}
+
+// UpdateBoard is the resolver for the updateBoard field.
+func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (string, error) {
+	fmt.Println("UpdateBoard called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	if err != nil {
+		return "", err
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
+	if err != nil {
+		return "", err
+	}
+
+	boardId, err := primitive.ObjectIDFromHex(updateBoard.ID)
+	if err != nil {
+		return "", err
+	}
+
+	filter := bson.D{{Key: "_id", Value: boardId}}
+	update := bson.D{{
+		Key: "$set",
+		Value: bson.D{
+			{Key: "todos", Value: updateBoard.Todos},
+			{Key: "name", Value: updateBoard.Name},
+			{Key: "updatedAt", Value: time.Now()},
+		},
+	}}
+
+	_, err = boardsColl.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return "", err
+	}
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateBoard.UserID))
+
+	return updateBoard.ID, nil
+}
+
+// DeleteBoard is the resolver for the deleteBoard field.
+func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (string, error) {
+	fmt.Println("DeleteBoard called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	if err != nil {
+		return "", err
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
+	if err != nil {
+		return "", err
+	}
+
+	boardId, err := primitive.ObjectIDFromHex(boardID)
+	if err != nil {
+		return "", err
+	}
+	filter := bson.D{{Key: "_id", Value: boardId}}
+
+	_, err = boardsColl.DeleteOne(ctx, filter)
+	if err != nil {
+		return "", err
+	}
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
+
+	return boardID, nil
+}
+
+// GetUser is the resolver for the getUser field.
+func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
+	fmt.Println("GetUser called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	result := usersColl.FindOne(ctx, bson.M{"email": email})
+	var user model.User
+	if err := result.Decode(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUsers is the resolver for the getUsers field.
+func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
+	fmt.Println("GetUsers called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	defer mongoClient.Disconnect(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	findOptions := options.Find()
+	findOptions.SetLimit(10)
+	cur, err := usersColl.Find(ctx, bson.M{}, findOptions)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	var users []*model.User
+	for cur.Next(ctx) {
+		var user model.User
+		err := cur.Decode(&user)
+		if err != nil {
+			fmt.Println("Failed to decode user document")
+		} else {
+			users = append(users, &user)
+		}
+	}
+
+	return users, nil
+}
+
+// GetTodo is the resolver for the getTodo field.
+func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
+	fmt.Println("GetTodo called")
+	mongoClient, err := database.GetMongoClient(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	todoId, err := primitive.ObjectIDFromHex(todoID)
+	if err != nil {
+		return nil, err
+	}
+
+	result := todosColl.FindOne(ctx, bson.M{"_id": todoId})
+	var todo model.Todo
+	if err := result.Decode(&todo); err != nil {
+		return nil, err
+	}
+	return &todo, nil
 }
 
 // GetTodos is the resolver for the getTodos field.
@@ -278,89 +479,96 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 	return todos, nil
 }
 
-// GetTodo is the resolver for the getTodo field.
-func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
-	fmt.Println("GetTodo called")
+// GetBoard is the resolver for the getBoard field.
+// FIXME: returning [] for todoIds
+func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Board, error) {
+	fmt.Println("GetBoard called")
 	mongoClient, err := database.GetMongoClient(ctx, true)
 	if err != nil {
 		return nil, err
 	}
 	defer mongoClient.Disconnect(ctx)
 
-	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
+	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
 		return nil, err
 	}
 
-	todoId, err := primitive.ObjectIDFromHex(todoID)
+	todoId, err := primitive.ObjectIDFromHex(boardID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := todosColl.FindOne(ctx, bson.M{"_id": todoId})
-	var todo model.Todo
-	if err := result.Decode(&todo); err != nil {
+	result := boardsColl.FindOne(ctx, bson.M{"_id": todoId})
+	var board model.Board
+	if err := result.Decode(&board); err != nil {
 		return nil, err
 	}
-	return &todo, nil
+	return &board, nil
 }
 
-// GetUsers is the resolver for the getUsers field.
-func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
-	fmt.Println("GetUsers called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
-	defer mongoClient.Disconnect(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
-	if err != nil {
-		return nil, err
-	}
-
-	findOptions := options.Find()
-	findOptions.SetLimit(10)
-	cur, err := usersColl.Find(ctx, bson.M{}, findOptions)
-	if err != nil {
-		return nil, err
-	}
-	defer cur.Close(context.TODO())
-
-	var users []*model.User
-	for cur.Next(ctx) {
-		var user model.User
-		err := cur.Decode(&user)
-		if err != nil {
-			fmt.Println("Failed to decode user document")
-		} else {
-			users = append(users, &user)
+// GetBoards is the resolver for the getBoards field.
+// FIXME: returning [] for todoIds
+func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool) ([]*model.Board, error) {
+	fmt.Println("GetBoards called")
+	redisClient, redisClientErr := database.GetRedisClient(ctx)
+	if !fresh && redisClient != nil {
+		cachedBoards, _ := redisClient.GetBoards(ctx, userID)
+		if cachedBoards != nil {
+			fmt.Println("Retrieved boards from redis cache")
+			return cachedBoards, nil
 		}
 	}
 
-	return users, nil
-}
-
-// GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
-	fmt.Println("GetUser called")
 	mongoClient, err := database.GetMongoClient(ctx, true)
 	if err != nil {
 		return nil, err
 	}
 	defer mongoClient.Disconnect(ctx)
 
-	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
+	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
 		return nil, err
 	}
 
-	result := usersColl.FindOne(ctx, bson.M{"email": email})
-	var user model.User
-	if err := result.Decode(&user); err != nil {
+	userId, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+
+	// findOptions := options.Find()
+	// findOptions.SetSort(bson.D{{Key: "updatedAt", Value: -1}})
+	filter := bson.D{{Key: "userId", Value: userId}}
+	cur, err := boardsColl.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+
+	// result := todosColl.FindOne(ctx, bson.M{"_id": todoId})
+	// var todo model.Todo
+	// if err := result.Decode(&todo); err != nil {
+	// 	return nil, err
+	// }
+	// return &todo, nil
+
+	boards := make([]*model.Board, 0)
+	for cur.Next(ctx) {
+		var board model.Board
+		err := cur.Decode(&board)
+		if err != nil {
+			fmt.Println("Failed to decode board document:")
+			fmt.Println(fmt.Printf("%v", err))
+		} else {
+			boards = append(boards, &board)
+		}
+	}
+
+	if redisClient != nil && redisClientErr == nil {
+		redisClient.SetBoards(ctx, userID, boards)
+	}
+
+	return boards, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

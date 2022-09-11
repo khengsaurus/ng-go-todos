@@ -1,7 +1,7 @@
 @import "../../../styles";
 
 mat-card.todo {
-  margin: $gap-m;
+  margin: 0px $gap-m $gap-m;
   background-color: rgba(0, 0, 0, 0.5) !important;
   transition: 500ms;
 }

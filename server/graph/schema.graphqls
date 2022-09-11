@@ -15,16 +15,19 @@ type Todo {
   done: Boolean!
   priority: Int!
   tag: String!
+  boardId: String!
   createdAt: Time!
   updatedAt: Time!
 }
 
-# type Board {
-#   id: ID!
-#   user: User!
-#   username: String!
-#   todos: [Todo!]!
-# }
+type Board {
+  id: ID!
+  userId: String!
+  name: String!
+  todoIds: [String]!
+  createdAt: Time!
+  updatedAt: Time!
+}
 
 # --------------- Inputs ---------------
 
@@ -38,6 +41,12 @@ input NewTodo {
   userId: String!
 }
 
+input NewBoard {
+  userId: String!
+  name: String!
+  todoIds: [String]!
+}
+
 input UpdateTodo {
   id: String!
   userId: String!
@@ -45,21 +54,38 @@ input UpdateTodo {
   done: Boolean
   priority: Int
   tag: String
+  boardId: String
+}
+
+input UpdateBoard {
+  id: String!
+  userId: String!
+  name: String!
+  todos: [String]!
 }
 
 # --------- Queries & Mutations ---------
 
 type Query {
-  getTodos(userId: String!, fresh: Boolean!): [Todo!]!
-  getTodo(todoId: String!): Todo
-  getUsers: [User!]!
   getUser(email: String!): User
+  getUsers: [User]!
+  #
+  getTodo(todoId: String!): Todo!
+  getTodos(userId: String!, fresh: Boolean!): [Todo]!
+  #
+  getBoard(boardId: String!): Board!
+  getBoards(userId: String!, fresh: Boolean!): [Board]!
 }
 
 type Mutation {
   createUser(newUser: NewUser!): User!
+  deleteUser(userId: String!): Boolean
+  #
   createTodo(newTodo: NewTodo!): Todo!
   updateTodo(updateTodo: UpdateTodo!): String!
-  deleteUser(userId: String!): Boolean
   deleteTodo(userId: String!, todoId: String!): String!
+  #
+  createBoard(newBoard: NewBoard!): Board!
+  updateBoard(updateBoard: UpdateBoard!): String!
+  deleteBoard(userId: String!, boardId: String!): String!
 }

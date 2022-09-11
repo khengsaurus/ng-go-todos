@@ -6,6 +6,21 @@ import (
 	"time"
 )
 
+type Board struct {
+	ID        string    `json:"id" bson:"_id"`
+	UserID    string    `json:"userId" bson:"userId"`
+	Name      string    `json:"name" bson:"name"`
+	TodoIds   []*string `json:"todoIds" bson:"todoIds"`
+	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
+}
+
+type NewBoard struct {
+	UserID  string    `json:"userId" bson:"userId"`
+	Name    string    `json:"name" bson:"name"`
+	TodoIds []*string `json:"todoIds" bson:"todoIds"`
+}
+
 type NewTodo struct {
 	Text   string `json:"text" bson:"text"`
 	UserID string `json:"userId" bson:"userId"`
@@ -23,8 +38,16 @@ type Todo struct {
 	Done      bool      `json:"done" bson:"done"`
 	Priority  int       `json:"priority" bson:"priority"`
 	Tag       string    `json:"tag" bson:"tag"`
+	BoardID   string    `json:"boardId" bson:"boardId"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
+}
+
+type UpdateBoard struct {
+	ID     string    `json:"id" bson:"_id"`
+	UserID string    `json:"userId" bson:"userId"`
+	Name   string    `json:"name" bson:"name"`
+	Todos  []*string `json:"todos" bson:"todos"`
 }
 
 type UpdateTodo struct {
@@ -34,6 +57,7 @@ type UpdateTodo struct {
 	Done     *bool   `json:"done" bson:"done"`
 	Priority *int    `json:"priority" bson:"priority"`
 	Tag      *string `json:"tag" bson:"tag"`
+	BoardID  *string `json:"boardId" bson:"boardId"`
 }
 
 type User struct {

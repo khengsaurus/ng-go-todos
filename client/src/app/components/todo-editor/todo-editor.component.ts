@@ -23,7 +23,6 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   @Input() todo: Nullable<ITodo> = null;
   todoForm: FormGroup;
   private formSub: Nullable<Subscription> = null;
-  private currTodoId: string | undefined = undefined;
 
   constructor(
     private todoService: TodosService,
@@ -56,10 +55,8 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
         priority: newTodo.priority,
         done: newTodo.done,
       });
-      if (this.currTodoId !== newTodo.id) {
-        setTimeout(() => (this.currTodoId = newTodo.id), autoDelay);
-      }
     }
+    this.focusEditor();
   }
 
   ngOnDestroy(): void {
@@ -82,7 +79,11 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  resetTodo() {
+  focusEditor() {
+    document.getElementById('todo-editor')?.focus();
+  }
+
+  resetTodo(focus = false) {
     this.todo = null;
     this.todoForm.patchValue({
       text: '',
@@ -90,9 +91,8 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       priority: 2,
       done: false,
     });
+    if (focus) this.focusEditor();
   }
-
-  /* -------------------- Edit todo fns -------------------- */
 
   updateTodo(updateTodo: ITypedObject) {
     if (this.todo) {
