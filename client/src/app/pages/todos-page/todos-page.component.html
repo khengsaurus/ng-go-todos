@@ -11,16 +11,35 @@
         mat-icon-button
         [class]="'todos-sidenav-toggle'"
         (click)="toggleSidenav()"
-        disableRipple="true"
+        disableRipple
       >
         <mat-icon [class.hide]="!sidenavOpen">chevron_left</mat-icon>
       </button>
     </div>
+
+    <!-- Todo card list -->
     <div
-      *ngFor="let todo of todosService.currentUserTodos$ | async; index as i"
+      *ngFor="
+        let todo of todosService.currentUserTodos$ | async;
+        trackBy: trackById
+      "
     >
-      <todo-card [todo]="todo" (click)="selectTodo(todo)"> </todo-card>
+      <todo-card [todo]="todo" (click)="selectTodo(todo)"></todo-card>
     </div>
+    <!-- <div class="todos" cdkDropList cdkDropListOrientation="vertical">
+      <div
+        cdkDrag
+        class="inner-card"
+        cdkDragDisabled
+        *ngFor="
+          let todo of todosService.currentUserTodos$ | async;
+          trackBy: trackById
+        "
+      >
+        <todo-card [todo]="todo" (click)="selectTodo(todo)"> </todo-card>
+      </div>
+    </div> -->
+    <!---------- ---------->
   </mat-sidenav>
   <mat-sidenav-content class="todo-content">
     <button

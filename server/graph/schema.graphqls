@@ -40,11 +40,11 @@ input NewTodo {
 
 input UpdateTodo {
   id: String!
-  userId: String! # change to assign to another user
-  text: String!
-  done: Boolean!
-  priority: Int!
-  tag: String!
+  userId: String!
+  text: String
+  done: Boolean
+  priority: Int
+  tag: String
 }
 
 # --------- Queries & Mutations ---------
@@ -59,7 +59,7 @@ type Query {
 type Mutation {
   createUser(newUser: NewUser!): User!
   createTodo(newTodo: NewTodo!): Todo!
-  updateTodo(updateTodo: UpdateTodo!): Todo!
+  updateTodo(updateTodo: UpdateTodo!): String!
   deleteUser(userId: String!): Boolean
   deleteTodo(userId: String!, todoId: String!): String!
 }

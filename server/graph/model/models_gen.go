@@ -28,12 +28,12 @@ type Todo struct {
 }
 
 type UpdateTodo struct {
-	ID       string `json:"id" bson:"_id"`
-	UserID   string `json:"userId" bson:"userId"`
-	Text     string `json:"text" bson:"text"`
-	Done     bool   `json:"done" bson:"done"`
-	Priority int    `json:"priority" bson:"priority"`
-	Tag      string `json:"tag" bson:"tag"`
+	ID       string  `json:"id" bson:"_id"`
+	UserID   string  `json:"userId" bson:"userId"`
+	Text     *string `json:"text" bson:"text"`
+	Done     *bool   `json:"done" bson:"done"`
+	Priority *int    `json:"priority" bson:"priority"`
+	Tag      *string `json:"tag" bson:"tag"`
 }
 
 type User struct {

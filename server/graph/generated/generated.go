@@ -81,7 +81,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error)
 	CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error)
-	UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (*model.Todo, error)
+	UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (string, error)
 	DeleteUser(ctx context.Context, userID string) (*bool, error)
 	DeleteTodo(ctx context.Context, userID string, todoID string) (string, error)
 }
@@ -400,11 +400,11 @@ input NewTodo {
 
 input UpdateTodo {
   id: String!
-  userId: String! # change to assign to another user
-  text: String!
-  done: Boolean!
-  priority: Int!
-  tag: String!
+  userId: String!
+  text: String
+  done: Boolean
+  priority: Int
+  tag: String
 }
 
 # --------- Queries & Mutations ---------
@@ -419,7 +419,7 @@ type Query {
 type Mutation {
   createUser(newUser: NewUser!): User!
   createTodo(newTodo: NewTodo!): Todo!
-  updateTodo(updateTodo: UpdateTodo!): Todo!
+  updateTodo(updateTodo: UpdateTodo!): String!
   deleteUser(userId: String!): Boolean
   deleteTodo(userId: String!, todoId: String!): String!
 }
@@ -784,9 +784,9 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -796,25 +796,7 @@ func (ec *executionContext) fieldContext_Mutation_updateTodo(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Todo_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Todo_userId(ctx, field)
-			case "text":
-				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
-			case "priority":
-				return ec.fieldContext_Todo_priority(ctx, field)
-			case "tag":
-				return ec.fieldContext_Todo_tag(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Todo_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Todo_updatedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	defer func() {
@@ -3682,7 +3664,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
-			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			it.Text, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3690,7 +3672,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
-			it.Done, err = ec.unmarshalNBoolean2bool(ctx, v)
+			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3698,7 +3680,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
-			it.Priority, err = ec.unmarshalNInt2int(ctx, v)
+			it.Priority, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3706,7 +3688,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
-			it.Tag, err = ec.unmarshalNString2string(ctx, v)
+			it.Tag, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4840,6 +4822,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
 	return res
 }
 

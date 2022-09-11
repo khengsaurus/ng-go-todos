@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -17,12 +18,13 @@ import { RouterModule } from '@angular/router';
 import { ConfirmButton } from './confirm-button.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
 import { AppShell } from './shell/shell.component';
-import { TodoCard } from './todo-card.component';
+import { TodoCard } from './cards/todo-card.component';
 
-const components = [ConfirmButton, TodoEditor, AppShell, TodoCard];
+const components = [AppShell, ConfirmButton, TodoCard, TodoEditor];
 
 const modules = [
   CommonModule,
+  DragDropModule,
   FormsModule,
   LayoutModule,
   MatButtonModule,

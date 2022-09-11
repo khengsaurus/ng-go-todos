@@ -1,0 +1,11 @@
+@import "../../../styles";
+
+mat-card.todo {
+  margin: $gap-m;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  transition: 500ms;
+}
+
+mat-icon.check {
+  min-width: 21px;
+}

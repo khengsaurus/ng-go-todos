@@ -30,4 +30,8 @@ export class TodosPage implements OnInit, OnDestroy {
   selectTodo(todo: ITodo) {
     this.selectedTodo = todo;
   }
+
+  trackById(_: number, item: Nullable<ITodo>) {
+    return item?.id;
+  }
 }

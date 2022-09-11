@@ -80,13 +80,6 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 		return nil, err
 	}
 
-	// optionalStringInput := new(string)
-	// if newTodo.Val == nil {
-	// 	*optionalStringInput = "default"
-	// } else {
-	// 	optionalStringInput = newTodo.Val
-	// }
-
 	currTime := time.Now()
 	result, err := todosColl.InsertOne(ctx, bson.D{
 		{Key: "userId", Value: userId},
@@ -114,55 +107,58 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 }
 
 // UpdateTodo is the resolver for the updateTodo field.
-func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (*model.Todo, error) {
+func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (string, error) {
 	fmt.Println("UpdateTodo called")
 	mongoClient, err := database.GetMongoClient(ctx, true)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer mongoClient.Disconnect(ctx)
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	todoId, err := primitive.ObjectIDFromHex(updateTodo.ID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	userId, err := primitive.ObjectIDFromHex(updateTodo.UserID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	filter := bson.D{{Key: "_id", Value: todoId}}
+	updateVals := bson.D{
+		{Key: "userId", Value: userId},
+		{Key: "updatedAt", Value: time.Now()},
+	}
+	if updateTodo.Text != nil {
+		updateVals = append(updateVals, bson.E{Key: "text", Value: updateTodo.Text})
+	}
+	if updateTodo.Priority != nil {
+		updateVals = append(updateVals, bson.E{Key: "priority", Value: updateTodo.Priority})
+	}
+	if updateTodo.Tag != nil {
+		updateVals = append(updateVals, bson.E{Key: "tag", Value: updateTodo.Tag})
+	}
+	if updateTodo.Done != nil {
+		updateVals = append(updateVals, bson.E{Key: "done", Value: updateTodo.Done})
+	}
 	update := bson.D{{
-		Key: "$set",
-		Value: bson.D{
-			{Key: "userId", Value: userId},
-			{Key: "text", Value: updateTodo.Text},
-			{Key: "priority", Value: updateTodo.Priority},
-			{Key: "tag", Value: updateTodo.Tag},
-			{Key: "done", Value: updateTodo.Done},
-			{Key: "updatedAt", Value: time.Now()},
-		}}}
+		Key:   "$set",
+		Value: updateVals,
+	}}
 
 	_, updateErr := todosColl.UpdateOne(ctx, filter, update)
 	if updateErr != nil {
-		return nil, updateErr
+		return "", updateErr
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateTodo.UserID))
 
-	return &model.Todo{
-		ID:       updateTodo.ID,
-		UserID:   updateTodo.UserID,
-		Text:     updateTodo.Text,
-		Done:     updateTodo.Done,
-		Priority: updateTodo.Priority,
-		Tag:      updateTodo.Tag,
-	}, nil
+	return updateTodo.ID, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.

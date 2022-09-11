@@ -1,24 +1,20 @@
 <form [formGroup]="todoForm" class="todo-container size-{{ size }}">
   <textarea class="todo-editor" formControlName="text"></textarea>
   <div *ngIf="todo !== null" class="todo-header">
-    <button
-      mat-icon-button
-      class="btn-m"
-      disableRipple="true"
-      (click)="resetTodo()"
-    >
+    <button mat-icon-button class="btn-m" disableRipple (click)="resetTodo()">
       <mat-icon>note_add</mat-icon>
     </button>
   </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
-    <mat-checkbox class="btn-m" formControlName="done" disableRipple="true">
-      Done
-    </mat-checkbox>
+    <mat-checkbox
+      class="btn-m"
+      formControlName="done"
+      disableRipple
+    ></mat-checkbox>
     <confirm-button
       (action)="this.deleteTodo()"
       [icon]="'delete'"
-      [label]="''"
     ></confirm-button>
   </div>
 </form>

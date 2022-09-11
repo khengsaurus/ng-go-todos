@@ -9,7 +9,7 @@ import {
 import { FormControl, FormGroup } from '@angular/forms';
 import { debounce, firstValueFrom, interval, Subscription, tap } from 'rxjs';
 import { TodosService, UserService } from 'src/app/services';
-import { ITodo, Nullable } from 'src/types';
+import { ITodo, ITypedObject, Nullable } from 'src/types';
 
 const autoDelay = 1000;
 
@@ -38,14 +38,10 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.formSub = this.todoForm.controls['text'].valueChanges
+    this.formSub = this.todoForm.valueChanges
       .pipe(
         debounce(() => interval(autoDelay)),
-        tap((str) => {
-          if (str !== this.todo?.text) {
-            this.updateTodoText(str);
-          }
-        })
+        tap((changes) => this.updateTodo(changes))
         // TODO tap auto-saved feedback
       )
       .subscribe();
@@ -68,21 +64,6 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.formSub?.unsubscribe();
-  }
-
-  updateTodoText(text: string) {
-    if (this.todo) {
-      this.todoService.updateTodo$({ ...this.todo, text }).subscribe();
-    } else if (text && this.userService.currentUser?.id) {
-      this.todoService
-        .createTodo$(text, this.userService.currentUser.id)
-        .pipe(
-          tap((todo) => {
-            if (todo) this.todo = todo;
-          })
-        )
-        .subscribe();
-    }
   }
 
   deleteTodo() {
@@ -110,4 +91,41 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       done: false,
     });
   }
+
+  /* -------------------- Edit todo fns -------------------- */
+
+  updateTodo(updateTodo: ITypedObject) {
+    if (this.todo) {
+      const updatedTodo: ITypedObject = {
+        userId: this.todo.userId,
+        id: this.todo.id,
+      };
+      let flagUpdate = false;
+      for (const key of updateKeys) {
+        const newVal = updateTodo[key];
+        if (
+          newVal !== undefined &&
+          newVal !== (this.todo as ITypedObject)[key]
+        ) {
+          flagUpdate = true;
+          updatedTodo[key] = newVal;
+        }
+      }
+      if (flagUpdate) {
+        this.todo = { ...this.todo, ...updatedTodo };
+        this.todoService.updateTodo$(updatedTodo).subscribe();
+      }
+    } else if (updateTodo['text'] && this.userService.currentUser?.id) {
+      this.todoService
+        .createTodo$(updateTodo['text'], this.userService.currentUser.id)
+        .pipe(
+          tap((todo) => {
+            if (todo) this.todo = todo;
+          })
+        )
+        .subscribe();
+    }
+  }
 }
+
+const updateKeys = ['text', 'done'] as unknown as 'text' | 'done';

@@ -59,7 +59,7 @@ export class TodosService {
   }
 
   createTodo$(text: string, userId: string) {
-    const newTodo = { userId, text, tag: 'white', priority: 2 };
+    const newTodo = { userId, text };
     return this.apollo
       .mutate<ICREATE_TODO>({
         mutation: CREATE_TODO,
@@ -75,22 +75,31 @@ export class TodosService {
       );
   }
 
-  updateTodo$(todo: ITodo) {
+  updateTodo$(todo: Partial<ITodo>) {
     return this.apollo
       .mutate<IUPDATE_TODO>({
         mutation: UPDATE_TODO,
         variables: { updateTodo: todo },
-        optimisticResponse: { updateTodo: todo },
+        optimisticResponse: { updateTodo: todo.id || '' },
       })
       .pipe(
         tap((res) => {
-          const updatedTodo = res.data?.updateTodo;
-          if (updatedTodo) {
-            const __todosCopy = [...this._todosCopy];
-            for (let i = 0; i < __todosCopy?.length; i++) {
-              if (__todosCopy[i].id === updatedTodo.id) {
-                __todosCopy[i] = updatedTodo;
-                break;
+          const updatedTodoId = res.data?.updateTodo;
+          if (updatedTodoId === todo.id) {
+            let __todosCopy = [];
+            if (Object.keys(todo).includes('text')) {
+              // unshift if text changed
+              let _updatedTodo = this._todosCopy.find((t) => t.id === todo.id)!;
+              _updatedTodo = { ..._updatedTodo, ...todo };
+              __todosCopy = this._todosCopy.filter((t) => t.id !== todo.id);
+              __todosCopy.unshift(_updatedTodo);
+            } else {
+              __todosCopy = [...this._todosCopy];
+              for (let i = 0; i < __todosCopy.length; i++) {
+                if (__todosCopy[i].id === todo.id) {
+                  __todosCopy[i] = { ...__todosCopy[i], ...todo };
+                  break;
+                }
               }
             }
             this.updateTodos(__todosCopy);
@@ -114,7 +123,7 @@ export class TodosService {
             );
             return true;
           }
-          throw new Error('Failed to delete');
+          throw new Error('Failed to delete todo');
         })
       );
   }

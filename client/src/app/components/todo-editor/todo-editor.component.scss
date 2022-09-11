@@ -44,5 +44,8 @@ form.todo-container {
   .todo-footer {
     @include toolbar;
     bottom: 0px;
+    .mat-checkbox {
+      padding-top: 2px;
+    }
   }
 }

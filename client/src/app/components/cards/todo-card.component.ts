@@ -4,12 +4,16 @@ import { ITodo, Nullable } from 'src/types';
 @Component({
   selector: 'todo-card',
   template: `
-    <div *ngIf="todo">
-      <mat-card class="todo" [class]="todo.tag">
-        <mat-card-subtitle>{{ todoTitle }}</mat-card-subtitle>
-      </mat-card>
-    </div>
+    <mat-card class="todo" [class]="todo?.tag">
+      <div class="row">
+        <mat-card-subtitle class="todo-title">{{
+          todoTitle
+        }}</mat-card-subtitle>
+        <mat-icon *ngIf="todo?.done" class="check">check</mat-icon>
+      </div>
+    </mat-card>
   `,
+  styleUrls: ['./cards.scss'],
 })
 export class TodoCard implements OnChanges {
   @Input() todo: Nullable<ITodo> = null;

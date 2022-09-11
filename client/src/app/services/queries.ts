@@ -1,6 +1,26 @@
 import { gql } from 'apollo-angular';
 import { ITodo, IUser } from 'src/types';
 
+const fragments = {
+  UserRepr: gql`
+    fragment UserFields on User {
+      id
+      email
+      username
+    }
+  `,
+  TodoRepr: gql`
+    fragment TodoFields on Todo {
+      id
+      userId
+      text
+      priority
+      tag
+      done
+    }
+  `,
+};
+
 export interface IGET_USER {
   getUser: IUser;
 }
@@ -8,11 +28,10 @@ export interface IGET_USER {
 export const GET_USER = gql`
   query GetUser($email: String!) {
     getUser(email: $email) {
-      id
-      email
-      username
+      ...UserFields
     }
   }
+  ${fragments.UserRepr}
 `;
 
 export interface IGET_USERS {
@@ -22,10 +41,10 @@ export interface IGET_USERS {
 export const GET_USERS = gql`
   query GetUsers {
     getUsers {
-      email
-      username
+      ...UserFields
     }
   }
+  ${fragments.UserRepr}
 `;
 
 export interface ICREATE_USER {
@@ -35,10 +54,10 @@ export interface ICREATE_USER {
 export const CREATE_USER = gql`
   mutation CreateUser($newUser: NewUser!) {
     createUser(newUser: $newUser) {
-      email
-      username
+      ...UserFields
     }
   }
+  ${fragments.UserRepr}
 `;
 
 export interface IGET_TODOS {
@@ -48,14 +67,10 @@ export interface IGET_TODOS {
 export const GET_TODOS = gql`
   query GetTodos($userId: String!, $fresh: Boolean!) {
     getTodos(userId: $userId, fresh: $fresh) {
-      id
-      userId
-      text
-      priority
-      tag
-      done
+      ...TodoFields
     }
   }
+  ${fragments.TodoRepr}
 `;
 
 export interface ICREATE_TODO {
@@ -65,29 +80,19 @@ export interface ICREATE_TODO {
 export const CREATE_TODO = gql`
   mutation createTodo($newTodo: NewTodo!) {
     createTodo(newTodo: $newTodo) {
-      id
-      userId
-      text
-      priority
-      tag
-      done
+      ...TodoFields
     }
   }
+  ${fragments.TodoRepr}
 `;
 
 export interface IUPDATE_TODO {
-  updateTodo: ITodo;
+  updateTodo: string;
 }
 
 export const UPDATE_TODO = gql`
   mutation updateTodo($updateTodo: UpdateTodo!) {
-    updateTodo(updateTodo: $updateTodo) {
-      id
-      text
-      priority
-      tag
-      done
-    }
+    updateTodo(updateTodo: $updateTodo)
   }
 `;
 
