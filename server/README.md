@@ -3,11 +3,19 @@
 ```bash
 go run github.com/99designs/gqlgen && go run tools/bson_generate.go
 ```
+
 NB: Running this after schema changes may result in gqlgen failing and bson_generate not being executed. Resolve the issues in `schema.resolvers.go` and run again to generate bson tags.
 
 ### Sample queries
 
 ```gql
+mutation createUser($newUser: NewUser!) {
+  createUser(newUser: $newUser) {
+    username
+    id
+  }
+}
+
 query getUsers {
   getUsers {
     username
@@ -23,15 +31,16 @@ query getUser($email: String!) {
   }
 }
 
-mutation createUser($newUser: NewUser!) {
-  createUser(newUser: $newUser) {
-    username
-    id
-  }
-}
-
 mutation deleteUser($userId: String!) {
   deleteUser(userId: $userId)
+}
+
+mutation createTodo($newTodo: NewTodo!) {
+  createTodo(newTodo: $newTodo) {
+    id
+    text
+    userId
+  }
 }
 
 query getTodos($userId: String!, $fresh: Boolean!) {
@@ -52,25 +61,50 @@ query getTodo($todoId: String!) {
   }
 }
 
-mutation createTodo($newTodo: NewTodo!) {
-  createTodo(newTodo: $newTodo) {
-    id
-    text
-    userId
-  }
-}
-
 mutation updateTodo($updateTodo: UpdateTodo!) {
-  updateTodo(updateTodo: $updateTodo) {
-    text
-    priority
-    tag
-    done
-  }
+  updateTodo(updateTodo: $updateTodo)
 }
 
 mutation deleteTodo($userId: String!, $todoId: String!) {
   deleteTodo(userId: $userId, todoId: $todoId)
+}
+
+mutation createBoard($newBoard: NewBoard!) {
+  createBoard(newBoard: $newBoard) {
+    id
+    name
+    userId
+  }
+}
+
+query getBoard($boardId: String!) {
+  getBoard(boardId: $boardId) {
+    id
+    userId
+    name
+    createdAt
+    todos {
+      id
+      text
+    }
+  }
+}
+
+query getBoards($userId: String!) {
+  getBoards(userId: $userId, fresh: true) {
+    id
+    userId
+    name
+    createdAt
+    todos {
+      id
+      text
+    }
+  }
+}
+
+mutation deleteBoard($userId: String!, $boardId: String!) {
+  deleteBoard(userId: $userId, boardId: $boardId)
 }
 ```
 
@@ -80,8 +114,9 @@ Request variables
 {
   "userId": "",
   "todoId": "",
+  "boardId": "",
   "email": "",
-  "fresh": false,
+  "fresh": true,
   "newUser": {
     "email": "",
     "username": ""
@@ -97,6 +132,11 @@ Request variables
     "tag": "",
     "priority": 2,
     "done": false
+  },
+  "newBoard": {
+    "userId": "",
+    "name": "",
+    "todoIds": ["", ""]
   }
 }
 ```

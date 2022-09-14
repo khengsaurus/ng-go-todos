@@ -261,10 +261,10 @@ func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBo
 	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(newBoard.UserID))
 	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
 		return &model.Board{
-			ID:      oid.Hex(),
-			Name:    newBoard.Name,
-			UserID:  newBoard.UserID,
-			TodoIds: newBoard.TodoIds,
+			ID:     oid.Hex(),
+			Name:   newBoard.Name,
+			UserID: newBoard.UserID,
+			Todos:  []*model.Todo{},
 		}, err
 	}
 
@@ -376,16 +376,16 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 
 	findOptions := options.Find()
 	findOptions.SetLimit(10)
-	cur, err := usersColl.Find(ctx, bson.M{}, findOptions)
+	cursor, err := usersColl.Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(context.TODO())
+	defer cursor.Close(context.TODO())
 
 	var users []*model.User
-	for cur.Next(ctx) {
+	for cursor.Next(ctx) {
 		var user model.User
-		err := cur.Decode(&user)
+		err := cursor.Decode(&user)
 		if err != nil {
 			fmt.Println("Failed to decode user document")
 		} else {
@@ -454,16 +454,16 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 	findOptions := options.Find()
 	findOptions.SetSort(bson.D{{Key: "updatedAt", Value: -1}})
 	filter := bson.D{{Key: "userId", Value: userId}}
-	cur, err := todosColl.Find(ctx, filter, findOptions)
+	cursor, err := todosColl.Find(ctx, filter, findOptions)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(ctx)
+	defer cursor.Close(ctx)
 
 	var todos []*model.Todo
-	for cur.Next(ctx) {
+	for cursor.Next(ctx) {
 		var todo model.Todo
-		err := cur.Decode(&todo)
+		err := cursor.Decode(&todo)
 		if err != nil {
 			fmt.Println("Failed to decode todo document:")
 			fmt.Println(fmt.Printf("%v", err))
@@ -480,7 +480,6 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 }
 
 // GetBoard is the resolver for the getBoard field.
-// FIXME: returning [] for todoIds
 func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Board, error) {
 	fmt.Println("GetBoard called")
 	mongoClient, err := database.GetMongoClient(ctx, true)
@@ -494,21 +493,37 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 		return nil, err
 	}
 
-	todoId, err := primitive.ObjectIDFromHex(boardID)
+	boardId, err := primitive.ObjectIDFromHex(boardID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := boardsColl.FindOne(ctx, bson.M{"_id": todoId})
-	var board model.Board
-	if err := result.Decode(&board); err != nil {
+	aggSearch := bson.M{"$match": bson.M{"_id": boardId}}
+	aggPopulate := bson.M{"$lookup": bson.M{
+		"from":         consts.TodosCollection,
+		"localField":   "todos",
+		"foreignField": "_id",
+		"as":           "todos",
+	}}
+
+	cursor, err := boardsColl.Aggregate(ctx, []bson.M{aggSearch, aggPopulate})
+	if err != nil {
 		return nil, err
 	}
-	return &board, nil
+	defer cursor.Close(ctx)
+
+	if cursor.Next(ctx) {
+		var board model.Board
+		if err := cursor.Decode(&board); err != nil {
+			return nil, err
+		}
+		return &board, nil
+	}
+
+	return nil, errors.New("MongoDB aggregate error - failed to create cursor in getBoard resolver")
 }
 
 // GetBoards is the resolver for the getBoards field.
-// FIXME: returning [] for todoIds
 func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool) ([]*model.Board, error) {
 	fmt.Println("GetBoards called")
 	redisClient, redisClientErr := database.GetRedisClient(ctx)
@@ -536,29 +551,26 @@ func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool
 		return nil, err
 	}
 
-	// findOptions := options.Find()
-	// findOptions.SetSort(bson.D{{Key: "updatedAt", Value: -1}})
-	filter := bson.D{{Key: "userId", Value: userId}}
-	cur, err := boardsColl.Find(ctx, filter)
+	aggSearch := bson.M{"$match": bson.M{"userId": userId}}
+	aggPopulate := bson.M{"$lookup": bson.M{
+		"from":         consts.TodosCollection,
+		"localField":   "todos",
+		"foreignField": "_id",
+		"as":           "todos",
+	}}
+
+	cursor, err := boardsColl.Aggregate(ctx, []bson.M{aggSearch, aggPopulate})
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(ctx)
-
-	// result := todosColl.FindOne(ctx, bson.M{"_id": todoId})
-	// var todo model.Todo
-	// if err := result.Decode(&todo); err != nil {
-	// 	return nil, err
-	// }
-	// return &todo, nil
+	defer cursor.Close(ctx)
 
 	boards := make([]*model.Board, 0)
-	for cur.Next(ctx) {
+	for cursor.Next(ctx) {
 		var board model.Board
-		err := cur.Decode(&board)
+		err := cursor.Decode(&board)
 		if err != nil {
-			fmt.Println("Failed to decode board document:")
-			fmt.Println(fmt.Printf("%v", err))
+			fmt.Printf("Failed to decode board document: %v", err)
 		} else {
 			boards = append(boards, &board)
 		}

@@ -24,7 +24,7 @@ type Board {
   id: ID!
   userId: String!
   name: String!
-  todoIds: [String]!
+  todos: [Todo]!
   createdAt: Time!
   updatedAt: Time!
 }

@@ -49,7 +49,7 @@ type ComplexityRoot struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
-		TodoIds   func(childComplexity int) int
+		Todos     func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 		UserID    func(childComplexity int) int
 	}
@@ -148,12 +148,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Board.Name(childComplexity), true
 
-	case "Board.todoIds":
-		if e.complexity.Board.TodoIds == nil {
+	case "Board.todos":
+		if e.complexity.Board.Todos == nil {
 			break
 		}
 
-		return e.complexity.Board.TodoIds(childComplexity), true
+		return e.complexity.Board.Todos(childComplexity), true
 
 	case "Board.updatedAt":
 		if e.complexity.Board.UpdatedAt == nil {
@@ -515,7 +515,7 @@ type Board {
   id: ID!
   userId: String!
   name: String!
-  todoIds: [String]!
+  todos: [Todo]!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -1004,8 +1004,8 @@ func (ec *executionContext) fieldContext_Board_name(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Board_todoIds(ctx context.Context, field graphql.CollectedField, obj *model.Board) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Board_todoIds(ctx, field)
+func (ec *executionContext) _Board_todos(ctx context.Context, field graphql.CollectedField, obj *model.Board) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Board_todos(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1018,7 +1018,7 @@ func (ec *executionContext) _Board_todoIds(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TodoIds, nil
+		return obj.Todos, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1030,19 +1030,39 @@ func (ec *executionContext) _Board_todoIds(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]*model.Todo)
 	fc.Result = res
-	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Board_todoIds(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Board",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Todo_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Todo_userId(ctx, field)
+			case "text":
+				return ec.fieldContext_Todo_text(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
+			case "priority":
+				return ec.fieldContext_Todo_priority(ctx, field)
+			case "tag":
+				return ec.fieldContext_Todo_tag(ctx, field)
+			case "boardId":
+				return ec.fieldContext_Todo_boardId(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Todo_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Todo_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
 	}
 	return fc, nil
@@ -1481,8 +1501,8 @@ func (ec *executionContext) fieldContext_Mutation_createBoard(ctx context.Contex
 				return ec.fieldContext_Board_userId(ctx, field)
 			case "name":
 				return ec.fieldContext_Board_name(ctx, field)
-			case "todoIds":
-				return ec.fieldContext_Board_todoIds(ctx, field)
+			case "todos":
+				return ec.fieldContext_Board_todos(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Board_createdAt(ctx, field)
 			case "updatedAt":
@@ -1922,8 +1942,8 @@ func (ec *executionContext) fieldContext_Query_getBoard(ctx context.Context, fie
 				return ec.fieldContext_Board_userId(ctx, field)
 			case "name":
 				return ec.fieldContext_Board_name(ctx, field)
-			case "todoIds":
-				return ec.fieldContext_Board_todoIds(ctx, field)
+			case "todos":
+				return ec.fieldContext_Board_todos(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Board_createdAt(ctx, field)
 			case "updatedAt":
@@ -1991,8 +2011,8 @@ func (ec *executionContext) fieldContext_Query_getBoards(ctx context.Context, fi
 				return ec.fieldContext_Board_userId(ctx, field)
 			case "name":
 				return ec.fieldContext_Board_name(ctx, field)
-			case "todoIds":
-				return ec.fieldContext_Board_todoIds(ctx, field)
+			case "todos":
+				return ec.fieldContext_Board_todos(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Board_createdAt(ctx, field)
 			case "updatedAt":
@@ -4725,9 +4745,9 @@ func (ec *executionContext) _Board(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "todoIds":
+		case "todos":
 
-			out.Values[i] = ec._Board_todoIds(ctx, field, obj)
+			out.Values[i] = ec._Board_todos(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

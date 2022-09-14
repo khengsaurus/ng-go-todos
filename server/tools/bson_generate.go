@@ -9,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen"
 )
 
+// @see https://github.com/99designs/gqlgen/issues/865#issuecomment-573043996
 func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 	for _, model := range b.Models {
 		for _, field := range model.Fields {

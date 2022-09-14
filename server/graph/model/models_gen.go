@@ -10,7 +10,7 @@ type Board struct {
 	ID        string    `json:"id" bson:"_id"`
 	UserID    string    `json:"userId" bson:"userId"`
 	Name      string    `json:"name" bson:"name"`
-	TodoIds   []*string `json:"todoIds" bson:"todoIds"`
+	Todos     []*Todo   `json:"todos" bson:"todos"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
