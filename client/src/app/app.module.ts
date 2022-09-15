@@ -16,6 +16,7 @@ import { GraphQLModule } from './graphql.module';
 import { HomePage } from './pages/home-page/home-page.component';
 import { TodosPage } from './pages/todos-page/todos-page.component';
 import { MatSelectModule } from '@angular/material/select';
+import { BoardsPage } from './pages/boards-page/boards-page.component';
 
 const uri = environment.production
   ? environment.prodApiURL
@@ -24,6 +25,7 @@ const uri = environment.production
 @NgModule({
   declarations: [
     AppComponent,
+    BoardsPage,
     HomePage,
     TodosPage,
     //

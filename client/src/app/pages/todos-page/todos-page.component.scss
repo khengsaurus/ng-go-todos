@@ -30,16 +30,3 @@
     }
   }
 }
-
-.cdk-drag-animating {
-  transition: transform 300ms ease;
-}
-
-.cdk-drag-placeholder {
-  opacity: 0.5;
-  margin: 0 $gap-s;
-}
-
-.todos.cdk-drop-list-dragging .cdk-drag {
-  transition: transform 300ms ease;
-}

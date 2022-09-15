@@ -48,16 +48,6 @@ export class TodosService {
     _todosObserver$.subscribe(this.currentUserTodos$);
   }
 
-  getcurrentUserTodos$(userId?: string) {
-    if (!userId) return of([]);
-    return this.apollo
-      .watchQuery<IGET_TODOS>({
-        query: GET_TODOS,
-        variables: { userId, fresh: false },
-      })
-      .valueChanges.pipe(map(({ data }) => data?.getTodos || []));
-  }
-
   createTodo$(text: string, userId: string) {
     const newTodo = { userId, text };
     return this.apollo

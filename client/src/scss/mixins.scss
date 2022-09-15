@@ -13,3 +13,9 @@
   transition: 300ms ease-in-out;
   transform: translateY(-1px);
 }
+
+@mixin hover-($color) {
+  &:hover {
+    color: $color;
+  }
+}

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'confirm-button',
@@ -6,9 +6,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
     <div class="row center">
       <button
         mat-button
+        class="btn-m"
         color="warn"
         (click)="canAction ? confirmAction() : promptAction()"
-        class="btn-m"
       >
         <mat-icon>{{ icon }}</mat-icon>
         <span>{{ canAction ? 'Confirm' : label }}</span>

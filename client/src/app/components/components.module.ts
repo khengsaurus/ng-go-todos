@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -15,12 +16,21 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
-import { ConfirmButton } from './confirm-button.component';
-import { TodoEditor } from './todo-editor/todo-editor.component';
-import { AppShell } from './shell/shell.component';
+import { Board } from './board/board.component';
 import { TodoCard } from './cards/todo-card.component';
+import { ConfirmButton } from './confirm-button.component';
+import { BoardDialog } from './dialogs/board-dialog.component';
+import { AppShell } from './shell/shell.component';
+import { TodoEditor } from './todo-editor/todo-editor.component';
 
-const components = [AppShell, ConfirmButton, TodoCard, TodoEditor];
+const components = [
+  AppShell,
+  Board,
+  BoardDialog,
+  ConfirmButton,
+  TodoCard,
+  TodoEditor,
+];
 
 const modules = [
   CommonModule,
@@ -30,6 +40,7 @@ const modules = [
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,

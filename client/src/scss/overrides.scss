@@ -1,0 +1,44 @@
+@import "./variables.scss";
+
+mat-sidenav-content.todo-content {
+  overflow-y: hidden;
+}
+
+.mat-card-header-text {
+  margin: 0px !important;
+}
+
+mat-card-title {
+  margin: 2px !important;
+}
+
+mat-card-subtitle {
+  &.todo-title {
+    margin: 0px;
+    margin-right: $gap-s;
+    line-height: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+mat-dialog-container {
+  padding: $gap-xl !important;
+}
+
+.mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(170, 170, 170, 0.4);
+}
+
+.cdk-drag-animating {
+  transition: transform 300ms ease;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.25;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 300ms ease;
+}

@@ -30,7 +30,6 @@
       <div
         cdkDrag
         class="inner-card"
-        cdkDragDisabled
         *ngFor="
           let todo of todosService.currentUserTodos$ | async;
           trackBy: trackById

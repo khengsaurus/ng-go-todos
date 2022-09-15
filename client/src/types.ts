@@ -25,6 +25,17 @@ export interface ITodo {
   priority: number;
   tag: string;
   done: boolean;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface IBoard {
+  id: string;
+  userId: string;
+  name: string;
+  todos: ITodo[];
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface ILink {

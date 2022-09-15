@@ -1,0 +1,24 @@
+<mat-card class="board">
+  <mat-card-header>
+    <ng-content></ng-content>
+    <mat-card-title>
+      {{ board.name }}
+    </mat-card-title>
+  </mat-card-header>
+
+  <div class="tasks" cdkDropList cdkDropListOrientation="vertical">
+    <div cdkDrag *ngFor="let todo of board.todos; let i = index">
+      <todo-card [todo]="todo"> </todo-card>
+    </div>
+  </div>
+  <div class="board-actions">
+    <!-- <button mat-stroked-button (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+    </button> -->
+    <div></div>
+    <confirm-button
+      (action)="handleDelete()"
+      [icon]="'delete'"
+    ></confirm-button>
+  </div>
+</mat-card>

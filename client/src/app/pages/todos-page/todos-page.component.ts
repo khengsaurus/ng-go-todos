@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, Subscription, switchMap } from 'rxjs';
-import { TodosService, UserService } from 'src/app/services';
+import { Subscription } from 'rxjs';
+import { TodosService } from 'src/app/services';
 import { ITodo, Nullable } from 'src/types';
 
 @Component({
