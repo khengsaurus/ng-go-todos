@@ -19,7 +19,7 @@ export class BoardsPage implements OnInit {
 
   openBoardDialog(): void {
     const dialogRef = this.dialog.open(BoardDialog, {
-      width: '300px',
+      width: '244px',
       data: {},
     });
 

@@ -30,3 +30,12 @@
     }
   }
 }
+
+.todos-container {
+  position: relative;
+  .todo-li {
+    position: absolute;
+    width: 100%;
+    transition: all 300ms;
+  }
+}

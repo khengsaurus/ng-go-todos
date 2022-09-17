@@ -1,28 +1,36 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
-import { map, share, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { ITodo } from 'src/types';
 import { UserService } from '.';
 import {
-  GET_TODOS,
-  IUPDATE_TODO,
-  IGET_TODOS,
-  UPDATE_TODO,
-  ICREATE_TODO,
   CREATE_TODO,
   DELETE_TODO,
+  GET_TODOS,
+  ICREATE_TODO,
   IDELETE_TODO,
+  IGET_TODOS,
+  IUPDATE_TODO,
+  UPDATE_TODO,
 } from './queries';
+
+interface ITodosSubject {
+  todos: ITodo[];
+  updated: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class TodosService {
-  currentUserTodos$: Subject<ITodo[]>;
+  currentUserTodos$: Subject<ITodosSubject>;
   // Hacky way to update subject value https://stackoverflow.com/questions/51037295/
   _todosCopy: ITodo[] = [];
 
   constructor(private apollo: Apollo, private userService: UserService) {
-    this.currentUserTodos$ = new BehaviorSubject<ITodo[]>([]);
+    this.currentUserTodos$ = new BehaviorSubject<ITodosSubject>({
+      todos: [],
+      updated: Date.now().valueOf(),
+    });
     const _todosObserver$ = this.userService.currentUser$.pipe(
       switchMap((user) => {
         const userId = user?.id || '';
@@ -34,16 +42,20 @@ export class TodosService {
             })
             .valueChanges.pipe(
               map(({ data }) => {
-                const todos = data?.getTodos || [];
-                return todos;
+                return {
+                  todos: data?.getTodos || [],
+                  updated: Date.now().valueOf(),
+                };
               })
             );
         } else {
-          return of([]);
+          return of({
+            todos: [],
+            updated: Date.now().valueOf(),
+          });
         }
       }),
-      tap((todos) => (this._todosCopy = todos)),
-      share()
+      tap((todosSub) => (this._todosCopy = todosSub.todos))
     );
     _todosObserver$.subscribe(this.currentUserTodos$);
   }
@@ -125,7 +137,11 @@ export class TodosService {
   }
 
   private updateTodos(todos: ITodo[]) {
+    console.log('-> updateTodos');
     this._todosCopy = todos;
-    this.currentUserTodos$.next(todos);
+    this.currentUserTodos$.next({
+      todos,
+      updated: Date.now().valueOf(),
+    });
   }
 }

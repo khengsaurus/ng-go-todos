@@ -16,7 +16,15 @@ export class TodosPage implements OnInit, OnDestroy {
   constructor(public todosService: TodosService) {}
 
   ngOnInit(): void {
-    this.userTodosSub = this.todosService.currentUserTodos$.subscribe();
+    this.userTodosSub = this.todosService.currentUserTodos$
+      // .pipe(
+      //   takeWhile((todosSub) => todosSub.updated > this.lastUpdated),
+      //   tap((todosSub) => {
+      //     this.lastUpdated = todosSub.updated;
+      //     this.todos = todosSub.todos;
+      //   })
+      // )
+      .subscribe(console.log);
   }
 
   ngOnDestroy(): void {
@@ -33,5 +41,9 @@ export class TodosPage implements OnInit, OnDestroy {
 
   trackById(_: number, item: Nullable<ITodo>) {
     return item?.id;
+  }
+
+  transform(index: number) {
+    return `translateY(${index * 100}%)`;
   }
 }

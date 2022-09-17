@@ -27,6 +27,12 @@ mat-dialog-container {
   padding: $gap-xl !important;
 }
 
+.mat-dialog-actions,
+.mat-dialog-content {
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
 .mat-drawer-backdrop.mat-drawer-shown {
   background-color: rgba(170, 170, 170, 0.4);
 }
