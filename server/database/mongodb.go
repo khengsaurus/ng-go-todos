@@ -73,7 +73,13 @@ func (mongoClient *MongoClient) Disconnect(ctx context.Context, trace string) {
 	}
 }
 
-func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, error) {
+func GetCollection(ctx context.Context, name string) (*mongo.Collection, error) {
+	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
+	if !ok {
+		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+	}
+	mongoClient.Ping(ctx)
+
 	database := mongoClient.instance.Database(consts.MongoDatabase)
 	if database == nil {
 		return nil, fmt.Errorf("MongoClient.GetCollection failed: %s", consts.MongoDatabase)
@@ -81,11 +87,33 @@ func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, e
 	return database.Collection(name), nil
 }
 
-func GetMongoClient(ctx context.Context) (*MongoClient, error) {
+func GetSession(ctx context.Context) (mongo.Session, *mongo.Database, error) {
 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
 	if !ok {
-		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+		return nil, nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
 	}
 	mongoClient.Ping(ctx)
-	return mongoClient, nil
+	database := mongoClient.instance.Database(consts.MongoDatabase)
+	session, err := mongoClient.instance.StartSession()
+	if err != nil {
+		return nil, nil, err
+	}
+	return session, database, nil
 }
+
+// func GetMongoClient(ctx context.Context) (*MongoClient, error) {
+// 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
+// 	if !ok {
+// 		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+// 	}
+// 	mongoClient.Ping(ctx)
+// 	return mongoClient, nil
+// }
+
+// func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, error) {
+// 	database := mongoClient.instance.Database(consts.MongoDatabase)
+// 	if database == nil {
+// 		return nil, fmt.Errorf("MongoClient.GetCollection failed: %s", consts.MongoDatabase)
+// 	}
+// 	return database.Collection(name), nil
+// }

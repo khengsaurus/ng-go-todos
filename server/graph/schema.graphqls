@@ -6,6 +6,7 @@ type User {
   id: ID!
   username: String!
   email: String
+  boards: [String]!
 }
 
 type Todo {

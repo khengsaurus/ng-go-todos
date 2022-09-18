@@ -61,7 +61,8 @@ type UpdateTodo struct {
 }
 
 type User struct {
-	ID       string  `json:"id" bson:"_id"`
-	Username string  `json:"username" bson:"username"`
-	Email    *string `json:"email" bson:"email"`
+	ID       string    `json:"id" bson:"_id"`
+	Username string    `json:"username" bson:"username"`
+	Email    *string   `json:"email" bson:"email"`
+	Boards   []*string `json:"boards" bson:"boards"`
 }
