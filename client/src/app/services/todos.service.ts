@@ -5,9 +5,11 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { ITodo } from 'src/types';
 import { UserService } from '.';
 import {
+  ADD_TODO_TO_BOARD,
   CREATE_TODO,
   DELETE_TODO,
   GET_TODOS,
+  IADD_TODO_TO_BOARD,
   ICREATE_TODO,
   IDELETE_TODO,
   IGET_TODOS,
@@ -60,7 +62,7 @@ export class TodosService {
     _todosObserver$.subscribe(this.currentUserTodos$);
   }
 
-  createTodo$(text: string, userId: string) {
+  createTodo$(userId: string, text: string) {
     const newTodo = { userId, text };
     return this.apollo
       .mutate<ICREATE_TODO>({
@@ -136,8 +138,14 @@ export class TodosService {
       );
   }
 
+  addTodoToBoard$(todoId: string, boardId: string) {
+    return this.apollo.mutate<IADD_TODO_TO_BOARD>({
+      mutation: ADD_TODO_TO_BOARD,
+      variables: { todoId, boardId },
+    });
+  }
+
   private updateTodos(todos: ITodo[]) {
-    console.log('-> updateTodos');
     this._todosCopy = todos;
     this.currentUserTodos$.next({
       todos,

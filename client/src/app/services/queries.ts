@@ -77,6 +77,16 @@ export const CREATE_USER = gql`
   ${fragments.UserRepr}
 `;
 
+export interface IADD_TODO_TO_BOARD {
+  addTodoToBoard: String;
+}
+
+export const ADD_TODO_TO_BOARD = gql`
+  mutation AddTodoToBoard($todoId: String!, $boardId: String!) {
+    addTodoToBoard(todoId: $todoId, boardId: $boardId)
+  }
+`;
+
 /* ------------------------- TODOS ------------------------- */
 
 export interface IGET_TODOS {

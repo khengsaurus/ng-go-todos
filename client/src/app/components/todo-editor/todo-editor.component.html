@@ -16,6 +16,16 @@
   </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
+    <button
+      mat-icon-button
+      matTooltip="Add this todo to a board"
+      matTooltipClass="hover-tooltip"
+      class="btn-m no-cdk-overlay"
+      disableRipple
+      (click)="this.addToBoard()"
+    >
+      <mat-icon class="mat-icon-s">view_day</mat-icon>
+    </button>
     <mat-checkbox
       class="btn-m"
       formControlName="done"

@@ -7,11 +7,21 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { debounce, firstValueFrom, interval, Subscription, tap } from 'rxjs';
-import { TodosService, UserService } from 'src/app/services';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  debounce,
+  firstValueFrom,
+  interval,
+  map,
+  Subscription,
+  tap,
+} from 'rxjs';
+import { BoardsService, TodosService, UserService } from 'src/app/services';
 import { ITodo, ITypedObject, Nullable } from 'src/types';
+import { SelectBoardDialog } from '../dialogs/select-board.component';
 
 const autoDelay = 1000;
+const updateKeys = ['text', 'done'] as unknown as 'text' | 'done';
 
 @Component({
   selector: 'todo-editor',
@@ -25,8 +35,10 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   private formSub: Nullable<Subscription> = null;
 
   constructor(
-    private todoService: TodosService,
-    private userService: UserService
+    private userService: UserService,
+    private todosService: TodosService,
+    private boardsService: BoardsService,
+    private dialog: MatDialog
   ) {
     this.todoForm = new FormGroup({
       text: new FormControl(),
@@ -36,7 +48,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.formSub = this.todoForm.valueChanges
       .pipe(
         debounce(() => interval(autoDelay)),
@@ -46,7 +58,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       .subscribe();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges) {
     const newTodo = changes['todo']?.currentValue;
     if (newTodo) {
       this.todoForm.patchValue({
@@ -59,14 +71,14 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
     this.focusEditor();
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.formSub?.unsubscribe();
   }
 
   deleteTodo() {
     if (this.userService.currentUser && this.todo) {
       firstValueFrom(
-        this.todoService.deleteTodo$(
+        this.todosService.deleteTodo$(
           this.userService.currentUser.id,
           this.todo.id
         )
@@ -113,11 +125,11 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       }
       if (flagUpdate) {
         this.todo = { ...this.todo, ...updatedTodo };
-        this.todoService.updateTodo$(updatedTodo).subscribe();
+        this.todosService.updateTodo$(updatedTodo).subscribe();
       }
     } else if (updateTodo['text'] && this.userService.currentUser?.id) {
-      this.todoService
-        .createTodo$(updateTodo['text'], this.userService.currentUser.id)
+      this.todosService
+        .createTodo$(this.userService.currentUser.id, updateTodo['text'])
         .pipe(
           tap((todo) => {
             if (todo) this.todo = todo;
@@ -126,6 +138,30 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
         .subscribe();
     }
   }
-}
 
-const updateKeys = ['text', 'done'] as unknown as 'text' | 'done';
+  addToBoard() {
+    if (!this.todo) return;
+
+    const dialogRef = this.dialog.open(SelectBoardDialog, {
+      autoFocus: false,
+      width: '244px',
+      data: {},
+    });
+
+    dialogRef.componentInstance.todo = this.todo;
+    dialogRef.componentInstance.selector.subscribe((boardId: string) => {
+      if (this.todo?.id && boardId) {
+        this.todosService
+          .addTodoToBoard$(this.todo.id, boardId)
+          .pipe(
+            tap((res) => {
+              if (res?.data?.addTodoToBoard === boardId) {
+                this.boardsService.unshiftTodoToBoard(this.todo!, boardId);
+              }
+            })
+          )
+          .subscribe();
+      }
+    });
+  }
+}

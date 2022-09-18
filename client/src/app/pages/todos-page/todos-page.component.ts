@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, tap } from 'rxjs';
 import { TodosService } from 'src/app/services';
 import { ITodo, Nullable } from 'src/types';
 
@@ -15,8 +15,16 @@ export class TodosPage implements OnInit, OnDestroy {
 
   constructor(public todosService: TodosService) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.userTodosSub = this.todosService.currentUserTodos$
+      // Dev: auto select first todo
+      .pipe(
+        tap((todosSub) => {
+          if (todosSub?.todos?.length) {
+            this.selectTodo(todosSub.todos[0]);
+          }
+        })
+      )
       // .pipe(
       //   takeWhile((todosSub) => todosSub.updated > this.lastUpdated),
       //   tap((todosSub) => {
@@ -24,10 +32,10 @@ export class TodosPage implements OnInit, OnDestroy {
       //     this.todos = todosSub.todos;
       //   })
       // )
-      .subscribe(console.log);
+      .subscribe();
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.userTodosSub?.unsubscribe();
   }
 

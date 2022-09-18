@@ -4,7 +4,10 @@ mat-card.todo {
   margin: 0px $gap-m $gap-m;
   background-color: rgba(0, 0, 0, 0.5) !important;
   transition: 500ms;
-  cursor: default;
+  cursor: pointer;
+  &.active {
+    box-shadow: 0 0 0px 1px $highlight;
+  }
 }
 
 mat-icon.check {

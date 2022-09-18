@@ -2,18 +2,28 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  selector: 'board-dialog',
+  selector: 'new-board',
   template: `
     <div>
-      <h2>Create a new Board</h2>
-      <div class="board-dialog-content">
+      <h3>Create a new Board</h3>
+      <div class="dialog-content">
         <mat-form-field>
-          <input placeholder="Board name" matInput [(ngModel)]="data.title" />
+          <input
+            placeholder="Board name"
+            matInput
+            [(ngModel)]="data.title"
+            #input
+          />
         </mat-form-field>
       </div>
       <div class="row spaced">
         <button mat-button class="btn-s" (click)="onNoClick()">Cancel</button>
-        <button mat-button class="btn-s" [mat-dialog-close]="data.title">
+        <button
+          mat-button
+          class="btn-s"
+          [mat-dialog-close]="data.title"
+          disabled="{{ !data.title }}"
+        >
           Create
         </button>
       </div>
@@ -21,13 +31,13 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   `,
   styleUrls: ['./dialog.scss'],
 })
-export class BoardDialog {
+export class NewBoardDialog {
   constructor(
-    public dialogRef: MatDialogRef<BoardDialog>,
+    public dialogRef: MatDialogRef<NewBoardDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
-  onNoClick(): void {
+  onNoClick() {
     this.dialogRef.close();
   }
 }

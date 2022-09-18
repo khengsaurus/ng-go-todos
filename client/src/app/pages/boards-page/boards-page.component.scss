@@ -9,8 +9,9 @@
   }
 
   .board-handle {
-    @include hover-(orange);
+    @include hover-($highlight);
     cursor: move;
+    transform: translateY(-1px);
   }
 }
 

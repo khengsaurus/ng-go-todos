@@ -28,7 +28,11 @@
         "
         [style.transform]="transform(index)"
       >
-        <todo-card [todo]="todo" (click)="selectTodo(todo)"></todo-card>
+        <todo-card
+          [todo]="todo"
+          [active]="todo.id === selectedTodo?.id"
+          (click)="selectTodo(todo)"
+        ></todo-card>
       </div>
     </div>
     <!---------- ---------->

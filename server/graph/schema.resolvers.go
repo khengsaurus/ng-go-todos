@@ -22,11 +22,10 @@ import (
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error) {
 	fmt.Println("CreateUser called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
 	if err != nil {
@@ -64,11 +63,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
 	fmt.Println("DeleteUser called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
 	if err != nil {
@@ -96,11 +94,10 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error) {
 	fmt.Println("CreateTodo called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
@@ -141,11 +138,10 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 // UpdateTodo is the resolver for the updateTodo field.
 func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (string, error) {
 	fmt.Println("UpdateTodo called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return "", err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
@@ -196,11 +192,10 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 // DeleteTodo is the resolver for the deleteTodo field.
 func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (string, error) {
 	fmt.Println("DeleteTodo called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return "", err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
@@ -225,11 +220,10 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 // CreateBoard is the resolver for the createBoard field.
 func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
 	fmt.Println("CreateBoard called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
@@ -274,11 +268,10 @@ func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBo
 // UpdateBoard is the resolver for the updateBoard field.
 func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (string, error) {
 	fmt.Println("UpdateBoard called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return "", err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
@@ -312,11 +305,10 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 // DeleteBoard is the resolver for the deleteBoard field.
 func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (string, error) {
 	fmt.Println("DeleteBoard called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return "", err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
@@ -338,14 +330,64 @@ func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, board
 	return boardID, nil
 }
 
+// AddTodoToBoard is the resolver for the addTodoToBoard field.
+func (r *mutationResolver) AddTodoToBoard(ctx context.Context, todoID string, boardID string) (string, error) {
+	fmt.Println("AddTodoToBoard called")
+	mongoClient, err := database.GetMongoClient(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
+	if err != nil {
+		return "", err
+	}
+
+	boardId, err := primitive.ObjectIDFromHex(boardID)
+	if err != nil {
+		return "", err
+	}
+
+	todoId, err := primitive.ObjectIDFromHex(todoID)
+	if err != nil {
+		return "", err
+	}
+
+	filter := bson.M{"_id": boardId}
+	update := bson.M{"$push": bson.M{
+		"todos": bson.M{
+			"$each":     []primitive.ObjectID{todoId},
+			"$position": 0,
+		},
+	}}
+
+	_, err = boardsColl.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return "", err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
+
+	return boardID, nil
+}
+
+// RemoveTodoFromBoard is the resolver for the removeTodoFromBoard field.
+func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, todoID string, boardID string) (string, error) {
+	panic(fmt.Errorf("not implemented: RemoveTodoFromBoard - removeTodoFromBoard"))
+}
+
+// MoveTodosOnBoard is the resolver for the moveTodosOnBoard field.
+func (r *mutationResolver) MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (string, error) {
+	panic(fmt.Errorf("not implemented: MoveTodosOnBoard - moveTodosOnBoard"))
+}
+
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
 	fmt.Println("GetUser called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	usersColl, err := mongoClient.GetCollection(consts.UsersCollection)
 	if err != nil {
@@ -363,8 +405,7 @@ func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User,
 // GetUsers is the resolver for the getUsers field.
 func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	fmt.Println("GetUsers called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
-	defer mongoClient.Disconnect(ctx)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -399,11 +440,10 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 // GetTodo is the resolver for the getTodo field.
 func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
 	fmt.Println("GetTodo called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
@@ -435,11 +475,11 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 		}
 	}
 
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
+		fmt.Printf("%v", err)
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
@@ -482,11 +522,10 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 // GetBoard is the resolver for the getBoard field.
 func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Board, error) {
 	fmt.Println("GetBoard called")
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
@@ -535,11 +574,11 @@ func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool
 		}
 	}
 
-	mongoClient, err := database.GetMongoClient(ctx, true)
+	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
+		fmt.Printf("%v", err)
 		return nil, err
 	}
-	defer mongoClient.Disconnect(ctx)
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {

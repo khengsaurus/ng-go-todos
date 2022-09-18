@@ -88,4 +88,8 @@ type Mutation {
   createBoard(newBoard: NewBoard!): Board!
   updateBoard(updateBoard: UpdateBoard!): String!
   deleteBoard(userId: String!, boardId: String!): String!
+  #
+  addTodoToBoard(todoId: String!, boardId: String!): String!
+  removeTodoFromBoard(todoId: String!, boardId: String!): String!
+  moveTodosOnBoard(todoIds: [String!]!, boardId: String!): String!
 }

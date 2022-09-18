@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { BoardDialog } from 'src/app/components/dialogs/board-dialog.component';
+import { NewBoardDialog } from 'src/app/components/dialogs/new-board.component';
 import { BoardsService, UserService } from 'src/app/services';
 
 @Component({
@@ -15,10 +15,11 @@ export class BoardsPage implements OnInit {
     private dialog: MatDialog
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit() {}
 
-  openBoardDialog(): void {
-    const dialogRef = this.dialog.open(BoardDialog, {
+  openBoardDialog() {
+    const dialogRef = this.dialog.open(NewBoardDialog, {
+      autoFocus: false,
       width: '244px',
       data: {},
     });

@@ -229,7 +229,7 @@ body {
   transition: 200ms;
   &:hover {
     cursor: pointer;
-    color: orange;
+    color: $highlight;
   }
 }
 
@@ -240,4 +240,9 @@ body {
     width: 100px !important;
     height: 37px;
   }
+}
+
+.hover-tooltip {
+  margin: $gap-s !important;
+  font-size: 14px;
 }

@@ -15,19 +15,22 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { Board } from './board/board.component';
 import { TodoCard } from './cards/todo-card.component';
 import { ConfirmButton } from './confirm-button.component';
-import { BoardDialog } from './dialogs/board-dialog.component';
+import { NewBoardDialog } from './dialogs/new-board.component';
+import { SelectBoardDialog } from './dialogs/select-board.component';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
 
 const components = [
   AppShell,
   Board,
-  BoardDialog,
   ConfirmButton,
+  NewBoardDialog,
+  SelectBoardDialog,
   TodoCard,
   TodoEditor,
 ];
@@ -49,6 +52,7 @@ const modules = [
   MatSidenavModule,
   MatSnackBarModule,
   MatToolbarModule,
+  MatTooltipModule,
   ReactiveFormsModule,
   RouterModule,
 ];

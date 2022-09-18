@@ -14,12 +14,10 @@ mat-card-title {
 
 mat-card-subtitle {
   &.todo-title {
+    @include ellipsis;
     margin: 0px;
     margin-right: $gap-s;
     line-height: 24px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
@@ -37,6 +35,11 @@ mat-dialog-container {
   background-color: rgba(170, 170, 170, 0.4);
 }
 
+.mat-icon-s {
+  // @include hover-($highlight);
+  transform: scale(0.8);
+}
+
 .cdk-drag-animating {
   transition: transform 300ms ease;
 }
@@ -47,4 +50,13 @@ mat-dialog-container {
 
 .cdk-drop-list-dragging .cdk-drag {
   transition: transform 300ms ease;
+}
+
+.no-cdk-overlay {
+  .cdk-program-focused {
+    background-color: transparent !important;
+  }
+  .mat-button-focus-overlay {
+    display: none;
+  }
 }

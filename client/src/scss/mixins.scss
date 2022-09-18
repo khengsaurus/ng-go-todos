@@ -8,8 +8,14 @@
   align-items: center;
 }
 
-@mixin icon-buttons {
-  color: orange;
+@mixin ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin icon-button {
+  color: $highlight;
   transition: 300ms ease-in-out;
   transform: translateY(-1px);
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { map, share, switchMap, tap } from 'rxjs/operators';
-import { IBoard } from 'src/types';
+import { IBoard, ITodo } from 'src/types';
 import { UserService } from '.';
 import {
   CREATE_BOARD,
@@ -78,6 +78,18 @@ export class BoardsService {
           }
         })
       );
+  }
+
+  unshiftTodoToBoard(todo: ITodo, boardId: string) {
+    const boardsCopy = [];
+    for (const board of this._boardsCopy) {
+      if (board.id === boardId) {
+        boardsCopy.push({ ...board, todos: [...board.todos, todo] });
+      } else {
+        boardsCopy.push(board);
+      }
+    }
+    this.updateBoards(boardsCopy);
   }
 
   private updateBoards(boards: IBoard[]) {

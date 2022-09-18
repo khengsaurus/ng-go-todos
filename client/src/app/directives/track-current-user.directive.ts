@@ -10,13 +10,13 @@ export class TrackCurrentUserDirective implements OnInit, OnDestroy {
 
   constructor(public userService: UserService) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.userSub = this.userService.currentUser$
       .pipe(tap((user) => (this.currentUser = user)))
       .subscribe();
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.userSub?.unsubscribe();
   }
 }

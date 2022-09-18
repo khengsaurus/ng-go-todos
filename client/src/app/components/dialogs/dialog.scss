@@ -1,6 +1,15 @@
 @import "../../../styles.scss";
 
-h2,
-.board-dialog-content {
-  margin-left: $gap-xl;
+h3 {
+  text-align: center;
+}
+
+.dialog-content {
+  margin: 0px $gap-xl;
+  .list-option {
+    @include ellipsis;
+    background-color: $grey-66;
+    width: 100%;
+    margin: $gap-xs 0px;
+  }
 }
