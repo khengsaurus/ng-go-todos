@@ -155,7 +155,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
           .addTodoToBoard$(this.todo.id, boardId)
           .pipe(
             tap((res) => {
-              if (res?.data?.addTodoToBoard === boardId) {
+              if (res?.data?.addTodoToBoard) {
                 this.boardsService.unshiftTodoToBoard(this.todo!, boardId);
               }
             })

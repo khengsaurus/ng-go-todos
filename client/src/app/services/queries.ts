@@ -77,16 +77,6 @@ export const CREATE_USER = gql`
   ${fragments.UserRepr}
 `;
 
-export interface IADD_TODO_TO_BOARD {
-  addTodoToBoard: String;
-}
-
-export const ADD_TODO_TO_BOARD = gql`
-  mutation AddTodoToBoard($todoId: String!, $boardId: String!) {
-    addTodoToBoard(todoId: $todoId, boardId: $boardId)
-  }
-`;
-
 /* ------------------------- TODOS ------------------------- */
 
 export interface IGET_TODOS {
@@ -116,7 +106,7 @@ export const CREATE_TODO = gql`
 `;
 
 export interface IUPDATE_TODO {
-  updateTodo: string;
+  updateTodo: boolean;
 }
 
 export const UPDATE_TODO = gql`
@@ -126,12 +116,22 @@ export const UPDATE_TODO = gql`
 `;
 
 export interface IDELETE_TODO {
-  deleteTodo: string;
+  deleteTodo: boolean;
 }
 
 export const DELETE_TODO = gql`
   mutation deleteTodo($userId: String!, $todoId: String!) {
     deleteTodo(userId: $userId, todoId: $todoId)
+  }
+`;
+
+export interface IADD_TODO_TO_BOARD {
+  addTodoToBoard: boolean;
+}
+
+export const ADD_TODO_TO_BOARD = gql`
+  mutation AddTodoToBoard($todoId: String!, $boardId: String!) {
+    addTodoToBoard(todoId: $todoId, boardId: $boardId)
   }
 `;
 
@@ -164,7 +164,7 @@ export const CREATE_BOARD = gql`
 `;
 
 export interface IUPDATE_BOARD {
-  updateBoard: string;
+  updateBoard: boolean;
 }
 
 export const UPDATE_BOARD = gql`
@@ -174,7 +174,7 @@ export const UPDATE_BOARD = gql`
 `;
 
 export interface IDELETE_BOARD {
-  deleteBoard: string;
+  deleteBoard: boolean;
 }
 
 export const DELETE_BOARD = gql`

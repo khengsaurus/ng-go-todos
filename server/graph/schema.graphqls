@@ -82,14 +82,15 @@ type Mutation {
   deleteUser(userId: String!): Boolean
   #
   createTodo(newTodo: NewTodo!): Todo!
-  updateTodo(updateTodo: UpdateTodo!): String!
-  deleteTodo(userId: String!, todoId: String!): String!
+  updateTodo(updateTodo: UpdateTodo!): Boolean!
+  deleteTodo(userId: String!, todoId: String!): Boolean!
   #
   createBoard(newBoard: NewBoard!): Board!
-  updateBoard(updateBoard: UpdateBoard!): String!
-  deleteBoard(userId: String!, boardId: String!): String!
+  updateBoard(updateBoard: UpdateBoard!): Boolean!
+  deleteBoard(userId: String!, boardId: String!): Boolean!
   #
-  addTodoToBoard(todoId: String!, boardId: String!): String!
-  removeTodoFromBoard(todoId: String!, boardId: String!): String!
-  moveTodosOnBoard(todoIds: [String!]!, boardId: String!): String!
+  moveBoards(boardIds: [String!]!): Boolean!
+  addTodoToBoard(todoId: String!, boardId: String!): Boolean!
+  removeTodoFromBoard(todoId: String!, boardId: String!): Boolean!
+  moveTodosOnBoard(todoIds: [String!]!, boardId: String!): Boolean!
 }

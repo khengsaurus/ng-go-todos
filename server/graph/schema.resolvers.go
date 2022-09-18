@@ -136,26 +136,26 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 }
 
 // UpdateTodo is the resolver for the updateTodo field.
-func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (string, error) {
+func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (bool, error) {
 	fmt.Println("UpdateTodo called")
 	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	todoId, err := primitive.ObjectIDFromHex(updateTodo.ID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	userId, err := primitive.ObjectIDFromHex(updateTodo.UserID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	filter := bson.D{{Key: "_id", Value: todoId}}
@@ -182,39 +182,39 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 
 	_, err = todosColl.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateTodo.UserID))
 
-	return updateTodo.ID, nil
+	return true, nil
 }
 
 // DeleteTodo is the resolver for the deleteTodo field.
-func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (string, error) {
+func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error) {
 	fmt.Println("DeleteTodo called")
 	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	todosColl, err := mongoClient.GetCollection(consts.TodosCollection)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	todoId, err := primitive.ObjectIDFromHex(todoID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 	filter := bson.D{{Key: "_id", Value: todoId}}
 
 	_, err = todosColl.DeleteOne(ctx, filter)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
 
-	return todoID, nil
+	return true, nil
 }
 
 // CreateBoard is the resolver for the createBoard field.
@@ -266,21 +266,21 @@ func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBo
 }
 
 // UpdateBoard is the resolver for the updateBoard field.
-func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (string, error) {
+func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (bool, error) {
 	fmt.Println("UpdateBoard called")
 	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	boardId, err := primitive.ObjectIDFromHex(updateBoard.ID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	filter := bson.D{{Key: "_id", Value: boardId}}
@@ -295,62 +295,67 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateBoard.UserID))
 
-	return updateBoard.ID, nil
+	return true, nil
 }
 
 // DeleteBoard is the resolver for the deleteBoard field.
-func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (string, error) {
+func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error) {
 	fmt.Println("DeleteBoard called")
 	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	boardId, err := primitive.ObjectIDFromHex(boardID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 	filter := bson.D{{Key: "_id", Value: boardId}}
 
 	_, err = boardsColl.DeleteOne(ctx, filter)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
 
-	return boardID, nil
+	return true, nil
+}
+
+// MoveBoards is the resolver for the moveBoards field.
+func (r *mutationResolver) MoveBoards(ctx context.Context, boardIds []string) (bool, error) {
+	panic(fmt.Errorf("not implemented: MoveBoards - moveBoards"))
 }
 
 // AddTodoToBoard is the resolver for the addTodoToBoard field.
-func (r *mutationResolver) AddTodoToBoard(ctx context.Context, todoID string, boardID string) (string, error) {
+func (r *mutationResolver) AddTodoToBoard(ctx context.Context, todoID string, boardID string) (bool, error) {
 	fmt.Println("AddTodoToBoard called")
 	mongoClient, err := database.GetMongoClient(ctx)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	boardsColl, err := mongoClient.GetCollection(consts.BoardsCollection)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	boardId, err := primitive.ObjectIDFromHex(boardID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	todoId, err := primitive.ObjectIDFromHex(todoID)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	filter := bson.M{"_id": boardId}
@@ -363,21 +368,21 @@ func (r *mutationResolver) AddTodoToBoard(ctx context.Context, todoID string, bo
 
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
 
-	return boardID, nil
+	return true, nil
 }
 
 // RemoveTodoFromBoard is the resolver for the removeTodoFromBoard field.
-func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, todoID string, boardID string) (string, error) {
+func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, todoID string, boardID string) (bool, error) {
 	panic(fmt.Errorf("not implemented: RemoveTodoFromBoard - removeTodoFromBoard"))
 }
 
 // MoveTodosOnBoard is the resolver for the moveTodosOnBoard field.
-func (r *mutationResolver) MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (string, error) {
+func (r *mutationResolver) MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (bool, error) {
 	panic(fmt.Errorf("not implemented: MoveTodosOnBoard - moveTodosOnBoard"))
 }
 

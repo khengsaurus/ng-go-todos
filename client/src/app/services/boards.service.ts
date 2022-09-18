@@ -69,9 +69,8 @@ export class BoardsService {
         variables: { userId, boardId },
       })
       .pipe(
-        map((res) => res.data?.deleteBoard),
-        tap((deletedBoardId) => {
-          if (deletedBoardId === boardId) {
+        tap((res) => {
+          if (res.data?.deleteBoard) {
             this.updateBoards(
               this._boardsCopy.filter((board) => board.id !== boardId)
             );
@@ -84,7 +83,7 @@ export class BoardsService {
     const boardsCopy = [];
     for (const board of this._boardsCopy) {
       if (board.id === boardId) {
-        boardsCopy.push({ ...board, todos: [...board.todos, todo] });
+        boardsCopy.push({ ...board, todos: [todo, ...board.todos] });
       } else {
         boardsCopy.push(board);
       }

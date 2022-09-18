@@ -84,12 +84,11 @@ export class TodosService {
       .mutate<IUPDATE_TODO>({
         mutation: UPDATE_TODO,
         variables: { updateTodo },
-        optimisticResponse: { updateTodo: updateTodo.id || '' },
+        optimisticResponse: { updateTodo: true },
       })
       .pipe(
         tap((res) => {
-          const updatedTodoId = res.data?.updateTodo;
-          if (updatedTodoId === updateTodo.id) {
+          if (res.data?.updateTodo) {
             let __todosCopy = [...this._todosCopy];
             if (updateTodo.text) {
               // unshift if text changed
@@ -125,9 +124,8 @@ export class TodosService {
         variables: { userId, todoId },
       })
       .pipe(
-        map((res) => res.data?.deleteTodo),
-        map((deletedTodoId) => {
-          if (deletedTodoId === todoId) {
+        map((res) => {
+          if (res.data?.deleteTodo) {
             this.updateTodos(
               this._todosCopy.filter((todo) => todo.id !== todoId)
             );
