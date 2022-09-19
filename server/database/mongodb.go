@@ -101,14 +101,14 @@ func GetSession(ctx context.Context) (mongo.Session, *mongo.Database, error) {
 	return session, database, nil
 }
 
-// func GetMongoClient(ctx context.Context) (*MongoClient, error) {
-// 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
-// 	if !ok {
-// 		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
-// 	}
-// 	mongoClient.Ping(ctx)
-// 	return mongoClient, nil
-// }
+func GetMongoDb(ctx context.Context) (*mongo.Database, error) {
+	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
+	if !ok {
+		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+	}
+	mongoClient.Ping(ctx)
+	return mongoClient.instance.Database(consts.MongoDatabase), nil
+}
 
 // func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, error) {
 // 	database := mongoClient.instance.Database(consts.MongoDatabase)

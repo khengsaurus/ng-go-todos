@@ -16,10 +16,7 @@ import (
 	"github.com/khengsaurus/ng-gql-todos/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readconcern"
-	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -52,7 +49,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 			ID:       oid.Hex(),
 			Username: username,
 			Email:    &newUser.Email,
-			Boards:   []*string{},
+			BoardIds: []*string{},
 		}, err
 	}
 
@@ -61,28 +58,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
-	fmt.Println("DeleteUser called")
-	usersColl, err := database.GetCollection(ctx, consts.UsersCollection)
-	if err != nil {
-		return nil, err
+	if consts.Container {
+		return DeleteUserAsync(ctx, userID)
+	} else {
+		return DeleteUserTxn(ctx, userID)
 	}
-
-	userId, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	filter := bson.D{{Key: "_id", Value: userId}}
-
-	_, err = usersColl.DeleteOne(ctx, filter)
-	if err != nil {
-		v := false
-		return &v, err
-	}
-	v := true
-	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
-
-	return &v, nil
 }
 
 // CreateTodo is the resolver for the createTodo field.
@@ -198,90 +178,11 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 
 // CreateBoard is the resolver for the createBoard field.
 func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
-	// FIXME: transactino not working in docker. Error:
-	// (IllegalOperation) Transaction numbers are only allowed on a replica set member or mongos
-	fmt.Println("CreateBoard called")
-
-	session, db, err := database.GetSession(ctx)
-	if err != nil {
-		return nil, err
+	if consts.Container {
+		return CreateBoardAsync(ctx, newBoard)
+	} else {
+		return CreateBoardTxn(ctx, newBoard)
 	}
-	defer session.EndSession(ctx)
-
-	boardsColl := db.Collection(consts.BoardsCollection)
-	usersColl := db.Collection(consts.UsersCollection)
-
-	wc := writeconcern.New(writeconcern.WMajority())
-	rc := readconcern.Snapshot()
-	txnOpts := options.Transaction().SetWriteConcern(wc).SetReadConcern(rc)
-	var createdBoard *model.Board
-
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(txnOpts); err != nil {
-			return err
-		}
-
-		userId, err := primitive.ObjectIDFromHex(newBoard.UserID)
-		if err != nil {
-			return err
-		}
-
-		todos := make([]*primitive.ObjectID, 0)
-		for _, s := range newBoard.TodoIds {
-			todoId, err := primitive.ObjectIDFromHex(*s)
-			if err == nil {
-				todos = append(todos, &todoId)
-			}
-		}
-
-		currTime := time.Now()
-		newBoardDoc := bson.D{
-			{Key: "userId", Value: userId},
-			{Key: "name", Value: newBoard.Name},
-			{Key: "todos", Value: todos},
-			{Key: "createdAt", Value: currTime},
-			{Key: "updatedAt", Value: currTime},
-		}
-		result, err := boardsColl.InsertOne(sessionContext, newBoardDoc)
-		if err != nil {
-			return err
-		}
-
-		oid, ok := result.InsertedID.(primitive.ObjectID)
-		var boardId string
-		if ok {
-			boardId = oid.Hex()
-			createdBoard = &model.Board{
-				ID:     boardId,
-				Name:   newBoard.Name,
-				UserID: newBoard.UserID,
-				Todos:  []*model.Todo{},
-			}
-		} else {
-			return fmt.Errorf("error in creating board document during MongoClient session transaction")
-		}
-
-		update := bson.M{"$push": bson.M{"boards": boardId}}
-		usersFilter := bson.D{{Key: "_id", Value: userId}}
-		_, err = usersColl.UpdateOne(ctx, usersFilter, update)
-		if err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
-
-	if err != nil {
-		fmt.Printf("CreateBoard - error in transaction: %v\nCreateBoard - Aborting transaction\n", err)
-		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
-			return nil, abortErr
-		}
-	}
-
-	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(newBoard.UserID))
-	return createdBoard, nil
 }
 
 // UpdateBoard is the resolver for the updateBoard field.
@@ -565,7 +466,7 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 		return &board, nil
 	}
 
-	return nil, errors.New("MongoDB aggregate error - failed to create cursor in getBoard resolver")
+	return nil, errors.New("MongoDB aggregate error - failed to create cursor in getBoard resolver - document may not exist")
 }
 
 // GetBoards is the resolver for the getBoards field.

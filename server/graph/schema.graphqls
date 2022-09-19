@@ -6,7 +6,7 @@ type User {
   id: ID!
   username: String!
   email: String
-  boards: [String]!
+  boardIds: [String]!
 }
 
 type Todo {
@@ -71,10 +71,10 @@ type Query {
   getUser(email: String!): User
   getUsers: [User]!
   #
-  getTodo(todoId: String!): Todo!
+  getTodo(todoId: String!): Todo
   getTodos(userId: String!, fresh: Boolean!): [Todo]!
   #
-  getBoard(boardId: String!): Board!
+  getBoard(boardId: String!): Board
   getBoards(userId: String!, fresh: Boolean!): [Board]!
 }
 
