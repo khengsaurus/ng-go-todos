@@ -1,9 +1,10 @@
-<div cdkDropList cdkDropListOrientation="horizontal" class="boards-page">
-  <board-component
-    cdkDrag
-    *ngFor="let board of boardsService.currentUserBoards$ | async"
-    [board]="board"
-  >
+<div
+  cdkDropList
+  class="boards-page"
+  cdkDropListOrientation="horizontal"
+  (cdkDropListDropped)="dropBoard($event)"
+>
+  <board-component *ngFor="let board of boards" [board]="board" cdkDrag>
     <mat-icon cdkDragHandle class="board-handle">drag_indicator</mat-icon>
   </board-component>
 

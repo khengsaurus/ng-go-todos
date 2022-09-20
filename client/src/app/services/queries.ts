@@ -7,6 +7,7 @@ const fragments = {
       id
       email
       username
+      boardIds
     }
   `,
   TodoRepr: gql`
@@ -180,5 +181,15 @@ export interface IDELETE_BOARD {
 export const DELETE_BOARD = gql`
   mutation deleteBoard($userId: String!, $boardId: String!) {
     deleteBoard(userId: $userId, boardId: $boardId)
+  }
+`;
+
+export interface IMOVE_BOARDS {
+  moveBoards: boolean;
+}
+
+export const MOVE_BOARDS = gql`
+  mutation moveBoards($userId: String!, $boardIds: [String!]!) {
+    moveBoards(userId: $userId, boardIds: $boardIds)
   }
 `;

@@ -7,6 +7,7 @@
   padding: $gap-m;
   background: $grey-66;
   min-height: $board-min-height;
+  transition: 500ms;
 
   .board-actions {
     @include flex-(row);

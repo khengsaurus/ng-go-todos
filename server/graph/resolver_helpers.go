@@ -193,7 +193,7 @@ func CreateBoardTxn(ctx context.Context, newBoard model.NewBoard) (*model.Board,
 		}
 
 		// Append boardId to user's boardIds
-		update := bson.M{"$push": bson.M{"boards": boardId}}
+		update := bson.M{"$push": bson.M{"boardIds": boardId}}
 		usersFilter := bson.D{{Key: "_id", Value: userId}}
 		_, err = usersColl.UpdateOne(ctx, usersFilter, update)
 		if err != nil {
@@ -270,7 +270,7 @@ func CreateBoardAsync(ctx context.Context, newBoard model.NewBoard) (*model.Boar
 		return nil, fmt.Errorf("error in creating board document during MongoClient session transaction")
 	}
 
-	update := bson.M{"$push": bson.M{"boards": boardId}}
+	update := bson.M{"$push": bson.M{"boardIds": boardId}}
 	usersFilter := bson.D{{Key: "_id", Value: userId}}
 	_, err = usersColl.UpdateOne(ctx, usersFilter, update)
 	if err != nil {

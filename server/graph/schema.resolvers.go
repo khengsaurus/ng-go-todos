@@ -140,10 +140,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 		updateVals = append(updateVals, bson.E{Key: "done", Value: updateTodo.Done})
 	}
 
-	update := bson.D{{
-		Key:   "$set",
-		Value: updateVals,
-	}}
+	update := bson.M{"$set": updateVals}
 	_, err = todosColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
@@ -240,8 +237,28 @@ func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, board
 }
 
 // MoveBoards is the resolver for the moveBoards field.
-func (r *mutationResolver) MoveBoards(ctx context.Context, boardIds []string) (bool, error) {
-	panic(fmt.Errorf("not implemented: MoveBoards - moveBoards"))
+func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardIds []string) (bool, error) {
+	fmt.Println("MoveBoards called")
+	userColl, err := database.GetCollection(ctx, consts.UsersCollection)
+	if err != nil {
+		return false, err
+	}
+
+	userId, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return false, err
+	}
+
+	filter := bson.M{"_id": userId}
+	update := bson.M{"$set": bson.M{"boardIds": boardIds}}
+	_, err = userColl.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return false, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
+
+	return true, nil
 }
 
 // AddTodoToBoard is the resolver for the addTodoToBoard field.

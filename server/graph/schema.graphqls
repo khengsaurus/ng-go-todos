@@ -90,7 +90,7 @@ type Mutation {
   updateBoard(updateBoard: UpdateBoard!): Boolean!
   deleteBoard(userId: String!, boardId: String!): Boolean!
   #
-  moveBoards(boardIds: [String!]!): Boolean!
+  moveBoards(userId: String!, boardIds: [String!]!): Boolean!
   addTodoToBoard(todoId: String!, boardId: String!): Boolean!
   removeTodoFromBoard(todoId: String!, boardId: String!): Boolean!
   moveTodosOnBoard(todoIds: [String!]!, boardId: String!): Boolean!

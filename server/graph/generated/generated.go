@@ -62,7 +62,7 @@ type ComplexityRoot struct {
 		DeleteBoard         func(childComplexity int, userID string, boardID string) int
 		DeleteTodo          func(childComplexity int, userID string, todoID string) int
 		DeleteUser          func(childComplexity int, userID string) int
-		MoveBoards          func(childComplexity int, boardIds []string) int
+		MoveBoards          func(childComplexity int, userID string, boardIds []string) int
 		MoveTodosOnBoard    func(childComplexity int, todoIds []string, boardID string) int
 		RemoveTodoFromBoard func(childComplexity int, todoID string, boardID string) int
 		UpdateBoard         func(childComplexity int, updateBoard model.UpdateBoard) int
@@ -107,7 +107,7 @@ type MutationResolver interface {
 	CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error)
 	UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (bool, error)
 	DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error)
-	MoveBoards(ctx context.Context, boardIds []string) (bool, error)
+	MoveBoards(ctx context.Context, userID string, boardIds []string) (bool, error)
 	AddTodoToBoard(ctx context.Context, todoID string, boardID string) (bool, error)
 	RemoveTodoFromBoard(ctx context.Context, todoID string, boardID string) (bool, error)
 	MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (bool, error)
@@ -272,7 +272,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.MoveBoards(childComplexity, args["boardIds"].([]string)), true
+		return e.complexity.Mutation.MoveBoards(childComplexity, args["userId"].(string), args["boardIds"].([]string)), true
 
 	case "Mutation.moveTodosOnBoard":
 		if e.complexity.Mutation.MoveTodosOnBoard == nil {
@@ -645,7 +645,7 @@ type Mutation {
   updateBoard(updateBoard: UpdateBoard!): Boolean!
   deleteBoard(userId: String!, boardId: String!): Boolean!
   #
-  moveBoards(boardIds: [String!]!): Boolean!
+  moveBoards(userId: String!, boardIds: [String!]!): Boolean!
   addTodoToBoard(todoId: String!, boardId: String!): Boolean!
   removeTodoFromBoard(todoId: String!, boardId: String!): Boolean!
   moveTodosOnBoard(todoIds: [String!]!, boardId: String!): Boolean!
@@ -793,15 +793,24 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_moveBoards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []string
-	if tmp, ok := rawArgs["boardIds"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boardIds"))
-		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["boardIds"] = arg0
+	args["userId"] = arg0
+	var arg1 []string
+	if tmp, ok := rawArgs["boardIds"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boardIds"))
+		arg1, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["boardIds"] = arg1
 	return args, nil
 }
 
@@ -1808,7 +1817,7 @@ func (ec *executionContext) _Mutation_moveBoards(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().MoveBoards(rctx, fc.Args["boardIds"].([]string))
+		return ec.resolvers.Mutation().MoveBoards(rctx, fc.Args["userId"].(string), fc.Args["boardIds"].([]string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

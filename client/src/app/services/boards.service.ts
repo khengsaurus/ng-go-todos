@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { map, share, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { IBoard, ITodo } from 'src/types';
 import { UserService } from '.';
 import {
@@ -20,29 +20,31 @@ export class BoardsService {
 
   constructor(private apollo: Apollo, private userService: UserService) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
+    let boardIds: string[] = [];
     const _boardsObserver$ = this.userService.currentUser$.pipe(
       switchMap((user) => {
         const userId = user?.id || '';
+        boardIds = user?.boardIds || [];
         if (userId) {
           return this.apollo
             .watchQuery<IGET_BOARDS>({
               query: GET_BOARDS,
               variables: { userId, fresh: true },
             })
-            .valueChanges.pipe(
-              map(({ data }) => {
-                const boards = data?.getBoards || [];
-                return boards;
-              })
-            );
+            .valueChanges.pipe(map(({ data }) => data?.getBoards || []));
         } else {
           return of([]);
         }
       }),
-      tap((boards) => (this._boardsCopy = boards)),
-      share()
+      tap((_boards) => {
+        if (!_boards.length) return;
+        const boards = boardIds
+          .map((boardId) => _boards.find((board) => board.id === boardId))
+          .filter((board) => board) as IBoard[];
+        this.updateBoards(boards);
+      })
     );
-    _boardsObserver$.subscribe(this.currentUserBoards$);
+    _boardsObserver$.subscribe();
   }
 
   createBoard$(userId: string, name: string) {

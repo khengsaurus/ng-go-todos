@@ -15,6 +15,7 @@ export interface IResponse<T> {
 export interface IUser {
   id: string;
   username: string;
+  boardIds: string[];
   email?: string;
 }
 
