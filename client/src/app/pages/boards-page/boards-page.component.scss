@@ -2,16 +2,17 @@
 
 .boards-page {
   @include flex-(row);
+  padding: $gap-m;
   overflow-x: scroll;
 
   &::-webkit-scrollbar {
     display: none;
   }
 
-  .board-handle {
+  mat-icon.cdk-drag-handle {
     @include hover-($highlight);
+    @include hover-scale-(0.9, 1);
     cursor: move;
-    transform: translateY(-1px);
   }
 }
 

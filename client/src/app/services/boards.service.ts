@@ -11,6 +11,8 @@ import {
   ICREATE_BOARD,
   IDELETE_BOARD,
   IGET_BOARDS,
+  IMOVE_TODOS,
+  MOVE_TODOS,
 } from './queries';
 
 @Injectable({ providedIn: 'root' })
@@ -79,6 +81,14 @@ export class BoardsService {
           }
         })
       );
+  }
+
+  moveTodos$(todoIds: string[], boardId: string) {
+    return this.apollo.mutate<IMOVE_TODOS>({
+      mutation: MOVE_TODOS,
+      variables: { todoIds, boardId },
+      optimisticResponse: { moveTodos: true },
+    });
   }
 
   unshiftTodoToBoard(todo: ITodo, boardId: string) {

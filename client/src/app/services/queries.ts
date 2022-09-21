@@ -126,16 +126,6 @@ export const DELETE_TODO = gql`
   }
 `;
 
-export interface IADD_TODO_TO_BOARD {
-  addTodoToBoard: boolean;
-}
-
-export const ADD_TODO_TO_BOARD = gql`
-  mutation AddTodoToBoard($todoId: String!, $boardId: String!) {
-    addTodoToBoard(todoId: $todoId, boardId: $boardId)
-  }
-`;
-
 /* ------------------------- BOARDS ------------------------- */
 
 export interface IGET_BOARDS {
@@ -191,5 +181,37 @@ export interface IMOVE_BOARDS {
 export const MOVE_BOARDS = gql`
   mutation moveBoards($userId: String!, $boardIds: [String!]!) {
     moveBoards(userId: $userId, boardIds: $boardIds)
+  }
+`;
+
+/* ---------------------- TODO - BOARDS ---------------------- */
+
+export interface IADD_TODO_TO_BOARD {
+  addTodoToBoard: boolean;
+}
+
+export const ADD_TODO_TO_BOARD = gql`
+  mutation AddTodoToBoard($todoId: String!, $boardId: String!) {
+    addTodoToBoard(todoId: $todoId, boardId: $boardId)
+  }
+`;
+
+export interface IREMOVE_TODO_FROM_BOARD {
+  removeTodoFromBoard: boolean;
+}
+
+export const REMOVE_TODO_FROM_BOARD = gql`
+  mutation RemoveTodoFromBoard($todoId: String!, $boardId: String!) {
+    removeTodoFromBoard(todoId: $todoId, boardId: $boardId)
+  }
+`;
+
+export interface IMOVE_TODOS {
+  moveTodos: boolean;
+}
+
+export const MOVE_TODOS = gql`
+  mutation MoveTodos($todoIds: [String!]!, $boardId: String!) {
+    moveTodos(todoIds: $todoIds, boardId: $boardId)
   }
 `;

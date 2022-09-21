@@ -10,6 +10,8 @@ mat-card.todo {
   }
 }
 
-mat-icon.check {
-  min-width: 21px;
+mat-icon {
+  &.check {
+    min-width: 21px;
+  }
 }

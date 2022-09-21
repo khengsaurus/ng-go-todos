@@ -28,6 +28,13 @@
   }
 }
 
+mat-icon.cdk-drag-handle {
+  @include hover-($highlight);
+  @include hover-scale-(0.8, 0.9);
+  cursor: move;
+  margin-left: auto;
+}
+
 .blue {
   background: #71deff;
   color: black;

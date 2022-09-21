@@ -1,14 +1,20 @@
 <mat-card class="board">
   <mat-card-header>
-    <ng-content></ng-content>
     <mat-card-title class="board-name">
       {{ board.name }}
     </mat-card-title>
+    <ng-content></ng-content>
   </mat-card-header>
 
-  <div class="tasks" cdkDropList cdkDropListOrientation="vertical">
-    <div cdkDrag *ngFor="let todo of board.todos; let i = index">
-      <todo-card [todo]="todo"> </todo-card>
+  <div
+    cdkDropList
+    cdkDropListOrientation="vertical"
+    (cdkDropListDropped)="dropTodo($event)"
+  >
+    <div cdkDrag *ngFor="let todo of board.todos">
+      <todo-card [todo]="todo">
+        <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+      </todo-card>
     </div>
   </div>
   <div class="board-actions">

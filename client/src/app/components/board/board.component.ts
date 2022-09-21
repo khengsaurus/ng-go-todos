@@ -1,5 +1,6 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, Input } from '@angular/core';
+import { tap } from 'rxjs';
 import { BoardsService, UserService } from 'src/app/services';
 import { IBoard } from 'src/types';
 
@@ -21,26 +22,42 @@ export class Board {
   @Input() board: IBoard = initBoard;
 
   constructor(
-    private boardService: BoardsService,
+    private boardsService: BoardsService,
     private userService: UserService
   ) {}
 
-  taskDrop(event: CdkDragDrop<string[]>) {
-    // if (this.board.id && this.board.todoIds) {
-    //   moveItemInArray(
-    //     this.board.todoIds,
-    //     event.previousIndex,
-    //     event.currentIndex
-    //   );
-    //   this.boardService.updateTasks(this.board.id, this.board.todoIds);
-    // }
-  }
-
   handleDelete() {
     if (this.userService.currentUser) {
-      this.boardService
+      this.boardsService
         .deleteBoard$(this.userService.currentUser.id, this.board.id)
         .subscribe();
+    }
+  }
+
+  dropTodo(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      const { previousIndex, currentIndex } = event;
+      if (!this.board.id || previousIndex === currentIndex) return;
+      const orderedTodos = this.board.todos.map((todo) => todo.id);
+      moveItemInArray(orderedTodos, previousIndex, currentIndex);
+      const oldBoard = { ...this.board }; // reset on failure
+      const newBoard = { ...this.board };
+      const updatedTodos = [...this.board.todos];
+      moveItemInArray(updatedTodos, previousIndex, currentIndex);
+      newBoard.todos = updatedTodos;
+      this.board = newBoard;
+      this.boardsService
+        .moveTodos$(orderedTodos, this.board.id)
+        .pipe(
+          tap((res) => {
+            if (!res?.data?.moveTodos) this.board = oldBoard;
+          })
+        )
+        .subscribe();
+    } else {
+      console.log(
+        `TODO: ${event.previousContainer.id}.${event.previousIndex} -> ${event.container.id}.${event.currentIndex}`
+      );
     }
   }
 }

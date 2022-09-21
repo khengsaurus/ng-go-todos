@@ -49,6 +49,7 @@ export class BoardsPage implements OnInit, OnDestroy {
 
   dropBoard(event: CdkDragDrop<string[]>) {
     const { previousIndex, currentIndex } = event;
+    if (previousIndex === currentIndex) return;
     const orderedBoards = this.boards.map((board) => board.id);
     moveItemInArray(orderedBoards, previousIndex, currentIndex);
     const oldBoards = [...this.boards]; // reset on failure

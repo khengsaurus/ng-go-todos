@@ -239,7 +239,7 @@ func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, board
 // MoveBoards is the resolver for the moveBoards field.
 func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardIds []string) (bool, error) {
 	fmt.Println("MoveBoards called")
-	userColl, err := database.GetCollection(ctx, consts.UsersCollection)
+	usersColl, err := database.GetCollection(ctx, consts.UsersCollection)
 	if err != nil {
 		return false, err
 	}
@@ -251,7 +251,7 @@ func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardI
 
 	filter := bson.M{"_id": userId}
 	update := bson.M{"$set": bson.M{"boardIds": boardIds}}
-	_, err = userColl.UpdateOne(ctx, filter, update)
+	_, err = usersColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
 	}
@@ -326,9 +326,29 @@ func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, todoID strin
 	return true, nil
 }
 
-// MoveTodosOnBoard is the resolver for the moveTodosOnBoard field.
-func (r *mutationResolver) MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (bool, error) {
-	panic(fmt.Errorf("not implemented: MoveTodosOnBoard - moveTodosOnBoard"))
+// MoveTodos is the resolver for the moveTodos field.
+func (r *mutationResolver) MoveTodos(ctx context.Context, todoIds []string, boardID string) (bool, error) {
+	fmt.Println("MoveTodos called")
+	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
+	if err != nil {
+		return false, err
+	}
+
+	boardId, err := primitive.ObjectIDFromHex(boardID)
+	if err != nil {
+		return false, err
+	}
+
+	filter := bson.M{"_id": boardId}
+	update := bson.M{"$set": bson.M{"todoIds": todoIds}}
+	_, err = boardsColl.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return false, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
+
+	return true, nil
 }
 
 // GetUser is the resolver for the getUser field.
@@ -548,3 +568,13 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (bool, error) {
+	panic(fmt.Errorf("not implemented: MoveTodosOnBoard - moveTodosOnBoard"))
+}

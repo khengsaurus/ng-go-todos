@@ -10,6 +10,7 @@ import { ITodo, Nullable } from 'src/types';
           todoTitle
         }}</mat-card-subtitle>
         <mat-icon *ngIf="todo?.done" class="check">check</mat-icon>
+        <ng-content></ng-content>
       </div>
     </mat-card>
   `,

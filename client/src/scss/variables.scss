@@ -9,7 +9,7 @@ $content-height: calc(100vh - $top-navbar-height);
 
 $black: rgb(33, 33, 33);
 
-$board-width: 300px;
+$board-width: clamp(300px, 25vw, 400px);
 $board-min-height: 215px;
 
 $grey-66: rgb(66, 66, 66);

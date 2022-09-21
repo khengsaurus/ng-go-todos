@@ -93,5 +93,5 @@ type Mutation {
   moveBoards(userId: String!, boardIds: [String!]!): Boolean!
   addTodoToBoard(todoId: String!, boardId: String!): Boolean!
   removeTodoFromBoard(todoId: String!, boardId: String!): Boolean!
-  moveTodosOnBoard(todoIds: [String!]!, boardId: String!): Boolean!
+  moveTodos(todoIds: [String!]!, boardId: String!): Boolean!
 }

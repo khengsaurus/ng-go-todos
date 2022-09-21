@@ -16,12 +16,21 @@
 
 @mixin icon-button {
   color: $highlight;
-  transition: 300ms ease-in-out;
+  transition: 300ms;
   transform: translateY(-1px);
 }
 
 @mixin hover-($color) {
+  transition: 300ms;
   &:hover {
     color: $color;
+  }
+}
+
+@mixin hover-scale-($small, $big) {
+  transform: scale($small);
+  transition: 300ms;
+  &:hover {
+    transform: scale($big);
   }
 }
