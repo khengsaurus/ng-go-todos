@@ -45,7 +45,7 @@ export class TodosService {
             .valueChanges.pipe(
               map(({ data }) => {
                 return {
-                  todos: data?.getTodos || [],
+                  todos: data?.getTodos?.todos || [],
                   updated: Date.now().valueOf(),
                 };
               })

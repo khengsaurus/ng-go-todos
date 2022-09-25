@@ -81,13 +81,19 @@ export const CREATE_USER = gql`
 /* ------------------------- TODOS ------------------------- */
 
 export interface IGET_TODOS {
-  getTodos: ITodo[];
+  getTodos: {
+    cache: boolean;
+    todos: ITodo[];
+  };
 }
 
 export const GET_TODOS = gql`
   query GetTodos($userId: String!, $fresh: Boolean!) {
     getTodos(userId: $userId, fresh: $fresh) {
-      ...TodoFields
+      cache
+      todos {
+        ...TodoFields
+      }
     }
   }
   ${fragments.TodoRepr}
@@ -129,13 +135,19 @@ export const DELETE_TODO = gql`
 /* ------------------------- BOARDS ------------------------- */
 
 export interface IGET_BOARDS {
-  getBoards: IBoard[];
+  getBoards: {
+    boards: IBoard[];
+    cache: boolean;
+  };
 }
 
 export const GET_BOARDS = gql`
   query GetBoards($userId: String!, $fresh: Boolean!) {
     getBoards(userId: $userId, fresh: $fresh) {
-      ...BoardFields
+      cache
+      boards {
+        ...BoardFields
+      }
     }
   }
   ${fragments.BoardRepr}

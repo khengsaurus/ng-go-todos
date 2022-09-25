@@ -65,6 +65,18 @@ input UpdateBoard {
   todos: [String]!
 }
 
+# --------------- Return ---------------
+
+type GetTodosRes {
+  todos: [Todo]!
+  cache: Boolean!
+}
+
+type GetBoardsRes {
+  boards: [Board]!
+  cache: Boolean!
+}
+
 # --------- Queries & Mutations ---------
 
 type Query {
@@ -72,10 +84,10 @@ type Query {
   getUsers: [User]!
   #
   getTodo(todoId: String!): Todo
-  getTodos(userId: String!, fresh: Boolean!): [Todo]!
+  getTodos(userId: String!, fresh: Boolean!): GetTodosRes
   #
   getBoard(boardId: String!): Board
-  getBoards(userId: String!, fresh: Boolean!): [Board]!
+  getBoards(userId: String!, fresh: Boolean!): GetBoardsRes
 }
 
 type Mutation {

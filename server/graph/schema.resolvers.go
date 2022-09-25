@@ -339,8 +339,19 @@ func (r *mutationResolver) MoveTodos(ctx context.Context, todoIds []string, boar
 		return false, err
 	}
 
+	todoIDs := make([]primitive.ObjectID, len(todoIds))
+	for _, todoId := range todoIds {
+		todoID, err := primitive.ObjectIDFromHex(todoId)
+		if err == nil {
+			fmt.Println(todoId)
+			todoIDs = append(todoIDs, todoID)
+		} else {
+			return false, fmt.Errorf("MoveTodos error: failed to parse todoId -> primitive.ObjectID")
+		}
+	}
+
 	filter := bson.M{"_id": boardId}
-	update := bson.M{"$set": bson.M{"todoIds": todoIds}}
+	update := bson.M{"$set": bson.M{"todos": todoIDs}}
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
@@ -419,14 +430,17 @@ func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo
 }
 
 // GetTodos is the resolver for the getTodos field.
-func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool) ([]*model.Todo, error) {
+func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool) (*model.GetTodosRes, error) {
 	fmt.Println("GetTodos called")
 	redisClient, redisClientErr := database.GetRedisClient(ctx)
 	if !fresh && redisClient != nil {
 		cachedTodos, _ := redisClient.GetTodos(ctx, userID)
 		if cachedTodos != nil {
 			fmt.Println("Retrieved todos from redis cache")
-			return cachedTodos, nil
+			return &model.GetTodosRes{
+				Todos: cachedTodos,
+				Cache: true,
+			}, nil
 		}
 	}
 
@@ -465,7 +479,10 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 		redisClient.SetTodos(ctx, userID, todos)
 	}
 
-	return todos, nil
+	return &model.GetTodosRes{
+		Todos: todos,
+		Cache: false,
+	}, nil
 }
 
 // GetBoard is the resolver for the getBoard field.
@@ -482,12 +499,47 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 	}
 
 	aggSearch := bson.M{"$match": bson.M{"_id": boardId}}
+	// FIXME: $lookup does not maintain array order - https://stackoverflow.com/questions/55033804
+	// aggPopulate := bson.M{"$lookup": bson.M{
+	// 	"from":         consts.TodosCollection,
+	// 	"localField":   "todos",
+	// 	"foreignField": "_id",
+	// 	"as":           "todos",
+	// }}
 	aggPopulate := bson.M{"$lookup": bson.M{
-		"from":         consts.TodosCollection,
-		"localField":   "todos",
-		"foreignField": "_id",
-		"as":           "todos",
+		"from": consts.TodosCollection,
+		"pipeline": []bson.M{
+			{"$match": bson.M{
+				"$expr": bson.M{"$in": []string{"$_id", "$todos"}},
+			}},
+			{"$addFields": bson.M{
+				"sort": bson.M{
+					"$indexOfArray": []string{"$todos", "$_id"},
+				},
+			}}},
+		"as": "todos",
 	}}
+
+	// collection.aggregate([
+	// 	{"$match": {"_id": ObjectId("5c781752176c512f180048e3") }},
+	// 	{"$lookup": {
+	// 		"from": "collection2",
+	// 		"let": { "classIds": "$Classes.ID" },
+	// 		"pipeline": [
+	// 			{ "$match": {
+	// 				"$expr": { "$in": [ "$_id", "$$classIds" ] }
+	// 			}},
+	// 			{ "$addFields": {
+	// 				"sort": {
+	// 					"$indexOfArray": [ "$$classIds", "$_id" ]
+	// 				}
+	// 			}},
+	// 			{ "$sort": { "sort": 1 } },
+	// 			{ "$addFields": { "sort": "$$REMOVE" }}
+	// 		],
+	// 		"as": "results"
+	// 	}}
+	// ])
 
 	cursor, err := boardsColl.Aggregate(ctx, []bson.M{aggSearch, aggPopulate})
 	if err != nil {
@@ -507,14 +559,17 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 }
 
 // GetBoards is the resolver for the getBoards field.
-func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool) ([]*model.Board, error) {
+func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool) (*model.GetBoardsRes, error) {
 	fmt.Println("GetBoards called")
 	redisClient, redisClientErr := database.GetRedisClient(ctx)
 	if !fresh && redisClient != nil {
 		cachedBoards, _ := redisClient.GetBoards(ctx, userID)
 		if cachedBoards != nil {
 			fmt.Println("Retrieved boards from redis cache")
-			return cachedBoards, nil
+			return &model.GetBoardsRes{
+				Boards: cachedBoards,
+				Cache:  true,
+			}, nil
 		}
 	}
 
@@ -557,7 +612,10 @@ func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool
 		redisClient.SetBoards(ctx, userID, boards)
 	}
 
-	return boards, nil
+	return &model.GetBoardsRes{
+		Boards: boards,
+		Cache:  false,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -568,13 +626,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *mutationResolver) MoveTodosOnBoard(ctx context.Context, todoIds []string, boardID string) (bool, error) {
-	panic(fmt.Errorf("not implemented: MoveTodosOnBoard - moveTodosOnBoard"))
-}

@@ -38,16 +38,14 @@ export class Board {
     if (event.previousContainer === event.container) {
       const { previousIndex, currentIndex } = event;
       if (!this.board.id || previousIndex === currentIndex) return;
-      const orderedTodos = this.board.todos.map((todo) => todo.id);
-      moveItemInArray(orderedTodos, previousIndex, currentIndex);
+      const orderedTodoIds = this.board.todos.map((todo) => todo.id);
+      moveItemInArray(orderedTodoIds, previousIndex, currentIndex);
       const oldBoard = { ...this.board }; // reset on failure
-      const newBoard = { ...this.board };
       const updatedTodos = [...this.board.todos];
       moveItemInArray(updatedTodos, previousIndex, currentIndex);
-      newBoard.todos = updatedTodos;
-      this.board = newBoard;
+      this.board = { ...this.board, todos: updatedTodos };
       this.boardsService
-        .moveTodos$(orderedTodos, this.board.id)
+        .moveTodos$(orderedTodoIds, this.board.id)
         .pipe(
           tap((res) => {
             if (!res?.data?.moveTodos) this.board = oldBoard;

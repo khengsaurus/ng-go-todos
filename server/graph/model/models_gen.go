@@ -15,6 +15,16 @@ type Board struct {
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
 
+type GetBoardsRes struct {
+	Boards []*Board `json:"boards" bson:"boards"`
+	Cache  bool     `json:"cache" bson:"cache"`
+}
+
+type GetTodosRes struct {
+	Todos []*Todo `json:"todos" bson:"todos"`
+	Cache bool    `json:"cache" bson:"cache"`
+}
+
 type NewBoard struct {
 	UserID  string    `json:"userId" bson:"userId"`
 	Name    string    `json:"name" bson:"name"`

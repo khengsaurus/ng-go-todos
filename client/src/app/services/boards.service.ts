@@ -33,7 +33,9 @@ export class BoardsService {
               query: GET_BOARDS,
               variables: { userId, fresh: true },
             })
-            .valueChanges.pipe(map(({ data }) => data?.getBoards || []));
+            .valueChanges.pipe(
+              map(({ data }) => data?.getBoards?.boards || [])
+            );
         } else {
           return of([]);
         }

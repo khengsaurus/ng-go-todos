@@ -54,6 +54,16 @@ type ComplexityRoot struct {
 		UserID    func(childComplexity int) int
 	}
 
+	GetBoardsRes struct {
+		Boards func(childComplexity int) int
+		Cache  func(childComplexity int) int
+	}
+
+	GetTodosRes struct {
+		Cache func(childComplexity int) int
+		Todos func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AddTodoToBoard      func(childComplexity int, todoID string, boardID string) int
 		CreateBoard         func(childComplexity int, newBoard model.NewBoard) int
@@ -116,9 +126,9 @@ type QueryResolver interface {
 	GetUser(ctx context.Context, email string) (*model.User, error)
 	GetUsers(ctx context.Context) ([]*model.User, error)
 	GetTodo(ctx context.Context, todoID string) (*model.Todo, error)
-	GetTodos(ctx context.Context, userID string, fresh bool) ([]*model.Todo, error)
+	GetTodos(ctx context.Context, userID string, fresh bool) (*model.GetTodosRes, error)
 	GetBoard(ctx context.Context, boardID string) (*model.Board, error)
-	GetBoards(ctx context.Context, userID string, fresh bool) ([]*model.Board, error)
+	GetBoards(ctx context.Context, userID string, fresh bool) (*model.GetBoardsRes, error)
 }
 
 type executableSchema struct {
@@ -177,6 +187,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Board.UserID(childComplexity), true
+
+	case "GetBoardsRes.boards":
+		if e.complexity.GetBoardsRes.Boards == nil {
+			break
+		}
+
+		return e.complexity.GetBoardsRes.Boards(childComplexity), true
+
+	case "GetBoardsRes.cache":
+		if e.complexity.GetBoardsRes.Cache == nil {
+			break
+		}
+
+		return e.complexity.GetBoardsRes.Cache(childComplexity), true
+
+	case "GetTodosRes.cache":
+		if e.complexity.GetTodosRes.Cache == nil {
+			break
+		}
+
+		return e.complexity.GetTodosRes.Cache(childComplexity), true
+
+	case "GetTodosRes.todos":
+		if e.complexity.GetTodosRes.Todos == nil {
+			break
+		}
+
+		return e.complexity.GetTodosRes.Todos(childComplexity), true
 
 	case "Mutation.addTodoToBoard":
 		if e.complexity.Mutation.AddTodoToBoard == nil {
@@ -620,6 +658,18 @@ input UpdateBoard {
   todos: [String]!
 }
 
+# --------------- Return ---------------
+
+type GetTodosRes {
+  todos: [Todo]!
+  cache: Boolean!
+}
+
+type GetBoardsRes {
+  boards: [Board]!
+  cache: Boolean!
+}
+
 # --------- Queries & Mutations ---------
 
 type Query {
@@ -627,10 +677,10 @@ type Query {
   getUsers: [User]!
   #
   getTodo(todoId: String!): Todo
-  getTodos(userId: String!, fresh: Boolean!): [Todo]!
+  getTodos(userId: String!, fresh: Boolean!): GetTodosRes
   #
   getBoard(boardId: String!): Board
-  getBoards(userId: String!, fresh: Boolean!): [Board]!
+  getBoards(userId: String!, fresh: Boolean!): GetBoardsRes
 }
 
 type Mutation {
@@ -1317,6 +1367,216 @@ func (ec *executionContext) fieldContext_Board_updatedAt(ctx context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetBoardsRes_boards(ctx context.Context, field graphql.CollectedField, obj *model.GetBoardsRes) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetBoardsRes_boards(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Boards, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Board)
+	fc.Result = res
+	return ec.marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetBoardsRes_boards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetBoardsRes",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Board_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Board_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Board_name(ctx, field)
+			case "todos":
+				return ec.fieldContext_Board_todos(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Board_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Board_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Board", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetBoardsRes_cache(ctx context.Context, field graphql.CollectedField, obj *model.GetBoardsRes) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetBoardsRes_cache(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cache, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetBoardsRes_cache(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetBoardsRes",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTodosRes_todos(ctx context.Context, field graphql.CollectedField, obj *model.GetTodosRes) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTodosRes_todos(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Todos, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Todo)
+	fc.Result = res
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTodosRes",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Todo_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Todo_userId(ctx, field)
+			case "text":
+				return ec.fieldContext_Todo_text(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
+			case "priority":
+				return ec.fieldContext_Todo_priority(ctx, field)
+			case "tag":
+				return ec.fieldContext_Todo_tag(ctx, field)
+			case "boardId":
+				return ec.fieldContext_Todo_boardId(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Todo_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Todo_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTodosRes_cache(ctx context.Context, field graphql.CollectedField, obj *model.GetTodosRes) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTodosRes_cache(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cache, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTodosRes_cache(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTodosRes",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2232,14 +2492,11 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Todo)
+	res := resTmp.(*model.GetTodosRes)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOGetTodosRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetTodosRes(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getTodos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2250,26 +2507,12 @@ func (ec *executionContext) fieldContext_Query_getTodos(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Todo_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Todo_userId(ctx, field)
-			case "text":
-				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
-			case "priority":
-				return ec.fieldContext_Todo_priority(ctx, field)
-			case "tag":
-				return ec.fieldContext_Todo_tag(ctx, field)
-			case "boardId":
-				return ec.fieldContext_Todo_boardId(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Todo_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Todo_updatedAt(ctx, field)
+			case "todos":
+				return ec.fieldContext_GetTodosRes_todos(ctx, field)
+			case "cache":
+				return ec.fieldContext_GetTodosRes_cache(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type GetTodosRes", field.Name)
 		},
 	}
 	defer func() {
@@ -2373,14 +2616,11 @@ func (ec *executionContext) _Query_getBoards(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Board)
+	res := resTmp.(*model.GetBoardsRes)
 	fc.Result = res
-	return ec.marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
+	return ec.marshalOGetBoardsRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetBoardsRes(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getBoards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2391,20 +2631,12 @@ func (ec *executionContext) fieldContext_Query_getBoards(ctx context.Context, fi
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Board_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Board_userId(ctx, field)
-			case "name":
-				return ec.fieldContext_Board_name(ctx, field)
-			case "todos":
-				return ec.fieldContext_Board_todos(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Board_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Board_updatedAt(ctx, field)
+			case "boards":
+				return ec.fieldContext_GetBoardsRes_boards(ctx, field)
+			case "cache":
+				return ec.fieldContext_GetBoardsRes_cache(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Board", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type GetBoardsRes", field.Name)
 		},
 	}
 	defer func() {
@@ -5207,6 +5439,76 @@ func (ec *executionContext) _Board(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var getBoardsResImplementors = []string{"GetBoardsRes"}
+
+func (ec *executionContext) _GetBoardsRes(ctx context.Context, sel ast.SelectionSet, obj *model.GetBoardsRes) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getBoardsResImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetBoardsRes")
+		case "boards":
+
+			out.Values[i] = ec._GetBoardsRes_boards(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cache":
+
+			out.Values[i] = ec._GetBoardsRes_cache(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var getTodosResImplementors = []string{"GetTodosRes"}
+
+func (ec *executionContext) _GetTodosRes(ctx context.Context, sel ast.SelectionSet, obj *model.GetTodosRes) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getTodosResImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetTodosRes")
+		case "todos":
+
+			out.Values[i] = ec._GetTodosRes_todos(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cache":
+
+			out.Values[i] = ec._GetTodosRes_cache(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -5434,9 +5736,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getTodos(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -5477,9 +5776,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getBoards(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -6559,6 +6855,20 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOGetBoardsRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetBoardsRes(ctx context.Context, sel ast.SelectionSet, v *model.GetBoardsRes) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetBoardsRes(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOGetTodosRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetTodosRes(ctx context.Context, sel ast.SelectionSet, v *model.GetTodosRes) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetTodosRes(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
