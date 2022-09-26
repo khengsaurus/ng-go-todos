@@ -280,12 +280,19 @@ func (r *mutationResolver) AddTodoToBoard(ctx context.Context, todoID string, bo
 	}
 
 	filter := bson.M{"_id": boardId}
-	update := bson.M{"$push": bson.M{
-		"todos": bson.M{
-			"$each":     []primitive.ObjectID{todoId},
-			"$position": 0,
+	update := bson.M{
+		"$push": bson.M{
+			"todoIds": bson.M{
+				"$each":     []string{todoID},
+				"$position": 0,
+			},
+			"todos": bson.M{
+				"$each":     []primitive.ObjectID{todoId},
+				"$position": 0,
+			},
 		},
-	}}
+	}
+
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
@@ -315,7 +322,10 @@ func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, todoID strin
 	}
 
 	filter := bson.M{"_id": boardId}
-	update := bson.M{"$pull": bson.M{"todos": todoId}}
+	update := bson.M{"$pull": bson.M{
+		"todoIds": todoID,
+		"todos":   todoId,
+	}}
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
@@ -339,19 +349,21 @@ func (r *mutationResolver) MoveTodos(ctx context.Context, todoIds []string, boar
 		return false, err
 	}
 
-	todoIDs := make([]primitive.ObjectID, len(todoIds))
-	for _, todoId := range todoIds {
-		todoID, err := primitive.ObjectIDFromHex(todoId)
-		if err == nil {
-			fmt.Println(todoId)
-			todoIDs = append(todoIDs, todoID)
-		} else {
-			return false, fmt.Errorf("MoveTodos error: failed to parse todoId -> primitive.ObjectID")
-		}
-	}
+	// todoIDs := make([]primitive.ObjectID, len(todoIds))
+	// for _, todoId := range todoIds {
+	// 	todoID, err := primitive.ObjectIDFromHex(todoId)
+	// 	if err == nil {
+	// 		fmt.Println(todoId)
+	// 		todoIDs = append(todoIDs, todoID)
+	// 	} else {
+	// 		return false, fmt.Errorf("MoveTodos error: failed to parse todoId -> primitive.ObjectID")
+	// 	}
+	// }
 
 	filter := bson.M{"_id": boardId}
-	update := bson.M{"$set": bson.M{"todos": todoIDs}}
+	update := bson.M{"$set": bson.M{
+		"todoIds": todoIds,
+	}}
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
@@ -499,47 +511,13 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 	}
 
 	aggSearch := bson.M{"$match": bson.M{"_id": boardId}}
-	// FIXME: $lookup does not maintain array order - https://stackoverflow.com/questions/55033804
-	// aggPopulate := bson.M{"$lookup": bson.M{
-	// 	"from":         consts.TodosCollection,
-	// 	"localField":   "todos",
-	// 	"foreignField": "_id",
-	// 	"as":           "todos",
-	// }}
+	// NB: $lookup does not maintain array order - https://stackoverflow.com/questions/55033804
 	aggPopulate := bson.M{"$lookup": bson.M{
-		"from": consts.TodosCollection,
-		"pipeline": []bson.M{
-			{"$match": bson.M{
-				"$expr": bson.M{"$in": []string{"$_id", "$todos"}},
-			}},
-			{"$addFields": bson.M{
-				"sort": bson.M{
-					"$indexOfArray": []string{"$todos", "$_id"},
-				},
-			}}},
-		"as": "todos",
+		"from":         consts.TodosCollection,
+		"localField":   "todos",
+		"foreignField": "_id",
+		"as":           "todos",
 	}}
-
-	// collection.aggregate([
-	// 	{"$match": {"_id": ObjectId("5c781752176c512f180048e3") }},
-	// 	{"$lookup": {
-	// 		"from": "collection2",
-	// 		"let": { "classIds": "$Classes.ID" },
-	// 		"pipeline": [
-	// 			{ "$match": {
-	// 				"$expr": { "$in": [ "$_id", "$$classIds" ] }
-	// 			}},
-	// 			{ "$addFields": {
-	// 				"sort": {
-	// 					"$indexOfArray": [ "$$classIds", "$_id" ]
-	// 				}
-	// 			}},
-	// 			{ "$sort": { "sort": 1 } },
-	// 			{ "$addFields": { "sort": "$$REMOVE" }}
-	// 		],
-	// 		"as": "results"
-	// 	}}
-	// ])
 
 	cursor, err := boardsColl.Aggregate(ctx, []bson.M{aggSearch, aggPopulate})
 	if err != nil {

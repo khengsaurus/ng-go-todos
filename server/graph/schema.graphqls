@@ -26,6 +26,7 @@ type Board {
   userId: String!
   name: String!
   todos: [Todo]!
+  todoIds: [String]!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -45,7 +46,6 @@ input NewTodo {
 input NewBoard {
   userId: String!
   name: String!
-  todoIds: [String]!
 }
 
 input UpdateTodo {

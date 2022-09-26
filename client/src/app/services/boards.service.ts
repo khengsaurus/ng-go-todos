@@ -52,11 +52,10 @@ export class BoardsService {
   }
 
   createBoard$(userId: string, name: string) {
-    const newBoard = { userId, name, todoIds: [] };
     return this.apollo
       .mutate<ICREATE_BOARD>({
         mutation: CREATE_BOARD,
-        variables: { newBoard },
+        variables: { newBoard: { userId, name } },
       })
       .pipe(
         map((res) => res.data?.createBoard),

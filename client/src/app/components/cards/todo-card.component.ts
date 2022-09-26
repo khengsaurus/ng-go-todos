@@ -26,10 +26,9 @@ export class TodoCard implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     // Get first line
     if (changes['todo'] !== undefined) {
-      // this.todoTitle = (changes['todo'].currentValue?.text || '').split(
-      //   /\r?\n|\r|\n/g
-      // )[0];
-      this.todoTitle = changes['todo'].currentValue?.id;
+      this.todoTitle = (changes['todo'].currentValue?.text || '').split(
+        /\r?\n|\r|\n/g
+      )[0];
     }
     if (changes['active'] !== undefined) {
       this.active = changes['active'].currentValue || false;

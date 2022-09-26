@@ -11,6 +11,7 @@ type Board struct {
 	UserID    string    `json:"userId" bson:"userId"`
 	Name      string    `json:"name" bson:"name"`
 	Todos     []*Todo   `json:"todos" bson:"todos"`
+	TodoIds   []*string `json:"todoIds" bson:"todoIds"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
@@ -26,9 +27,8 @@ type GetTodosRes struct {
 }
 
 type NewBoard struct {
-	UserID  string    `json:"userId" bson:"userId"`
-	Name    string    `json:"name" bson:"name"`
-	TodoIds []*string `json:"todoIds" bson:"todoIds"`
+	UserID string `json:"userId" bson:"userId"`
+	Name   string `json:"name" bson:"name"`
 }
 
 type NewTodo struct {

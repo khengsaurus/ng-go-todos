@@ -48,3 +48,4 @@ Thumbs.db
 
 # 
 Dockerfile
+src/environments/configuration.ts

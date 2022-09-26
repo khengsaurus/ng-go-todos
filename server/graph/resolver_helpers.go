@@ -72,7 +72,7 @@ func DeleteUserTxn(ctx context.Context, userID string) (*bool, error) {
 	})
 
 	if err != nil {
-		fmt.Printf("CreateBoard - error in transaction: %v\nCreateBoard - Aborting transaction\n", err)
+		fmt.Printf("CreateBoard - error in transaction: %v\nDeleteUser - Aborting transaction\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return &v, abortErr
 		} else {
@@ -87,7 +87,7 @@ func DeleteUserTxn(ctx context.Context, userID string) (*bool, error) {
 }
 
 func DeleteUserAsync(ctx context.Context, userID string) (*bool, error) {
-	fmt.Println("DeleteUserTxn called")
+	fmt.Println("DeleteUserAsync called")
 
 	v := false
 	db, err := database.GetMongoDb(ctx)
@@ -157,19 +157,12 @@ func CreateBoardTxn(ctx context.Context, newBoard model.NewBoard) (*model.Board,
 		}
 
 		// Create new board
-		todos := make([]*primitive.ObjectID, 0)
-		for _, s := range newBoard.TodoIds {
-			todoId, err := primitive.ObjectIDFromHex(*s)
-			if err == nil {
-				todos = append(todos, &todoId)
-			}
-		}
-
 		currTime := time.Now()
 		newBoardDoc := bson.D{
 			{Key: "userId", Value: userId},
 			{Key: "name", Value: newBoard.Name},
-			{Key: "todos", Value: todos},
+			{Key: "todos", Value: []*model.Todo{}},
+			{Key: "todoIds", Value: []*string{}},
 			{Key: "createdAt", Value: currTime},
 			{Key: "updatedAt", Value: currTime},
 		}
@@ -183,10 +176,11 @@ func CreateBoardTxn(ctx context.Context, newBoard model.NewBoard) (*model.Board,
 		if ok {
 			boardId = oid.Hex()
 			createdBoard = &model.Board{
-				ID:     boardId,
-				Name:   newBoard.Name,
-				UserID: newBoard.UserID,
-				Todos:  []*model.Todo{},
+				ID:      boardId,
+				Name:    newBoard.Name,
+				UserID:  newBoard.UserID,
+				Todos:   []*model.Todo{},
+				TodoIds: []*string{},
 			}
 		} else {
 			return fmt.Errorf("error in creating board document during MongoClient session transaction")
@@ -234,19 +228,12 @@ func CreateBoardAsync(ctx context.Context, newBoard model.NewBoard) (*model.Boar
 		return nil, err
 	}
 
-	todos := make([]*primitive.ObjectID, 0)
-	for _, s := range newBoard.TodoIds {
-		todoId, err := primitive.ObjectIDFromHex(*s)
-		if err == nil {
-			todos = append(todos, &todoId)
-		}
-	}
-
 	currTime := time.Now()
 	newBoardDoc := bson.D{
 		{Key: "userId", Value: userId},
 		{Key: "name", Value: newBoard.Name},
-		{Key: "todos", Value: todos},
+		{Key: "todos", Value: []*model.Todo{}},
+		{Key: "todoIds", Value: []*string{}},
 		{Key: "createdAt", Value: currTime},
 		{Key: "updatedAt", Value: currTime},
 	}
@@ -261,10 +248,11 @@ func CreateBoardAsync(ctx context.Context, newBoard model.NewBoard) (*model.Boar
 	if ok {
 		boardId = oid.Hex()
 		createdBoard = &model.Board{
-			ID:     boardId,
-			Name:   newBoard.Name,
-			UserID: newBoard.UserID,
-			Todos:  []*model.Todo{},
+			ID:      boardId,
+			Name:    newBoard.Name,
+			UserID:  newBoard.UserID,
+			Todos:   []*model.Todo{},
+			TodoIds: []*string{},
 		}
 	} else {
 		return nil, fmt.Errorf("error in creating board document during MongoClient session transaction")

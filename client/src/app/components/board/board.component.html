@@ -11,7 +11,7 @@
     cdkDropListOrientation="vertical"
     (cdkDropListDropped)="dropTodo($event)"
   >
-    <div cdkDrag *ngFor="let todo of board.todos">
+    <div cdkDrag *ngFor="let todo of orderedTodos">
       <todo-card [todo]="todo">
         <mat-icon cdkDragHandle>drag_indicator</mat-icon>
       </todo-card>
