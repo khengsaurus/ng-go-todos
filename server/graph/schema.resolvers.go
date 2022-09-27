@@ -57,7 +57,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*bool, error) {
+func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool, error) {
 	if consts.Container {
 		return DeleteUserAsync(ctx, userID)
 	} else {
@@ -152,25 +152,11 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 
 // DeleteTodo is the resolver for the deleteTodo field.
 func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error) {
-	fmt.Println("DeleteTodo called")
-	todosColl, err := database.GetCollection(ctx, consts.TodosCollection)
-	if err != nil {
-		return false, err
+	if consts.Container {
+		return DeleteTodoAsync(ctx, userID, todoID)
+	} else {
+		return DeleteTodoTxn(ctx, userID, todoID)
 	}
-
-	todoId, err := primitive.ObjectIDFromHex(todoID)
-	if err != nil {
-		return false, err
-	}
-	filter := bson.D{{Key: "_id", Value: todoId}}
-
-	_, err = todosColl.DeleteOne(ctx, filter)
-	if err != nil {
-		return false, err
-	}
-	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
-
-	return true, nil
 }
 
 // CreateBoard is the resolver for the createBoard field.
@@ -215,25 +201,11 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 
 // DeleteBoard is the resolver for the deleteBoard field.
 func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error) {
-	fmt.Println("DeleteBoard called")
-	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
-	if err != nil {
-		return false, err
+	if consts.Container {
+		return DeleteBoardAsync(ctx, userID, boardID)
+	} else {
+		return DeleteBoardTxn(ctx, userID, boardID)
 	}
-
-	boardId, err := primitive.ObjectIDFromHex(boardID)
-	if err != nil {
-		return false, err
-	}
-	filter := bson.D{{Key: "_id", Value: boardId}}
-
-	_, err = boardsColl.DeleteOne(ctx, filter)
-	if err != nil {
-		return false, err
-	}
-	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
-
-	return true, nil
 }
 
 // MoveBoards is the resolver for the moveBoards field.
@@ -530,6 +502,7 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 		if err := cursor.Decode(&board); err != nil {
 			return nil, err
 		}
+		board.OrderTodos()
 		return &board, nil
 	}
 
@@ -582,6 +555,7 @@ func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool
 		if err != nil {
 			fmt.Printf("Failed to decode board document: %v", err)
 		} else {
+			board.OrderTodos()
 			boards = append(boards, &board)
 		}
 	}

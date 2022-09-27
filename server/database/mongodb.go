@@ -9,6 +9,8 @@ import (
 	"github.com/khengsaurus/ng-gql-todos/consts"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 type MongoClient struct {
@@ -108,6 +110,12 @@ func GetMongoDb(ctx context.Context) (*mongo.Database, error) {
 	}
 	mongoClient.Ping(ctx)
 	return mongoClient.instance.Database(consts.MongoDatabase), nil
+}
+
+func GetTxnSessionConfig() *options.TransactionOptions {
+	wc := writeconcern.New(writeconcern.WMajority())
+	rc := readconcern.Snapshot()
+	return options.Transaction().SetWriteConcern(wc).SetReadConcern(rc)
 }
 
 // func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, error) {

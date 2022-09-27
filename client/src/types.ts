@@ -35,7 +35,7 @@ export interface IBoard {
   userId: string;
   name: string;
   todos: ITodo[];
-  todoIds: string[];
+  // todoIds: string[];
   createdAt: any;
   updatedAt: any;
 }

@@ -111,7 +111,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error)
-	DeleteUser(ctx context.Context, userID string) (*bool, error)
+	DeleteUser(ctx context.Context, userID string) (bool, error)
 	CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error)
 	UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (bool, error)
 	DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error)
@@ -693,7 +693,7 @@ type Query {
 
 type Mutation {
   createUser(newUser: NewUser!): User!
-  deleteUser(userId: String!): Boolean
+  deleteUser(userId: String!): Boolean!
   #
   createTodo(newTodo: NewTodo!): Todo!
   updateTodo(updateTodo: UpdateTodo!): Boolean!
@@ -1722,11 +1722,14 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*bool)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5600,6 +5603,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_deleteUser(ctx, field)
 			})
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createTodo":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {

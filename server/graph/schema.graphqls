@@ -92,7 +92,7 @@ type Query {
 
 type Mutation {
   createUser(newUser: NewUser!): User!
-  deleteUser(userId: String!): Boolean
+  deleteUser(userId: String!): Boolean!
   #
   createTodo(newTodo: NewTodo!): Todo!
   updateTodo(updateTodo: UpdateTodo!): Boolean!
