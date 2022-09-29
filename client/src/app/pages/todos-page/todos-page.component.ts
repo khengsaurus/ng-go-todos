@@ -52,6 +52,6 @@ export class TodosPage implements OnInit, OnDestroy {
   }
 
   transform(index: number) {
-    return `translateY(${index * 100}%)`;
+    return `translateY(${index * 120}%)`;
   }
 }

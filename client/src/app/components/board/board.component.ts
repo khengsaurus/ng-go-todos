@@ -1,7 +1,7 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { tap } from 'rxjs';
-import { BoardsService, UserService } from 'src/app/services';
+import { BoardsService, TodosService, UserService } from 'src/app/services';
 import { IBoard, ITodo } from 'src/types';
 
 const initBoard: IBoard = {
@@ -9,7 +9,6 @@ const initBoard: IBoard = {
   userId: '',
   name: '',
   todos: [],
-  // todoIds: [],
   createdAt: undefined,
   updatedAt: undefined,
 };
@@ -19,23 +18,23 @@ const initBoard: IBoard = {
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
 })
-export class Board {
+export class Board implements OnChanges {
   @Input() board: IBoard = initBoard;
-  // orderedTodos: ITodo[] = [];
+  showTodoOptions: boolean = false;
+  minHeight: string = '0px';
+  todos: ITodo[] = [];
+  toDelete: ITodo[] = [];
 
   constructor(
+    private userService: UserService,
     private boardsService: BoardsService,
-    private userService: UserService
+    private todosService: TodosService
   ) {}
 
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   const board = changes['board']?.currentValue as IBoard;
-  //   if (board) {
-  //     this.orderedTodos = board.todoIds
-  //       .map((todoId) => board.todos.find((todo) => todo.id === todoId))
-  //       .filter((todo) => todo) as ITodo[];
-  //   }
-  // }
+  ngOnChanges(changes: SimpleChanges): void {
+    const todos = changes['board']?.currentValue?.todos || [];
+    this.renderTodos(todos, true);
+  }
 
   handleDelete() {
     if (this.userService.currentUser) {
@@ -45,7 +44,7 @@ export class Board {
     }
   }
 
-  dropTodo(event: CdkDragDrop<string[]>) {
+  dropTodo(event: CdkDragDrop<ITodo[]>) {
     if (event.previousContainer === event.container) {
       const { previousIndex, currentIndex } = event;
       if (!this.board.id || previousIndex === currentIndex) return;
@@ -69,9 +68,49 @@ export class Board {
         )
         .subscribe();
     } else {
-      console.log(
-        `TODO: ${event.previousContainer.id}.${event.previousIndex} -> ${event.container.id}.${event.currentIndex}`
-      );
+      const oldTodos = [...this.todos];
+      const newTodos = [...this.todos];
+      const spliced = newTodos.splice(event.previousIndex, 1);
+      const toRemove = spliced[0]?.id;
+      if (toRemove) {
+        this.renderTodos(newTodos);
+        this.todosService
+          .removeTodoFromBoard$(toRemove, this.board.id)
+          .pipe(
+            tap((res) => {
+              if (!res.data?.removeTodoFromBoard) {
+                this.renderTodos(oldTodos);
+              }
+            })
+          )
+          .subscribe();
+      }
     }
+  }
+
+  renderTodos(todos: ITodo[], duplicate = false) {
+    this.todos = duplicate ? [...todos] : todos;
+    this.minHeight = `${todos.length * 66}px`;
+  }
+
+  todoDragStart() {
+    console.log('todoDragStart');
+    this.showTodoOptions = true;
+  }
+
+  todoDragReleased() {
+    this.showTodoOptions = false;
+  }
+
+  todoDeleteEntered() {
+    console.log('todoDeleteEntered');
+  }
+
+  todoDeleteDrop(event: CdkDragDrop<ITodo[]>) {
+    console.log('todoDeleteDrop');
+  }
+
+  todoCancelDrop(event: CdkDragDrop<ITodo[]>) {
+    console.log('todoCancelDrop');
   }
 }

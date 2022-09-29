@@ -197,7 +197,7 @@ $ng-go-todos-theme: mat.define-dark-theme(
 @include mat.all-component-themes($ng-go-todos-theme);
 
 :root {
-  background-color: $black;
+  background-color: $black-33;
 }
 
 html,

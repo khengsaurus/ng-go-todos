@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
-import { IBoard, ITodo } from 'src/types';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { IBoard, ITodo, IUser, Nullable } from 'src/types';
 import { UserService } from '.';
 import {
   CREATE_BOARD,
@@ -22,33 +22,32 @@ export class BoardsService {
 
   constructor(private apollo: Apollo, private userService: UserService) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
-    let boardIds: string[] = [];
     const _boardsObserver$ = this.userService.currentUser$.pipe(
-      switchMap((user) => {
-        const userId = user?.id || '';
-        boardIds = user?.boardIds || [];
-        if (userId) {
-          return this.apollo
-            .watchQuery<IGET_BOARDS>({
-              query: GET_BOARDS,
-              variables: { userId, fresh: true },
-            })
-            .valueChanges.pipe(
-              map(({ data }) => data?.getBoards?.boards || [])
-            );
-        } else {
-          return of([]);
-        }
-      }),
-      tap((_boards) => {
-        if (!_boards.length) return;
-        const boards = boardIds
-          .map((boardId) => _boards.find((board) => board.id === boardId))
-          .filter((board) => board) as IBoard[];
-        this.updateBoards(boards);
-      })
+      tap((user) => this.getBoards(user))
     );
     _boardsObserver$.subscribe();
+  }
+
+  getBoards(user: Nullable<IUser>) {
+    const { id = '', boardIds } = user || {};
+    if (id && boardIds?.length) {
+      this.apollo
+        .watchQuery<IGET_BOARDS>({
+          query: GET_BOARDS,
+          variables: { userId: id, fresh: true },
+        })
+        .valueChanges.pipe(
+          map(({ data }) => data?.getBoards?.boards || []),
+          tap((_boards) => {
+            if (!_boards.length) return;
+            const boards = boardIds
+              .map((boardId) => _boards.find((board) => board.id === boardId))
+              .filter((board) => board) as IBoard[];
+            this.updateBoards(boards);
+          })
+        )
+        .subscribe();
+    }
   }
 
   createBoard$(userId: string, name: string) {

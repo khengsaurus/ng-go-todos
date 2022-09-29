@@ -21,7 +21,7 @@ form.todo-container {
     background-color: transparent;
     font-family: "Roboto", "Helvetica Neue", sans-serif;
     font-size: 16px;
-    color: white;
+    color: gainsboro;
     padding: $offset-v $gap-l;
     height: calc($content-height - 2 * $offset-v);
     width: calc(100% - 2 * $gap-l);
@@ -49,4 +49,3 @@ form.todo-container {
     }
   }
 }
-

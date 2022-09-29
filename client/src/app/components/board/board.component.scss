@@ -9,12 +9,6 @@
   min-height: $board-min-height;
   transition: 500ms;
 
-  .board-actions {
-    @include flex-(row);
-    margin-top: auto;
-    justify-content: space-between;
-  }
-
   mat-card-header {
     @include flex-(row);
     justify-content: space-between;
@@ -24,6 +18,69 @@
       @include ellipsis;
       font-size: 18px;
       max-width: 250px;
+    }
+  }
+
+  .todos-list {
+    > * {
+      margin: 0px $gap-m $gap-m;
+    }
+  }
+
+  .board-actions {
+    @include flex-(row);
+    margin-top: auto;
+    justify-content: space-between;
+  }
+
+  .todo-actions {
+    @include flex-(row);
+    justify-content: space-between;
+    margin: 0px;
+    transition: 300ms;
+    height: 20px;
+    h3 {
+      display: none;
+    }
+    .dropzone {
+      margin: 0px $gap-m $gap-m;
+      border: none;
+      border-radius: 6px;
+      width: calc($board-width - 2 * $gap-m);
+      transition: 300ms;
+
+      > :not(h3) * {
+        opacity: 0;
+      }
+    }
+    &.show {
+      height: 70px;
+      h3 {
+        &:not(:only-child) {
+          display: none;
+        }
+        display: block;
+        font-size: 16px;
+        font-weight: 400;
+        color: gainsboro;
+        margin: 0px;
+        transition: 200ms;
+      }
+      .dropzone {
+        @include flex-(column);
+        @include center;
+        transition: 300ms;
+        &.cancel {
+          border: 2px dashed grey;
+        }
+        &.delete {
+          border: 2px dashed indianred;
+          .cdk-drag-placeholder {
+            width: 80%;
+            opacity: 0.25;
+          }
+        }
+      }
     }
   }
 }

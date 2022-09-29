@@ -6,10 +6,12 @@ import { ITodo, Nullable } from 'src/types';
   template: `
     <mat-card class="todo" [class]="todo?.tag" [class.active]="active">
       <div class="row">
-        <mat-card-subtitle class="todo-title">{{
-          todoTitle
-        }}</mat-card-subtitle>
-        <mat-icon *ngIf="todo?.done" class="check">check</mat-icon>
+        <div class="content">
+          <mat-card-subtitle class="todo-title">{{
+            todoTitle
+          }}</mat-card-subtitle>
+          <mat-icon *ngIf="todo?.done" class="check">check</mat-icon>
+        </div>
         <ng-content></ng-content>
       </div>
     </mat-card>

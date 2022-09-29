@@ -13,7 +13,9 @@ import {
   ICREATE_TODO,
   IDELETE_TODO,
   IGET_TODOS,
+  IREMOVE_TODO_FROM_BOARD,
   IUPDATE_TODO,
+  REMOVE_TODO_FROM_BOARD,
   UPDATE_TODO,
 } from './queries';
 
@@ -140,6 +142,15 @@ export class TodosService {
     return this.apollo.mutate<IADD_TODO_TO_BOARD>({
       mutation: ADD_TODO_TO_BOARD,
       variables: { todoId, boardId },
+      optimisticResponse: { addTodoToBoard: true },
+    });
+  }
+
+  removeTodoFromBoard$(todoId: string, boardId: string) {
+    return this.apollo.mutate<IREMOVE_TODO_FROM_BOARD>({
+      mutation: REMOVE_TODO_FROM_BOARD,
+      variables: { todoId, boardId },
+      optimisticResponse: { removeTodoFromBoard: true },
     });
   }
 

@@ -1,17 +1,19 @@
 @import "../../../styles";
 
 mat-card.todo {
-  margin: 0px $gap-m $gap-m;
-  background-color: rgba(0, 0, 0, 0.5) !important;
+  background-color: $black-0 !important;
   transition: 500ms;
   cursor: pointer;
   &.active {
     box-shadow: 0 0 0px 1px $highlight;
   }
-}
-
-mat-icon {
-  &.check {
-    min-width: 21px;
+  .content {
+    @include flex-(row);
+    max-width: calc(100% - 30px);
+    mat-icon {
+      &.check {
+        min-width: 21px;
+      }
+    }
   }
 }
