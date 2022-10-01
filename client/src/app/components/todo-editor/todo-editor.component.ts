@@ -8,14 +8,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  debounce,
-  firstValueFrom,
-  interval,
-  map,
-  Subscription,
-  tap,
-} from 'rxjs';
+import { debounce, firstValueFrom, interval, Subscription, tap } from 'rxjs';
 import { BoardsService, TodosService, UserService } from 'src/app/services';
 import { ITodo, ITypedObject, Nullable } from 'src/types';
 import { SelectBoardDialog } from '../dialogs/select-board.component';
@@ -150,17 +143,9 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
 
     dialogRef.componentInstance.todo = this.todo;
     dialogRef.componentInstance.selector.subscribe((boardId: string) => {
-      if (this.todo?.id && boardId) {
-        this.todosService
-          .addTodoToBoard$(this.todo.id, boardId)
-          .pipe(
-            tap((res) => {
-              if (res?.data?.addTodoToBoard) {
-                this.boardsService.unshiftTodoToBoard(this.todo!, boardId);
-              }
-            })
-          )
-          .subscribe();
+      if (this.todo && boardId) {
+        this.boardsService.addTodoToBoard$(this.todo, boardId).subscribe();
+        this.todosService.addTodoToBoardCB({ ...this.todo, boardId });
       }
     });
   }

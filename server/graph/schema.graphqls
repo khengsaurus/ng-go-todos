@@ -102,8 +102,19 @@ type Mutation {
   updateBoard(updateBoard: UpdateBoard!): Boolean!
   deleteBoard(userId: String!, boardId: String!): Boolean!
   #
+  moveTodos(userId: String!, boardId: String!, todoIds: [String!]!): Boolean!
   moveBoards(userId: String!, boardIds: [String!]!): Boolean!
-  addTodoToBoard(todoId: String!, boardId: String!): Boolean!
-  removeTodoFromBoard(todoId: String!, boardId: String!): Boolean!
-  moveTodos(todoIds: [String!]!, boardId: String!): Boolean!
+  addTodoToBoard(userId: String!, todoId: String!, boardId: String!): Boolean!
+  removeTodoFromBoard(
+    userId: String!
+    todoId: String!
+    boardId: String!
+  ): Boolean!
+  shiftTodoBetweenBoards(
+    userId: String!
+    todoId: String!
+    fromBoard: String!
+    toBoard: String!
+    toIndex: Int!
+  ): Boolean!
 }

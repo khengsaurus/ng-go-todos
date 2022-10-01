@@ -58,11 +58,19 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool, error) {
+	var err error
 	if consts.Container {
-		return DeleteUserAsync(ctx, userID)
+		err = DeleteUserAsync(ctx, userID)
 	} else {
-		return DeleteUserTxn(ctx, userID)
+		err = DeleteUserTxn(ctx, userID)
 	}
+	if err != nil {
+		return false, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
+	return true, nil
 }
 
 // CreateTodo is the resolver for the createTodo field.
@@ -85,6 +93,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 		{Key: "done", Value: false},
 		{Key: "priority", Value: 2},
 		{Key: "tag", Value: "white"},
+		{Key: "boardId", Value: nil},
 		{Key: "createdAt", Value: currTime},
 		{Key: "updatedAt", Value: currTime},
 	})
@@ -152,20 +161,36 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 
 // DeleteTodo is the resolver for the deleteTodo field.
 func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error) {
+	var err error
 	if consts.Container {
-		return DeleteTodoAsync(ctx, userID, todoID)
+		err = DeleteTodoAsync(ctx, userID, todoID)
 	} else {
-		return DeleteTodoTxn(ctx, userID, todoID)
+		err = DeleteTodoTxn(ctx, userID, todoID)
 	}
+	if err != nil {
+		return false, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
+	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
+	return true, nil
 }
 
 // CreateBoard is the resolver for the createBoard field.
 func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
+	var board *model.Board
+	var err error
 	if consts.Container {
-		return CreateBoardAsync(ctx, newBoard)
+		board, err = CreateBoardAsync(ctx, newBoard)
 	} else {
-		return CreateBoardTxn(ctx, newBoard)
+		board, err = CreateBoardTxn(ctx, newBoard)
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(newBoard.UserID))
+	return board, nil
 }
 
 // UpdateBoard is the resolver for the updateBoard field.
@@ -201,11 +226,45 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 
 // DeleteBoard is the resolver for the deleteBoard field.
 func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error) {
+	var err error
 	if consts.Container {
-		return DeleteBoardAsync(ctx, userID, boardID)
+		err = DeleteBoardAsync(ctx, userID, boardID)
 	} else {
-		return DeleteBoardTxn(ctx, userID, boardID)
+		err = DeleteBoardTxn(ctx, userID, boardID)
 	}
+	if err != nil {
+		return false, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
+	return true, nil
+}
+
+// MoveTodos is the resolver for the moveTodos field.
+func (r *mutationResolver) MoveTodos(ctx context.Context, userID string, boardID string, todoIds []string) (bool, error) {
+	fmt.Println("MoveTodos called")
+	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
+	if err != nil {
+		return false, err
+	}
+
+	boardId, err := primitive.ObjectIDFromHex(boardID)
+	if err != nil {
+		return false, err
+	}
+
+	filter := bson.M{"_id": boardId}
+	update := bson.M{"$set": bson.M{
+		"todoIds": todoIds,
+	}}
+	_, err = boardsColl.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return false, err
+	}
+
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
+
+	return true, nil
 }
 
 // MoveBoards is the resolver for the moveBoards field.
@@ -234,115 +293,51 @@ func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardI
 }
 
 // AddTodoToBoard is the resolver for the addTodoToBoard field.
-func (r *mutationResolver) AddTodoToBoard(ctx context.Context, todoID string, boardID string) (bool, error) {
-	fmt.Println("AddTodoToBoard called")
-	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
+func (r *mutationResolver) AddTodoToBoard(ctx context.Context, userID string, todoID string, boardID string) (bool, error) {
+	var err error
+	if consts.Container {
+		err = AddTodoToBoardAsync(ctx, todoID, boardID)
+	} else {
+		err = AddTodoToBoardTxn(ctx, todoID, boardID)
+	}
+
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 
-	boardId, err := primitive.ObjectIDFromHex(boardID)
-	if err != nil {
-		return false, err
-	}
-
-	todoId, err := primitive.ObjectIDFromHex(todoID)
-	if err != nil {
-		return false, err
-	}
-
-	filter := bson.M{"_id": boardId}
-	update := bson.M{
-		"$push": bson.M{
-			"todoIds": bson.M{
-				"$each":     []string{todoID},
-				"$position": 0,
-			},
-			"todos": bson.M{
-				"$each":     []primitive.ObjectID{todoId},
-				"$position": 0,
-			},
-		},
-	}
-
-	_, err = boardsColl.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return false, err
-	}
-
-	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
-
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
 	return true, nil
 }
 
 // RemoveTodoFromBoard is the resolver for the removeTodoFromBoard field.
-func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, todoID string, boardID string) (bool, error) {
-	fmt.Println("RemoveTodoFromBoard called")
-	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
+func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, userID string, todoID string, boardID string) (bool, error) {
+	var err error
+	if consts.Container {
+		err = RemoveTodoFromBoardAsync(ctx, todoID, boardID)
+	} else {
+		err = RemoveTodoFromBoardTxn(ctx, todoID, boardID)
+	}
 	if err != nil {
 		return false, err
 	}
 
-	boardId, err := primitive.ObjectIDFromHex(boardID)
-	if err != nil {
-		return false, err
-	}
-
-	todoId, err := primitive.ObjectIDFromHex(todoID)
-	if err != nil {
-		return false, err
-	}
-
-	filter := bson.M{"_id": boardId}
-	update := bson.M{"$pull": bson.M{
-		"todoIds": todoID,
-		"todos":   todoId,
-	}}
-	_, err = boardsColl.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return false, err
-	}
-
-	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
-
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
 	return true, nil
 }
 
-// MoveTodos is the resolver for the moveTodos field.
-func (r *mutationResolver) MoveTodos(ctx context.Context, todoIds []string, boardID string) (bool, error) {
-	fmt.Println("MoveTodos called")
-	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
+// ShiftTodoBetweenBoards is the resolver for the shiftTodoBetweenBoards field.
+func (r *mutationResolver) ShiftTodoBetweenBoards(ctx context.Context, userID string, todoID string, fromBoard string, toBoard string, toIndex int) (bool, error) {
+	var err error
+	if consts.Container {
+		err = ShiftTodoBetweenBoardsAsync(ctx, todoID, fromBoard, toBoard, toIndex)
+	} else {
+		err = ShiftTodoBetweenBoardsTxn(ctx, todoID, fromBoard, toBoard, toIndex)
+	}
 	if err != nil {
 		return false, err
 	}
 
-	boardId, err := primitive.ObjectIDFromHex(boardID)
-	if err != nil {
-		return false, err
-	}
-
-	// todoIDs := make([]primitive.ObjectID, len(todoIds))
-	// for _, todoId := range todoIds {
-	// 	todoID, err := primitive.ObjectIDFromHex(todoId)
-	// 	if err == nil {
-	// 		fmt.Println(todoId)
-	// 		todoIDs = append(todoIDs, todoID)
-	// 	} else {
-	// 		return false, fmt.Errorf("MoveTodos error: failed to parse todoId -> primitive.ObjectID")
-	// 	}
-	// }
-
-	filter := bson.M{"_id": boardId}
-	update := bson.M{"$set": bson.M{
-		"todoIds": todoIds,
-	}}
-	_, err = boardsColl.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return false, err
-	}
-
-	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(boardID))
-
+	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
 	return true, nil
 }
 

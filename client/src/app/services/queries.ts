@@ -18,6 +18,7 @@ const fragments = {
       priority
       tag
       done
+      boardId
     }
   `,
   BoardRepr: gql`
@@ -32,8 +33,8 @@ const fragments = {
         priority
         tag
         done
+        boardId
       }
-      # todoIds
     }
   `,
 };
@@ -204,8 +205,12 @@ export interface IADD_TODO_TO_BOARD {
 }
 
 export const ADD_TODO_TO_BOARD = gql`
-  mutation AddTodoToBoard($todoId: String!, $boardId: String!) {
-    addTodoToBoard(todoId: $todoId, boardId: $boardId)
+  mutation AddTodoToBoard(
+    $userId: String!
+    $todoId: String!
+    $boardId: String!
+  ) {
+    addTodoToBoard(userId: $userId, todoId: $todoId, boardId: $boardId)
   }
 `;
 
@@ -214,8 +219,12 @@ export interface IREMOVE_TODO_FROM_BOARD {
 }
 
 export const REMOVE_TODO_FROM_BOARD = gql`
-  mutation RemoveTodoFromBoard($todoId: String!, $boardId: String!) {
-    removeTodoFromBoard(todoId: $todoId, boardId: $boardId)
+  mutation RemoveTodoFromBoard(
+    $userId: String!
+    $todoId: String!
+    $boardId: String!
+  ) {
+    removeTodoFromBoard(userId: $userId, todoId: $todoId, boardId: $boardId)
   }
 `;
 
@@ -224,7 +233,33 @@ export interface IMOVE_TODOS {
 }
 
 export const MOVE_TODOS = gql`
-  mutation MoveTodos($todoIds: [String!]!, $boardId: String!) {
-    moveTodos(todoIds: $todoIds, boardId: $boardId)
+  mutation MoveTodos(
+    $userId: String!
+    $boardId: String!
+    $todoIds: [String!]!
+  ) {
+    moveTodos(userId: $userId, boardId: $boardId, todoIds: $todoIds)
+  }
+`;
+
+export interface ISHIFT_TODO_BETWEEN_BOARDS {
+  shiftTodoBetweenBoards: boolean;
+}
+
+export const SHIFT_TODO_BETWEEN_BOARDS = gql`
+  mutation ShiftTodoBetweenBoards(
+    $userId: String!
+    $todoId: String!
+    $fromBoard: String!
+    $toBoard: String!
+    $toIndex: Int!
+  ) {
+    shiftTodoBetweenBoards(
+      userId: $userId
+      todoId: $todoId
+      fromBoard: $fromBoard
+      toBoard: $toBoard
+      toIndex: $toIndex
+    )
   }
 `;

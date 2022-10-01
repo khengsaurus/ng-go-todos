@@ -26,6 +26,7 @@ export interface ITodo {
   priority: number;
   tag: string;
   done: boolean;
+  boardId: string;
   createdAt: any;
   updatedAt: any;
 }
@@ -35,9 +36,9 @@ export interface IBoard {
   userId: string;
   name: string;
   todos: ITodo[];
-  // todoIds: string[];
   createdAt: any;
   updatedAt: any;
+  todoIds?: string[]; // for sorting on server-side
 }
 
 export interface ILink {

@@ -8,19 +8,20 @@
 
   <div
     cdkDropList
-    #todoList="cdkDropList"
+    [id]="this.board.id"
     cdkDropListOrientation="vertical"
     [cdkDropListData]="todos"
-    [cdkDropListConnectedTo]="[deleteDropZone]"
-    (cdkDropListDropped)="dropTodo($event)"
+    (cdkDropListDropped)="todoListDrop($event)"
     [ngStyle]="{ minHeight }"
     class="todos-list"
   >
     <div
       cdkDrag
       (cdkDragStarted)="todoDragStart()"
-      (cdkDragReleased)="todoDragReleased()"
+      (cdkDragReleased)="todoDragReleased($event)"
       *ngFor="let todo of todos"
+      [cdkDragData]="todo"
+      
     >
       <todo-card [todo]="todo">
         <mat-icon cdkDragHandle>drag_indicator</mat-icon>
@@ -31,19 +32,15 @@
   <div class="todo-actions" [class.show]="showTodoOptions">
     <div
       cdkDropList
-      #deleteDropZone="cdkDropList"
       [cdkDropListData]="toDelete"
-      [cdkDropListConnectedTo]="[todoList]"
-      (cdkDropListDropped)="dropTodo($event)"
+      (cdkDropListDropped)="deleteTodoDrop($event)"
       class="dropzone delete"
+      [id]="'delete-dropzone'"
     >
       <h3>Remove</h3>
     </div>
   </div>
   <div class="board-actions">
-    <!-- <button mat-stroked-button (click)="openDialog()">
-      <mat-icon>add</mat-icon>
-    </button> -->
     <div></div>
     <confirm-button
       (action)="handleDelete()"

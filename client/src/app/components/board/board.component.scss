@@ -22,8 +22,12 @@
   }
 
   .todos-list {
+    min-height: calc(3 * $todo-card-height + 20px);
     > * {
       margin: 0px $gap-m $gap-m;
+      &:last-child {
+        margin-bottom: 0px;
+      }
     }
   }
 
@@ -43,7 +47,7 @@
       display: none;
     }
     .dropzone {
-      margin: 0px $gap-m $gap-m;
+      margin: 0px $gap-m;
       border: none;
       border-radius: 6px;
       width: calc($board-width - 2 * $gap-m);
@@ -54,7 +58,8 @@
       }
     }
     &.show {
-      height: 70px;
+      margin-top: $gap-m;
+      height: $todo-card-height;
       h3 {
         &:not(:only-child) {
           display: none;

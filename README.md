@@ -47,6 +47,7 @@ query getUser($email: String!) {
   getUser(email: $email) {
     username
     id
+    boardIds
   }
 }
 
@@ -71,6 +72,7 @@ query getTodos($userId: String!, $fresh: Boolean!) {
       id
       createdAt
       updatedAt
+      boardId
     }
   }
 }
@@ -131,12 +133,16 @@ mutation deleteBoard($userId: String!, $boardId: String!) {
   deleteBoard(userId: $userId, boardId: $boardId)
 }
 
-mutation addTodoToBoard($boardId: String!, $todoId: String!) {
-  addTodoToBoard(boardId: $boardId, todoId: $todoId)
+mutation addTodoToBoard($userId: String!, $boardId: String!, $todoId: String!) {
+  addTodoToBoard(userId: $userId, boardId: $boardId, todoId: $todoId)
 }
 
-mutation removeTodoFromBoard($boardId: String!, $todoId: String!) {
-  removeTodoFromBoard(boardId: $boardId, todoId: $todoId)
+mutation removeTodoFromBoard(
+  $userId: String!
+  $boardId: String!
+  $todoId: String!
+) {
+  removeTodoFromBoard(userId: $userId, boardId: $boardId, todoId: $todoId)
 }
 ```
 
@@ -167,8 +173,7 @@ Request variables
   },
   "newBoard": {
     "userId": "",
-    "name": "",
-    "todoIds": []
+    "name": ""
   }
 }
 ```

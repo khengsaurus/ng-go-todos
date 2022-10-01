@@ -5,17 +5,13 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { ITodo } from 'src/types';
 import { UserService } from '.';
 import {
-  ADD_TODO_TO_BOARD,
   CREATE_TODO,
   DELETE_TODO,
   GET_TODOS,
-  IADD_TODO_TO_BOARD,
   ICREATE_TODO,
   IDELETE_TODO,
   IGET_TODOS,
-  IREMOVE_TODO_FROM_BOARD,
   IUPDATE_TODO,
-  REMOVE_TODO_FROM_BOARD,
   UPDATE_TODO,
 } from './queries';
 
@@ -38,28 +34,26 @@ export class TodosService {
     const _todosObserver$ = this.userService.currentUser$.pipe(
       switchMap((user) => {
         const userId = user?.id || '';
-        if (userId) {
-          return this.apollo
-            .watchQuery<IGET_TODOS>({
-              query: GET_TODOS,
-              variables: { userId, fresh: true },
-            })
-            .valueChanges.pipe(
-              map(({ data }) => {
-                return {
-                  todos: data?.getTodos?.todos || [],
-                  updated: Date.now().valueOf(),
-                };
+        return userId
+          ? this.apollo
+              .watchQuery<IGET_TODOS>({
+                query: GET_TODOS,
+                variables: { userId, fresh: true },
               })
-            );
-        } else {
-          return of({
-            todos: [],
-            updated: Date.now().valueOf(),
-          });
-        }
+              .valueChanges.pipe(
+                map(({ data }) => {
+                  return {
+                    todos: data?.getTodos?.todos || [],
+                    updated: Date.now().valueOf(),
+                  };
+                })
+              )
+          : of({
+              todos: [],
+              updated: Date.now().valueOf(),
+            });
       }),
-      tap((todosSub) => (this._todosCopy = todosSub.todos))
+      tap((todosSub) => this.updateTodosSub(todosSub.todos))
     );
     _todosObserver$.subscribe(this.currentUserTodos$);
   }
@@ -75,7 +69,7 @@ export class TodosService {
         map((res) => res.data?.createTodo),
         tap((_newTodo) => {
           if (_newTodo) {
-            this.updateTodos([_newTodo, ...this._todosCopy]);
+            this.updateTodosSub([_newTodo, ...this._todosCopy]);
           }
         })
       );
@@ -113,7 +107,7 @@ export class TodosService {
                 }
               }
             }
-            this.updateTodos(__todosCopy);
+            this.updateTodosSub(__todosCopy);
           }
         })
       );
@@ -128,7 +122,7 @@ export class TodosService {
       .pipe(
         map((res) => {
           if (res.data?.deleteTodo) {
-            this.updateTodos(
+            this.updateTodosSub(
               this._todosCopy.filter((todo) => todo.id !== todoId)
             );
             return true;
@@ -138,23 +132,19 @@ export class TodosService {
       );
   }
 
-  addTodoToBoard$(todoId: string, boardId: string) {
-    return this.apollo.mutate<IADD_TODO_TO_BOARD>({
-      mutation: ADD_TODO_TO_BOARD,
-      variables: { todoId, boardId },
-      optimisticResponse: { addTodoToBoard: true },
-    });
+  addTodoToBoardCB(todo: ITodo) {
+    const todos = [];
+    for (const t of this._todosCopy) {
+      if (t.id === todo.id) {
+        todos.push(todo);
+      } else {
+        todos.push(t);
+      }
+    }
+    this.updateTodosSub(todos);
   }
 
-  removeTodoFromBoard$(todoId: string, boardId: string) {
-    return this.apollo.mutate<IREMOVE_TODO_FROM_BOARD>({
-      mutation: REMOVE_TODO_FROM_BOARD,
-      variables: { todoId, boardId },
-      optimisticResponse: { removeTodoFromBoard: true },
-    });
-  }
-
-  private updateTodos(todos: ITodo[]) {
+  private updateTodosSub(todos: ITodo[]) {
     this._todosCopy = todos;
     this.currentUserTodos$.next({
       todos,

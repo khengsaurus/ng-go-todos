@@ -17,6 +17,7 @@
 
   <div *ngIf="todo !== null" class="todo-footer">
     <button
+      *ngIf="!todo.boardId"
       mat-icon-button
       matTooltip="Add this todo to a board"
       matTooltipClass="hover-tooltip"

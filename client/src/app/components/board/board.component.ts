@@ -1,7 +1,12 @@
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  CdkDragExit,
+  CdkDragRelease,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { tap } from 'rxjs';
-import { BoardsService, TodosService, UserService } from 'src/app/services';
+import { BoardsService, UserService } from 'src/app/services';
 import { IBoard, ITodo } from 'src/types';
 
 const initBoard: IBoard = {
@@ -27,8 +32,7 @@ export class Board implements OnChanges {
 
   constructor(
     private userService: UserService,
-    private boardsService: BoardsService,
-    private todosService: TodosService
+    private boardsService: BoardsService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -44,16 +48,14 @@ export class Board implements OnChanges {
     }
   }
 
-  dropTodo(event: CdkDragDrop<ITodo[]>) {
+  todoListDrop(event: CdkDragDrop<ITodo[]>) {
     if (event.previousContainer === event.container) {
       const { previousIndex, currentIndex } = event;
       if (!this.board.id || previousIndex === currentIndex) return;
       const oldBoard = { ...this.board }; // reset on failure
-
       const newTodos = [...this.board.todos];
       moveItemInArray(newTodos, previousIndex, currentIndex);
       this.board = { ...this.board, todos: newTodos };
-
       this.boardsService
         .moveTodos$(
           newTodos.map((todo) => todo.id),
@@ -68,49 +70,67 @@ export class Board implements OnChanges {
         )
         .subscribe();
     } else {
-      const oldTodos = [...this.todos];
-      const newTodos = [...this.todos];
-      const spliced = newTodos.splice(event.previousIndex, 1);
-      const toRemove = spliced[0]?.id;
-      if (toRemove) {
-        this.renderTodos(newTodos);
-        this.todosService
-          .removeTodoFromBoard$(toRemove, this.board.id)
-          .pipe(
-            tap((res) => {
-              if (!res.data?.removeTodoFromBoard) {
-                this.renderTodos(oldTodos);
-              }
-            })
+      const { previousContainer, previousIndex, container, currentIndex } =
+        event;
+      const prevTodos = previousContainer.data || [];
+      const todo =
+        prevTodos.length < previousIndex + 1
+          ? undefined
+          : prevTodos[previousIndex];
+      if (todo?.id) {
+        this.boardsService
+          .shiftTodoBetweenBoards$(
+            todo,
+            previousContainer.id,
+            container.id,
+            currentIndex
           )
           .subscribe();
       }
     }
   }
 
-  renderTodos(todos: ITodo[], duplicate = false) {
-    this.todos = duplicate ? [...todos] : todos;
-    this.minHeight = `${todos.length * 66}px`;
+  deleteTodoDrop(event: CdkDragDrop<ITodo[]>) {
+    const oldTodos = [...this.todos];
+    const newTodos = [...this.todos];
+    const toRemove = event.item.data as ITodo;
+    if (toRemove?.id) {
+      this.renderTodos(newTodos);
+      this.boardsService
+        .removeTodoFromBoard$(toRemove.id, this.board.id)
+        .pipe(
+          tap((res) => {
+            if (!res.data?.removeTodoFromBoard) {
+              this.renderTodos(oldTodos);
+            } else {
+              this.boardsService.addRmTodoOnBoard(
+                toRemove,
+                this.board.id,
+                false
+              );
+            }
+          })
+        )
+        .subscribe();
+    }
   }
 
   todoDragStart() {
-    console.log('todoDragStart');
     this.showTodoOptions = true;
   }
 
-  todoDragReleased() {
+  todoDragReleased(event: CdkDragRelease<ITodo>) {
     this.showTodoOptions = false;
+    const todo = event.source.data as ITodo;
+    const target = (event.event.target as HTMLElement).id;
+    if (this.board?.id !== target) {
+      const todos = [...this.todos].filter((t) => t.id !== todo.id);
+      this.renderTodos(todos);
+    }
   }
 
-  todoDeleteEntered() {
-    console.log('todoDeleteEntered');
-  }
-
-  todoDeleteDrop(event: CdkDragDrop<ITodo[]>) {
-    console.log('todoDeleteDrop');
-  }
-
-  todoCancelDrop(event: CdkDragDrop<ITodo[]>) {
-    console.log('todoCancelDrop');
+  private renderTodos(todos: ITodo[], duplicate = false) {
+    this.todos = duplicate ? [...todos] : todos;
+    this.minHeight = `${todos.length * 66 - 10}px`;
   }
 }
