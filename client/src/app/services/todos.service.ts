@@ -23,10 +23,12 @@ interface ITodosSubject {
 @Injectable({ providedIn: 'root' })
 export class TodosService {
   currentUserTodos$: Subject<ITodosSubject>;
+  resetTodoEditor$: Subject<boolean>;
   // Hacky way to update subject value https://stackoverflow.com/questions/51037295/
   _todosCopy: ITodo[] = [];
 
   constructor(private apollo: Apollo, private userService: UserService) {
+    this.resetTodoEditor$ = new Subject<boolean>();
     this.currentUserTodos$ = new BehaviorSubject<ITodosSubject>({
       todos: [],
       updated: Date.now().valueOf(),
@@ -56,6 +58,10 @@ export class TodosService {
       tap((todosSub) => this.updateTodosSub(todosSub.todos))
     );
     _todosObserver$.subscribe(this.currentUserTodos$);
+  }
+
+  resetTodoEditor() {
+    this.resetTodoEditor$.next(true);
   }
 
   createTodo$(userId: string, text: string) {

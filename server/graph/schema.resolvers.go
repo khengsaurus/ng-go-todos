@@ -90,9 +90,10 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 	result, err := todosColl.InsertOne(ctx, bson.D{
 		{Key: "userId", Value: userId},
 		{Key: "text", Value: newTodo.Text},
-		{Key: "done", Value: false},
 		{Key: "priority", Value: 2},
 		{Key: "tag", Value: "white"},
+		{Key: "markdown", Value: false},
+		{Key: "done", Value: false},
 		{Key: "boardId", Value: nil},
 		{Key: "createdAt", Value: currTime},
 		{Key: "updatedAt", Value: currTime},
@@ -106,6 +107,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 			Text:     newTodo.Text,
 			Priority: 2,
 			Tag:      "white",
+			Markdown: false,
 			Done:     false,
 		}, err
 	}
@@ -144,6 +146,9 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 	}
 	if updateTodo.Tag != nil {
 		updateVals = append(updateVals, bson.E{Key: "tag", Value: updateTodo.Tag})
+	}
+	if updateTodo.Markdown != nil {
+		updateVals = append(updateVals, bson.E{Key: "markdown", Value: updateTodo.Markdown})
 	}
 	if updateTodo.Done != nil {
 		updateVals = append(updateVals, bson.E{Key: "done", Value: updateTodo.Done})

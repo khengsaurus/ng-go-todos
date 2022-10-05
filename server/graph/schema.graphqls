@@ -13,9 +13,10 @@ type Todo {
   id: ID!
   userId: String!
   text: String!
-  done: Boolean!
   priority: Int!
   tag: String!
+  markdown: Boolean!
+  done: Boolean!
   boardId: String!
   createdAt: Time!
   updatedAt: Time!
@@ -52,9 +53,10 @@ input UpdateTodo {
   id: String!
   userId: String!
   text: String
-  done: Boolean
   priority: Int
   tag: String
+  markdown: Boolean
+  done: Boolean
   boardId: String
 }
 

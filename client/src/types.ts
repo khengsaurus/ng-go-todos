@@ -25,6 +25,7 @@ export interface ITodo {
   text: string;
   priority: number;
   tag: string;
+  markdown: boolean;
   done: boolean;
   boardId: string;
   createdAt: any;

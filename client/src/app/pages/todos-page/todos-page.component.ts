@@ -47,6 +47,11 @@ export class TodosPage implements OnInit, OnDestroy {
     this.selectedTodo = todo;
   }
 
+  handleNewTodo() {
+    this.todosService.resetTodoEditor();
+    this.selectedTodo = null;
+  }
+
   trackById(_: number, item: Nullable<ITodo>) {
     return item?.id;
   }

@@ -14,7 +14,7 @@ import { ITodo, ITypedObject, Nullable } from 'src/types';
 import { SelectBoardDialog } from '../dialogs/select-board.component';
 
 const autoDelay = 1000;
-const updateKeys = ['text', 'done'] as unknown as 'text' | 'done';
+const updateKeys = ['text', 'markdown', 'done'];
 
 @Component({
   selector: 'todo-editor',
@@ -24,8 +24,10 @@ const updateKeys = ['text', 'done'] as unknown as 'text' | 'done';
 export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   @Input() size: number = 2;
   @Input() todo: Nullable<ITodo> = null;
+  showMarkdown: boolean = false;
   todoForm: FormGroup;
   private formSub: Nullable<Subscription> = null;
+  private resetSub: Nullable<Subscription> = null;
 
   constructor(
     private userService: UserService,
@@ -37,6 +39,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       text: new FormControl(),
       tag: new FormControl(),
       priority: new FormControl(),
+      markdown: new FormControl(),
       done: new FormControl(),
     });
   }
@@ -44,9 +47,20 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
     this.formSub = this.todoForm.valueChanges
       .pipe(
+        tap((changes) => (this.showMarkdown = Boolean(changes?.markdown))),
         debounce(() => interval(autoDelay)),
         tap((changes) => this.updateTodo(changes))
         // TODO tap auto-saved feedback
+      )
+      .subscribe();
+
+    this.resetSub = this.todosService.resetTodoEditor$
+      .pipe(
+        tap((signal) => {
+          if (signal) {
+            this.resetTodo();
+          }
+        })
       )
       .subscribe();
   }
@@ -58,6 +72,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
         text: newTodo.text,
         tag: newTodo.tag,
         priority: newTodo.priority,
+        markdown: newTodo.markdown,
         done: newTodo.done,
       });
     }
@@ -66,6 +81,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.formSub?.unsubscribe();
+    this.resetSub?.unsubscribe();
   }
 
   deleteTodo() {
@@ -94,6 +110,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       text: '',
       tag: '',
       priority: 2,
+      markdown: false,
       done: false,
     });
     if (focus) this.focusEditor();

@@ -45,9 +45,10 @@ type Todo struct {
 	ID        string    `json:"id" bson:"_id"`
 	UserID    string    `json:"userId" bson:"userId"`
 	Text      string    `json:"text" bson:"text"`
-	Done      bool      `json:"done" bson:"done"`
 	Priority  int       `json:"priority" bson:"priority"`
 	Tag       string    `json:"tag" bson:"tag"`
+	Markdown  bool      `json:"markdown" bson:"markdown"`
+	Done      bool      `json:"done" bson:"done"`
 	BoardID   string    `json:"boardId" bson:"boardId"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
@@ -64,9 +65,10 @@ type UpdateTodo struct {
 	ID       string  `json:"id" bson:"_id"`
 	UserID   string  `json:"userId" bson:"userId"`
 	Text     *string `json:"text" bson:"text"`
-	Done     *bool   `json:"done" bson:"done"`
 	Priority *int    `json:"priority" bson:"priority"`
 	Tag      *string `json:"tag" bson:"tag"`
+	Markdown *bool   `json:"markdown" bson:"markdown"`
+	Done     *bool   `json:"done" bson:"done"`
 	BoardID  *string `json:"boardId" bson:"boardId"`
 }
 

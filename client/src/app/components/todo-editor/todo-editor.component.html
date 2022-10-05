@@ -3,17 +3,8 @@
     id="todo-editor"
     class="todo-editor"
     formControlName="text"
+    placeholder="New note..."
   ></textarea>
-  <div *ngIf="todo !== null" class="todo-header">
-    <button
-      mat-icon-button
-      class="btn-m"
-      disableRipple
-      (click)="resetTodo(true)"
-    >
-      <mat-icon>note_add</mat-icon>
-    </button>
-  </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
     <button
@@ -27,11 +18,12 @@
     >
       <mat-icon class="mat-icon-s">view_day</mat-icon>
     </button>
-    <mat-checkbox
-      class="btn-m"
-      formControlName="done"
-      disableRipple
-    ></mat-checkbox>
+    <mat-checkbox class="btn-m" disableRipple formControlName="markdown"
+      >Markdown</mat-checkbox
+    >
+    <mat-checkbox class="btn-m" formControlName="done" disableRipple
+      >Done</mat-checkbox
+    >
     <confirm-button (action)="this.deleteTodo()" icon="delete"></confirm-button>
   </div>
 </form>

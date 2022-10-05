@@ -7,25 +7,33 @@
   }
   .todos-sidenav {
     width: 200px;
-  }
-  .todos-sidenav-toggle {
-    @include icon-button;
-    transition: 300ms ease-in;
-    mat-icon.hide {
-      opacity: 0;
-      transition: 150ms ease-in;
-    }
-    &-secondary {
+
+    &-toggle {
       @include icon-button;
       position: absolute;
-      top: 4px;
-      left: 0px;
-      transform: translateY(-1px);
-      animation: 300ms ease-out;
-      &.hide {
+      right: 0px;
+      transition: 300ms ease-in;
+      mat-icon.hide {
         opacity: 0;
-        transform: translate(-40px, -1px);
-        transition: 50ms;
+        transition: 100ms ease-in;
+      }
+      &.secondary {
+        @include icon-button;
+        position: absolute;
+        left: 0px;
+        transform: translateY(-1px);
+        animation: 300ms ease-out;
+        &.hide {
+          opacity: 0;
+          transform: translate(-40px, -1px);
+          transition: 50ms;
+        }
+      }
+      &.top {
+        top: 4px;
+      }
+      &.bottom {
+        bottom: 4px;
       }
     }
   }

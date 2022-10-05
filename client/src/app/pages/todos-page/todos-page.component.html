@@ -9,11 +9,21 @@
       <h3>Your Todos</h3>
       <button
         mat-icon-button
-        [class]="'todos-sidenav-toggle'"
+        class="todos-sidenav-toggle top"
         (click)="toggleSidenav()"
         disableRipple
       >
         <mat-icon [class.hide]="!sidenavOpen">chevron_left</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        class="todos-sidenav-toggle bottom"
+        (click)="this.handleNewTodo()"
+        disableRipple
+      >
+        <mat-icon class="mat-icon-s" [class.hide]="!sidenavOpen"
+          >note_add</mat-icon
+        >
       </button>
     </div>
 
@@ -35,17 +45,28 @@
         ></todo-card>
       </div>
     </div>
-    <!---------- ---------->
   </mat-sidenav>
+
+  <!---------- Editor ---------->
   <mat-sidenav-content class="todo-content">
     <button
       mat-icon-button
-      [class]="'todos-sidenav-toggle-secondary'"
+      [class]="'todos-sidenav-toggle top secondary'"
       [class.hide]="sidenavOpen"
       (click)="toggleSidenav()"
-      disableRipple="true"
+      disableRipple
     >
       <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      [class]="'todos-sidenav-toggle bottom secondary'"
+      [class.hide]="sidenavOpen"
+      (click)="this.handleNewTodo()"
+      [ngStyle]="{ bottom: '4px' }"
+      disableRipple
+    >
+      <mat-icon class="mat-icon-s">note_add</mat-icon>
     </button>
     <todo-editor
       [todo]="this.selectedTodo"

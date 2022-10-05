@@ -95,6 +95,7 @@ type ComplexityRoot struct {
 		CreatedAt func(childComplexity int) int
 		Done      func(childComplexity int) int
 		ID        func(childComplexity int) int
+		Markdown  func(childComplexity int) int
 		Priority  func(childComplexity int) int
 		Tag       func(childComplexity int) int
 		Text      func(childComplexity int) int
@@ -477,6 +478,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.ID(childComplexity), true
 
+	case "Todo.markdown":
+		if e.complexity.Todo.Markdown == nil {
+			break
+		}
+
+		return e.complexity.Todo.Markdown(childComplexity), true
+
 	case "Todo.priority":
 		if e.complexity.Todo.Priority == nil {
 			break
@@ -628,9 +636,10 @@ type Todo {
   id: ID!
   userId: String!
   text: String!
-  done: Boolean!
   priority: Int!
   tag: String!
+  markdown: Boolean!
+  done: Boolean!
   boardId: String!
   createdAt: Time!
   updatedAt: Time!
@@ -667,9 +676,10 @@ input UpdateTodo {
   id: String!
   userId: String!
   text: String
-  done: Boolean
   priority: Int
   tag: String
+  markdown: Boolean
+  done: Boolean
   boardId: String
 }
 
@@ -1376,12 +1386,14 @@ func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_userId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
 			case "tag":
 				return ec.fieldContext_Todo_tag(ctx, field)
+			case "markdown":
+				return ec.fieldContext_Todo_markdown(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
 			case "boardId":
 				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
@@ -1676,12 +1688,14 @@ func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, 
 				return ec.fieldContext_Todo_userId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
 			case "tag":
 				return ec.fieldContext_Todo_tag(ctx, field)
+			case "markdown":
+				return ec.fieldContext_Todo_markdown(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
 			case "boardId":
 				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
@@ -1904,12 +1918,14 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_userId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
 			case "tag":
 				return ec.fieldContext_Todo_tag(ctx, field)
+			case "markdown":
+				return ec.fieldContext_Todo_markdown(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
 			case "boardId":
 				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
@@ -2658,12 +2674,14 @@ func (ec *executionContext) fieldContext_Query_getTodo(ctx context.Context, fiel
 				return ec.fieldContext_Todo_userId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
 			case "tag":
 				return ec.fieldContext_Todo_tag(ctx, field)
+			case "markdown":
+				return ec.fieldContext_Todo_markdown(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
 			case "boardId":
 				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
@@ -3133,50 +3151,6 @@ func (ec *executionContext) fieldContext_Todo_text(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_done(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Done, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Todo_priority(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_priority(ctx, field)
 	if err != nil {
@@ -3260,6 +3234,94 @@ func (ec *executionContext) fieldContext_Todo_tag(ctx context.Context, field gra
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Todo_markdown(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_markdown(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Markdown, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_markdown(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_done(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Done, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5510,7 +5572,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "text", "done", "priority", "tag", "boardId"}
+	fieldsInOrder := [...]string{"id", "userId", "text", "priority", "tag", "markdown", "done", "boardId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5541,14 +5603,6 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-		case "done":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
-			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "priority":
 			var err error
 
@@ -5562,6 +5616,22 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
 			it.Tag, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "markdown":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("markdown"))
+			it.Markdown, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "done":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
+			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6070,13 +6140,6 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "done":
-
-			out.Values[i] = ec._Todo_done(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "priority":
 
 			out.Values[i] = ec._Todo_priority(ctx, field, obj)
@@ -6087,6 +6150,20 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 		case "tag":
 
 			out.Values[i] = ec._Todo_tag(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "markdown":
+
+			out.Values[i] = ec._Todo_markdown(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "done":
+
+			out.Values[i] = ec._Todo_done(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
