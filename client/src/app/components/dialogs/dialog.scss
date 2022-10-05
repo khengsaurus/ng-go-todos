@@ -6,10 +6,18 @@ h3 {
 
 .dialog-content {
   margin: 0px $gap-xl;
+  max-height: 5 * 44px;
+  overflow-y: scroll;
   .list-option {
     @include ellipsis;
     background-color: $grey-66;
     width: 100%;
     margin: $gap-xs 0px;
   }
+}
+
+.dialog-footer {
+  @include flex-(row);
+  @include center;
+  margin-top: $gap-xl;
 }

@@ -1,8 +1,6 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Subscription, tap } from 'rxjs';
-import { NewBoardDialog } from 'src/app/components/dialogs/new-board.component';
 import { BoardsService, UserService } from 'src/app/services';
 import { IBoard } from 'src/types';
 
@@ -17,8 +15,7 @@ export class BoardsPage implements OnInit, OnDestroy {
 
   constructor(
     public boardsService: BoardsService,
-    private userService: UserService,
-    private dialog: MatDialog
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -29,22 +26,6 @@ export class BoardsPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.boardsSub.unsubscribe();
-  }
-
-  openBoardDialog() {
-    const dialogRef = this.dialog.open(NewBoardDialog, {
-      autoFocus: false,
-      width: '244px',
-      data: {},
-    });
-
-    dialogRef.afterClosed().subscribe((inputName) => {
-      if (inputName && this.userService.currentUser) {
-        this.boardsService
-          .createBoard$(this.userService.currentUser.id, inputName)
-          .subscribe();
-      }
-    });
   }
 
   dropBoard(event: CdkDragDrop<string[]>) {

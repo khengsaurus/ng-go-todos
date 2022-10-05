@@ -20,6 +20,15 @@ import { IBoard, ITodo } from 'src/types';
           </button>
         </div>
       </div>
+      <div class="dialog-footer">
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="this.boardsService.openBoardDialog()"
+        >
+          New Board
+        </button>
+      </div>
     </div>
   `,
   styleUrls: ['./dialog.scss'],

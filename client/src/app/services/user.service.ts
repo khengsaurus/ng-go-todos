@@ -91,14 +91,13 @@ export class UserService {
           })
           .pipe(
             tap((res) => {
-              if (res.data?.moveBoards) this.updateBoardIds(boardIds);
+              if (res.data?.moveBoards) {
+                const updatedUser = { ...this.currentUser!, boardIds };
+                this.currentUser = updatedUser;
+                this.currentUser$.next(updatedUser);
+              }
             })
           )
       : of({ data: { moveBoards: false }, loading: false });
-  }
-
-  updateBoardIds(boardIds: string[]) {
-    if (!this.currentUser?.boardIds) return;
-    this.currentUser = { ...this.currentUser, boardIds };
   }
 }

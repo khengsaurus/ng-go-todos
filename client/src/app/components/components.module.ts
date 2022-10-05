@@ -20,8 +20,7 @@ import { RouterModule } from '@angular/router';
 import { Board } from './board/board.component';
 import { TodoCard } from './cards/todo-card.component';
 import { ConfirmButton } from './confirm-button.component';
-import { NewBoardDialog } from './dialogs/new-board.component';
-import { SelectBoardDialog } from './dialogs/select-board.component';
+import { NewBoardDialog, SelectBoardDialog } from './dialogs';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
 

@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Apollo, MutationResult } from 'apollo-angular';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { IBoard, ITodo, IUser, Nullable } from 'src/types';
 import { UserService } from '.';
+import { NewBoardDialog } from 'src/app/components/dialogs';
 import {
   ADD_TODO_TO_BOARD,
   CREATE_BOARD,
@@ -26,7 +28,11 @@ export class BoardsService {
   currentUserBoards$: Subject<IBoard[]>;
   private _boardsCopy: IBoard[] = [];
 
-  constructor(private apollo: Apollo, private userService: UserService) {
+  constructor(
+    private apollo: Apollo,
+    private userService: UserService,
+    private dialog: MatDialog
+  ) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
     const _boardsObserver$ = this.userService.currentUser$.pipe(
       tap((user) => this.getBoards(user))
@@ -68,8 +74,36 @@ export class BoardsService {
           if (_newBoard) {
             this.updateBoards([...this._boardsCopy, _newBoard]);
           }
-        })
+        }),
+        map((board) => board?.id)
       );
+  }
+
+  openBoardDialog() {
+    const dialogRef = this.dialog.open(NewBoardDialog, {
+      autoFocus: false,
+      width: '244px',
+      data: {},
+    });
+
+    return new Promise(async (resolve) => {
+      dialogRef.afterClosed().subscribe((inputName) => {
+        if (inputName && this.userService.currentUser) {
+          firstValueFrom(
+            this.createBoard$(this.userService.currentUser.id, inputName)
+          )
+            .then(resolve)
+            .catch((err) => {
+              console.error(err);
+              resolve(undefined);
+            });
+        } else {
+          resolve(undefined);
+        }
+      });
+
+      return of(undefined);
+    });
   }
 
   deleteBoard$(userId: string, boardId: string) {
@@ -173,6 +207,13 @@ export class BoardsService {
       }
     }
     this.updateBoards(boardsCopy);
+  }
+
+  reorderBoards(boardIds: string[]) {
+    const boards = boardIds
+      .map((id) => this._boardsCopy.find((b) => b.id === id))
+      .filter((board) => board) as IBoard[];
+    this.updateBoards(boards);
   }
 
   private updateBoards(boards: IBoard[]) {
