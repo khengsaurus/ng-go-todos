@@ -1,0 +1,214 @@
+pre {
+  margin: 0;
+  code {
+    &.hljs {
+      display: block;
+      overflow-x: auto;
+      padding: 10px;
+      color: rgb(235, 235, 235);
+      background: rgb(32, 34, 36);
+      &.dracula {
+        background: #282936;
+        color: #e9e9f4;
+      }
+      &.colorBrewer {
+        background: #1a1b26;
+        color: #9aa5ce;
+        // background: rgb(32, 34, 36);
+        // color: #e9e9f4;
+      }
+      &.github {
+        background: rgb(24, 26, 28);
+        color: rgb(225, 225, 225);
+      }
+      &.atomOneDark {
+        background: #282c34;
+        color: #abb2bf;
+      }
+      &.monokaiSublime {
+        background: #282828;
+        color: #f8f8f2;
+      }
+      &.solarLight {
+        background: #d0cec2;
+        color: #3e4446;
+      }
+    }
+  }
+  // base16 Dracula
+  .dracula ::selection,
+  .dracula::selection {
+    background-color: #4d4f68;
+    color: #e9e9f4;
+  }
+  .dracula-comment {
+    color: #626483;
+  }
+  .dracula-tag {
+    color: #62d6e8;
+  }
+  .dracula-operator,
+  .dracula-punctuation,
+  .dracula-subst {
+    color: #e9e9f4;
+  }
+  .dracula-operator {
+    opacity: 0.7;
+  }
+  .dracula-bullet,
+  .dracula-deletion,
+  .dracula-name,
+  .dracula-selector-tag,
+  .dracula-template-variable,
+  .dracula-variable {
+    color: #ea51b2;
+  }
+  .dracula-attr,
+  .dracula-link,
+  .dracula-literal,
+  .dracula-number,
+  .dracula-symbol,
+  .dracula-variable.constant_ {
+    color: #b45bcf;
+  }
+  .dracula-class .dracula-title,
+  .dracula-title,
+  .dracula-title.class_ {
+    color: #00f769;
+  }
+  .dracula-strong {
+    font-weight: 700;
+    color: #00f769;
+  }
+  .dracula-addition,
+  .dracula-code,
+  .dracula-string,
+  .dracula-title.class_.inherited__ {
+    color: #ebff87;
+  }
+  .dracula-built_in,
+  .dracula-doctag,
+  .dracula-keyword.dracula-atrule,
+  .dracula-quote,
+  .dracula-regexp {
+    color: #a1efe4;
+  }
+  .dracula-attribute,
+  .dracula-function .dracula-title,
+  .dracula-section,
+  .dracula-title.function_,
+  .ruby .dracula-property {
+    color: #62d6e8;
+  }
+  .diff .dracula-meta,
+  .dracula-keyword,
+  .dracula-template-tag,
+  .dracula-type {
+    font-weight: 700;
+    color: #b45bcf;
+  }
+  .dracula-emphasis {
+    color: #b45bcf;
+    font-style: italic;
+  }
+  .dracula-meta,
+  .dracula-meta .dracula-keyword,
+  .dracula-meta .dracula-string {
+    color: #00f769;
+  }
+  .dracula-meta .dracula-keyword,
+  .dracula-meta-keyword {
+    font-weight: 700;
+  }
+
+  // base16 Github
+  .github ::selection,
+  .github::selection {
+    background-color: #c8c8fa;
+    color: #333;
+  }
+  .github-comment {
+    // color: #969896;
+    color: #589664;
+  }
+  .github-tag {
+    color: #e8e8e8;
+  }
+  .github-operator,
+  .github-punctuation,
+  .github-subst {
+    color: #ae81ff;
+    // color: #333;
+  }
+  .github-operator {
+    opacity: 0.7;
+  }
+  .github-bullet,
+  .github-deletion,
+  .github-name,
+  .github-selector-tag,
+  .github-template-variable,
+  .github-variable {
+    // color: #ed6a43;
+    color: rgb(250, 100, 70);
+  }
+  .github-attr,
+  .github-link,
+  .github-literal,
+  .github-number,
+  .github-symbol,
+  .github-variable.constant_ {
+    // color: #0086b3;
+    color: rgb(79, 211, 255);
+  }
+  .github-class .github-title,
+  .github-title,
+  .github-title.class_,
+  .github-strong {
+    font-weight: 550;
+    color: rgb(155, 115, 200);
+    // color: #795da3;
+  }
+  .github-addition,
+  .github-built_in,
+  .github-code,
+  .github-doctag,
+  .github-keyword.github-atrule,
+  .github-quote,
+  .github-regexp,
+  .github-string,
+  .github-title.class_.inherited__ {
+    // color: #183691;
+    color: rgb(124, 174, 255);
+  }
+  .github-attribute,
+  .github-function .github-title,
+  .github-section,
+  .github-title.function_,
+  .ruby .github-property {
+    color: rgb(155, 115, 200);
+    // color: #795da3;
+  }
+  .diff .github-meta,
+  .github-keyword,
+  .github-template-tag,
+  .github-type {
+    font-weight: 600;
+    // color: #a71d5d;
+    color: rgb(227, 95, 156);
+  }
+  .github-emphasis {
+    // color: #a71d5d;
+    color: rgb(227, 95, 156);
+    font-style: italic;
+  }
+  .github-meta,
+  .github-meta .github-keyword,
+  .github-meta .github-string {
+    color: #333;
+  }
+  .github-meta .github-keyword,
+  .github-meta-keyword {
+    font-weight: 700;
+  }
+}

@@ -2,12 +2,9 @@
 
 .boards-page {
   @include flex-(row);
+  @include no-scrollbar;
   padding: $gap-m;
   overflow-x: scroll;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 
   mat-icon.cdk-drag-handle {
     @include hover-($highlight);

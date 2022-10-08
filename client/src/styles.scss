@@ -3,6 +3,7 @@
 @include mat.core();
 
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap");
+@import "./scss/markdown.scss";
 @import "./scss/mixins.scss";
 @import "./scss/overrides.scss";
 @import "./scss/variables.scss";

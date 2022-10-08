@@ -41,7 +41,7 @@
     @include flex-(row);
     justify-content: space-between;
     margin: 0px;
-    transition: 300ms;
+    transition: $transition-normal;
     height: 20px;
     h3 {
       display: none;
@@ -51,7 +51,7 @@
       border: none;
       border-radius: 6px;
       width: calc($board-width - 2 * $gap-m);
-      transition: 300ms;
+      transition: $transition-normal;
 
       > :not(h3) * {
         opacity: 0;
@@ -74,7 +74,7 @@
       .dropzone {
         @include flex-(column);
         @include center;
-        transition: 300ms;
+        transition: $transition-normal;
         &.cancel {
           border: 2px dashed grey;
         }

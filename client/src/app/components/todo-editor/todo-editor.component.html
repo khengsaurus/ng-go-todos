@@ -1,10 +1,19 @@
 <form [formGroup]="todoForm" class="todo-container size-{{ size }}">
-  <textarea
-    id="todo-editor"
-    class="todo-editor"
-    formControlName="text"
-    placeholder="New note..."
-  ></textarea>
+  <div class="row">
+    <textarea
+      id="todo-editor"
+      class="todo-editor"
+      [class.half]="showMarkdown"
+      formControlName="text"
+      placeholder="New note..."
+    ></textarea>
+    <markdown-viewer
+      [text]="text"
+      [format]="showMarkdown"
+      class="markdown-viewer"
+      [class.hide]="!showMarkdown"
+    ></markdown-viewer>
+  </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
     <button
@@ -14,7 +23,7 @@
       matTooltipClass="hover-tooltip"
       class="btn-m no-cdk-overlay"
       disableRipple
-      (click)="this.addToBoard()"
+      (click)="addToBoard()"
     >
       <mat-icon class="mat-icon-s">view_day</mat-icon>
     </button>
@@ -24,6 +33,6 @@
     <mat-checkbox class="btn-m" formControlName="done" disableRipple
       >Done</mat-checkbox
     >
-    <confirm-button (action)="this.deleteTodo()" icon="delete"></confirm-button>
+    <confirm-button (action)="deleteTodo()" icon="delete"></confirm-button>
   </div>
 </form>

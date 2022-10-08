@@ -26,6 +26,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   @Input() todo: Nullable<ITodo> = null;
   showMarkdown: boolean = false;
   todoForm: FormGroup;
+  text: string = '';
   private formSub: Nullable<Subscription> = null;
   private resetSub: Nullable<Subscription> = null;
 
@@ -47,7 +48,10 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
     this.formSub = this.todoForm.valueChanges
       .pipe(
-        tap((changes) => (this.showMarkdown = Boolean(changes?.markdown))),
+        tap((changes) => {
+          this.showMarkdown = Boolean(changes?.markdown);
+          this.text = changes?.text || ""
+        }),
         debounce(() => interval(autoDelay)),
         tap((changes) => this.updateTodo(changes))
         // TODO tap auto-saved feedback

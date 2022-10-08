@@ -7,6 +7,7 @@ $gap-xl: 16px;
 $todo-card-height: 56px;
 $top-navbar-height: 56px;
 $content-height: calc(100vh - $top-navbar-height);
+$textarea-offset-v: 14px;
 
 $board-width: clamp(300px, 25vw, 400px);
 $board-min-height: 290px;
@@ -15,5 +16,7 @@ $black-0: rgba(0, 0, 0, 0.5);
 $black-33: rgb(33, 33, 33);
 $grey-66: rgb(66, 66, 66);
 $grey-48: rgb(48, 48, 48);
-
 $highlight: orange;
+
+$transition-normal: 300ms;
+$transition-slow: 450ms;

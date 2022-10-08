@@ -1,5 +1,7 @@
 @import "../../../styles.scss";
 
+$half-w: calc(50% - 2 * $gap-l - 1px);
+
 @mixin toolbar {
   @include flex-(row);
   align-items: center;
@@ -17,14 +19,14 @@ form.todo-container {
     padding-left: 30px;
   }
   textarea.todo-editor {
-    $offset-v: 14px;
+    @include no-scrollbar;
     background-color: transparent;
     font-family: "Roboto", "Helvetica Neue", sans-serif;
     font-size: 16px;
     color: gainsboro;
-    padding: $offset-v $gap-l;
-    height: calc($content-height - 2 * $offset-v);
-    width: calc(100% - 2 * $gap-l);
+    padding: $textarea-offset-v $gap-l;
+    height: calc($content-height - 2 * $textarea-offset-v);
+    width: 100%;
 
     // Override defaults
     border: none;
@@ -34,6 +36,25 @@ form.todo-container {
     -moz-box-shadow: none;
     box-shadow: none;
     resize: none;
+    transition: $transition-slow;
+    border-right: 2px solid transparent;
+
+    &.half {
+      width: calc(50% - 2 * $gap-l);
+      border-color: gainsboro;
+    }
+  }
+
+  .markdown-viewer {
+    @include no-scrollbar;
+    height: calc($content-height - $gap-l);
+    width: calc(50% - 2 * $gap-l);
+    padding: 0px $gap-l;
+    transition: $transition-slow;
+    &.hide {
+      width: 0px;
+      padding: 0px;
+    }
   }
 
   .todo-header {
@@ -44,6 +65,7 @@ form.todo-container {
   .todo-footer {
     @include toolbar;
     bottom: 0px;
+    // background-color: $black-33;
     .mat-checkbox {
       padding-top: 2px;
     }
