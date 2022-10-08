@@ -20,7 +20,11 @@ import { RouterModule } from '@angular/router';
 import { Board } from './board/board.component';
 import { TodoCard } from './cards/todo-card.component';
 import { ConfirmButton } from './confirm-button.component';
-import { NewBoardDialog, SelectBoardDialog } from './dialogs';
+import {
+  NewBoardDialog,
+  PreviewTodoDialog,
+  SelectBoardDialog,
+} from './dialogs';
 import { MarkdownViewer } from './markdown-viewer/markdown-viewer.component';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
@@ -31,6 +35,7 @@ const components = [
   ConfirmButton,
   MarkdownViewer,
   NewBoardDialog,
+  PreviewTodoDialog,
   SelectBoardDialog,
   TodoCard,
   TodoEditor,

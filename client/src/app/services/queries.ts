@@ -33,6 +33,7 @@ const fragments = {
         text
         priority
         tag
+        markdown
         done
         boardId
       }

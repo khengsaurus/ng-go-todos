@@ -12,12 +12,12 @@ type User {
 type Todo {
   id: ID!
   userId: String!
+  boardId: String!
   text: String!
   priority: Int!
   tag: String!
   markdown: Boolean!
   done: Boolean!
-  boardId: String!
   createdAt: Time!
   updatedAt: Time!
 }

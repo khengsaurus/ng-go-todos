@@ -138,6 +138,9 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 		{Key: "userId", Value: userId},
 		{Key: "updatedAt", Value: time.Now()},
 	}
+	if updateTodo.BoardID != nil {
+		updateVals = append(updateVals, bson.E{Key: "boardId", Value: updateTodo.BoardID})
+	}
 	if updateTodo.Text != nil {
 		updateVals = append(updateVals, bson.E{Key: "text", Value: updateTodo.Text})
 	}

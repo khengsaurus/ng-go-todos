@@ -6,7 +6,8 @@ import {
 } from '@angular/cdk/drag-drop';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { tap } from 'rxjs';
-import { BoardsService, UserService } from 'src/app/services';
+import { BoardsService, TodosService, UserService } from 'src/app/services';
+import { trackById } from 'src/app/utils';
 import { IBoard, ITodo } from 'src/types';
 
 const initBoard: IBoard = {
@@ -32,7 +33,8 @@ export class Board implements OnChanges {
 
   constructor(
     private userService: UserService,
-    private boardsService: BoardsService
+    private boardsService: BoardsService,
+    private todosService: TodosService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -56,6 +58,7 @@ export class Board implements OnChanges {
       const newTodos = [...this.board.todos];
       moveItemInArray(newTodos, previousIndex, currentIndex);
       this.board = { ...this.board, todos: newTodos };
+      this.todos = newTodos;
       this.boardsService
         .moveTodos$(
           newTodos.map((todo) => todo.id),
@@ -65,6 +68,7 @@ export class Board implements OnChanges {
           tap((res) => {
             if (!res?.data?.moveTodos) {
               this.board = oldBoard;
+              this.todos = oldBoard.todos;
             }
           })
         )
@@ -108,6 +112,7 @@ export class Board implements OnChanges {
                 this.board.id,
                 false
               );
+              this.todosService.updateTodoInplace({ ...toRemove, boardId: '' });
             }
           })
         )
@@ -133,4 +138,6 @@ export class Board implements OnChanges {
     this.todos = duplicate ? [...todos] : todos;
     this.minHeight = `${todos.length * 66 - 10}px`;
   }
+
+  trackById = trackById;
 }

@@ -119,6 +119,17 @@ export class TodosService {
       );
   }
 
+  updateTodoInplace(updateTodo: Partial<ITodo>) {
+    let __todosCopy = [...this._todosCopy];
+    for (let i = 0; i < __todosCopy.length; i++) {
+      if (__todosCopy[i].id === updateTodo.id) {
+        __todosCopy[i] = { ...__todosCopy[i], ...updateTodo };
+        break;
+      }
+    }
+    this.updateTodosSub(__todosCopy);
+  }
+
   deleteTodo$(userId: string, todoId: string) {
     return this.apollo
       .mutate<IDELETE_TODO>({

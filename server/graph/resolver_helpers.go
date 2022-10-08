@@ -463,7 +463,7 @@ func RemoveTodoFromBoardCB(
 	todoID string,
 	boardID string,
 ) error {
-	todosColl := db.Collection(consts.BoardsCollection)
+	todosColl := db.Collection(consts.TodosCollection)
 	todoId, err := primitive.ObjectIDFromHex(todoID)
 	if err != nil {
 		return err

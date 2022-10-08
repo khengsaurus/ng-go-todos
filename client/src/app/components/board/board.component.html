@@ -8,7 +8,7 @@
 
   <div
     cdkDropList
-    [id]="this.board.id"
+    [id]="board.id"
     cdkDropListOrientation="vertical"
     [cdkDropListData]="todos"
     (cdkDropListDropped)="todoListDrop($event)"
@@ -19,11 +19,10 @@
       cdkDrag
       (cdkDragStarted)="todoDragStart()"
       (cdkDragReleased)="todoDragReleased($event)"
-      *ngFor="let todo of todos"
+      *ngFor="let todo of todos; index as index; trackBy: trackById"
       [cdkDragData]="todo"
-      
     >
-      <todo-card [todo]="todo">
+      <todo-card [todo]="todo" [triggerModal]="true">
         <mat-icon cdkDragHandle>drag_indicator</mat-icon>
       </todo-card>
     </div>

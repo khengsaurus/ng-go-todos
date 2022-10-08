@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, tap } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { takeWhile, tap } from 'rxjs';
 import { TodosService } from 'src/app/services';
+import { trackById } from 'src/app/utils';
 import { ITodo, Nullable } from 'src/types';
 
 @Component({
@@ -8,35 +9,25 @@ import { ITodo, Nullable } from 'src/types';
   templateUrl: './todos-page.component.html',
   styleUrls: ['./todos-page.component.scss'],
 })
-export class TodosPage implements OnInit, OnDestroy {
+export class TodosPage implements OnInit {
   sidenavOpen: boolean = true;
   selectedTodo: Nullable<ITodo> = null;
-  private userTodosSub: Nullable<Subscription> = null;
+  private hasAutoSelected = false;
 
   constructor(public todosService: TodosService) {}
 
   ngOnInit() {
-    this.userTodosSub = this.todosService.currentUserTodos$
-      // Dev: auto select first todo
+    this.todosService.currentUserTodos$
       .pipe(
+        takeWhile(() => !this.hasAutoSelected),
         tap((todosSub) => {
           if (todosSub?.todos?.length) {
+            this.hasAutoSelected = true;
             this.selectTodo(todosSub.todos[0]);
           }
         })
       )
-      // .pipe(
-      //   takeWhile((todosSub) => todosSub.updated > this.lastUpdated),
-      //   tap((todosSub) => {
-      //     this.lastUpdated = todosSub.updated;
-      //     this.todos = todosSub.todos;
-      //   })
-      // )
       .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.userTodosSub?.unsubscribe();
   }
 
   toggleSidenav() {
@@ -52,11 +43,9 @@ export class TodosPage implements OnInit, OnDestroy {
     this.selectedTodo = null;
   }
 
-  trackById(_: number, item: Nullable<ITodo>) {
-    return item?.id;
-  }
-
   transform(index: number) {
     return `translateY(${index * 120}%)`;
   }
+
+  trackById = trackById;
 }

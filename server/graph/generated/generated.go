@@ -635,12 +635,12 @@ type User {
 type Todo {
   id: ID!
   userId: String!
+  boardId: String!
   text: String!
   priority: Int!
   tag: String!
   markdown: Boolean!
   done: Boolean!
-  boardId: String!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -1384,6 +1384,8 @@ func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_id(ctx, field)
 			case "userId":
 				return ec.fieldContext_Todo_userId(ctx, field)
+			case "boardId":
+				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
@@ -1394,8 +1396,6 @@ func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "boardId":
-				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -1686,6 +1686,8 @@ func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, 
 				return ec.fieldContext_Todo_id(ctx, field)
 			case "userId":
 				return ec.fieldContext_Todo_userId(ctx, field)
+			case "boardId":
+				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
@@ -1696,8 +1698,6 @@ func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, 
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "boardId":
-				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -1916,6 +1916,8 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_id(ctx, field)
 			case "userId":
 				return ec.fieldContext_Todo_userId(ctx, field)
+			case "boardId":
+				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
@@ -1926,8 +1928,6 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "boardId":
-				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -2672,6 +2672,8 @@ func (ec *executionContext) fieldContext_Query_getTodo(ctx context.Context, fiel
 				return ec.fieldContext_Todo_id(ctx, field)
 			case "userId":
 				return ec.fieldContext_Todo_userId(ctx, field)
+			case "boardId":
+				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
@@ -2682,8 +2684,6 @@ func (ec *executionContext) fieldContext_Query_getTodo(ctx context.Context, fiel
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "boardId":
-				return ec.fieldContext_Todo_boardId(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -3107,6 +3107,50 @@ func (ec *executionContext) fieldContext_Todo_userId(ctx context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Todo_boardId(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_boardId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BoardID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_boardId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_text(ctx, field)
 	if err != nil {
@@ -3322,50 +3366,6 @@ func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Todo_boardId(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_boardId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.BoardID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Todo_boardId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6133,6 +6133,13 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "boardId":
+
+			out.Values[i] = ec._Todo_boardId(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "text":
 
 			out.Values[i] = ec._Todo_text(ctx, field, obj)
@@ -6164,13 +6171,6 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 		case "done":
 
 			out.Values[i] = ec._Todo_done(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "boardId":
-
-			out.Values[i] = ec._Todo_boardId(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
