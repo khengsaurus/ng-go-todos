@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -29,19 +30,7 @@ import { MarkdownViewer } from './markdown-viewer/markdown-viewer.component';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
 
-const components = [
-  AppShell,
-  Board,
-  ConfirmButton,
-  MarkdownViewer,
-  NewBoardDialog,
-  PreviewTodoDialog,
-  SelectBoardDialog,
-  TodoCard,
-  TodoEditor,
-];
-
-const modules = [
+const imports = [
   CommonModule,
   DragDropModule,
   FormsModule,
@@ -55,6 +44,7 @@ const modules = [
   MatInputModule,
   MatListModule,
   MatMenuModule,
+  MatSelectModule,
   MatSidenavModule,
   MatSnackBarModule,
   MatToolbarModule,
@@ -63,9 +53,21 @@ const modules = [
   RouterModule,
 ];
 
+const declarations = [
+  AppShell,
+  Board,
+  ConfirmButton,
+  MarkdownViewer,
+  NewBoardDialog,
+  PreviewTodoDialog,
+  SelectBoardDialog,
+  TodoCard,
+  TodoEditor,
+];
+
 @NgModule({
-  declarations: components,
-  imports: modules,
-  exports: [...modules, ...components],
+  imports,
+  declarations,
+  exports: [...imports, ...declarations],
 })
 export class ComponentsModule {}

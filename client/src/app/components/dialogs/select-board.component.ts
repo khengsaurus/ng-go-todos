@@ -8,13 +8,13 @@ import { IBoard, ITodo } from 'src/types';
   template: `
     <div>
       <h3>Add todo to a board</h3>
-      <div class="dialog-content">
+      <div class="dialog-content small">
         <div *ngFor="let board of boardsService.currentUserBoards$ | async">
           <button
             mat-button
             class="list-option"
             (click)="select(board)"
-            [disabled]="this.todoPresentInBoard(board)"
+            [disabled]="todoPresentInBoard(board)"
           >
             {{ board.name }}
           </button>
@@ -24,7 +24,7 @@ import { IBoard, ITodo } from 'src/types';
         <button
           mat-raised-button
           color="accent"
-          (click)="this.boardsService.openBoardDialog()"
+          (click)="boardsService.openBoardDialog()"
         >
           New Board
         </button>

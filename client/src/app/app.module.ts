@@ -15,7 +15,6 @@ import { ComponentsModule } from './components/components.module';
 import { GraphQLModule } from './graphql.module';
 import { HomePage } from './pages/home-page/home-page.component';
 import { TodosPage } from './pages/todos-page/todos-page.component';
-import { MatSelectModule } from '@angular/material/select';
 import { BoardsPage } from './pages/boards-page/boards-page.component';
 
 const uri = environment.production
@@ -41,7 +40,6 @@ const uri = environment.production
     GraphQLModule,
     HttpClientModule,
     MatSidenavModule,
-    MatSelectModule,
   ],
   providers: [
     {

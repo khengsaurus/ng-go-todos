@@ -1,18 +1,47 @@
 @import "../../../styles.scss";
 
+$dialog-header-h: 80px;
+
 h3 {
   text-align: center;
 }
 
 .dialog-content {
+  @include flex-(column);
   margin: 0px $gap-xl;
-  max-height: 5 * 44px;
   overflow-y: scroll;
+
+  &.small {
+    max-height: 5 * 44px;
+  }
   .list-option {
     @include ellipsis;
     background-color: $grey-66;
     width: 100%;
     margin: $gap-xs 0px;
+  }
+
+  .header {
+    @include flex-(row);
+    padding: 0px $gap-xl;
+    background-color: $black-33;
+    border-radius: 4px;
+    height: $dialog-header-h;
+    &.baseline-end {
+      align-items: baseline;
+      justify-content: flex-end;
+    }
+
+    p.label {
+      margin: 0px $gap-m;
+    }
+  }
+
+  .todo-text {
+    @include no-scrollbar;
+    max-height: calc(90vh - $dialog-header-h - 2 * $gap-xl);
+    padding-top: $gap-l;
+    overflow-y: scroll;
   }
 }
 

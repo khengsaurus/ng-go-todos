@@ -4,7 +4,6 @@
   @include no-scrollbar;
   height: 100%;
   width: 100%;
-  padding-top: $gap-l;
   overflow-y: scroll;
   pre {
     @include no-scrollbar;

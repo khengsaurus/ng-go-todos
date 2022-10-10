@@ -10,6 +10,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { debounce, firstValueFrom, interval, Subscription, tap } from 'rxjs';
 import { BoardsService, TodosService, UserService } from 'src/app/services';
+import { scrollEle } from 'src/app/utils';
 import { ITodo, ITypedObject, Nullable } from 'src/types';
 import { SelectBoardDialog } from '../dialogs/select-board.component';
 
@@ -50,7 +51,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       .pipe(
         tap((changes) => {
           this.showMarkdown = Boolean(changes?.markdown);
-          this.text = changes?.text || ""
+          this.text = changes?.text || '';
         }),
         debounce(() => interval(autoDelay)),
         tap((changes) => this.updateTodo(changes))
@@ -79,6 +80,7 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
         markdown: newTodo.markdown,
         done: newTodo.done,
       });
+      scrollEle('todo-editor');
     }
     this.focusEditor();
   }
