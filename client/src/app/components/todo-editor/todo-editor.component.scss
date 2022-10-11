@@ -20,7 +20,6 @@ form.todo-container {
   }
   textarea.todo-editor {
     @include no-scrollbar;
-    background-color: transparent;
     font-family: "Roboto", "Helvetica Neue", sans-serif;
     font-size: 16px;
     color: gainsboro;
@@ -30,14 +29,14 @@ form.todo-container {
 
     // Override defaults
     border: none;
+    border-right: 2px solid transparent;
     overflow: auto;
     outline: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
     resize: none;
-    transition: $transition-slow;
-    border-right: 2px solid transparent;
+    transition: $transition-normal;
 
     &.half {
       width: calc(50% - 2 * $gap-l);
@@ -66,6 +65,7 @@ form.todo-container {
     @include toolbar;
     bottom: 0px;
     // background-color: $black-33;
+    .pt-2px,
     .mat-checkbox {
       padding-top: 2px;
     }

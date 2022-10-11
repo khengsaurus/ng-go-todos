@@ -13,6 +13,7 @@
       position: absolute;
       right: 0px;
       transition: 300ms ease-in;
+      z-index: 1;
       mat-icon.hide {
         opacity: 0;
         transition: 100ms ease-in;

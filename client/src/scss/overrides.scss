@@ -1,5 +1,9 @@
 @import "./variables.scss";
 
+textarea {
+  background-color: rgb(48, 48, 48);
+}
+
 mat-sidenav-content.todo-content {
   overflow-y: hidden;
 }
@@ -22,6 +26,7 @@ mat-card-subtitle {
 }
 
 mat-dialog-container {
+  @include no-scrollbar;
   padding: $gap-xl !important;
 }
 

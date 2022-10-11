@@ -18,19 +18,21 @@
   <div *ngIf="todo !== null" class="todo-footer">
     <button
       *ngIf="!todo.boardId"
-      mat-icon-button
-      matTooltip="Add this todo to a board"
-      matTooltipClass="hover-tooltip"
-      class="btn-m no-cdk-overlay"
+      mat-button
+      class="btn pt-2px"
       disableRipple
       (click)="addToBoard()"
     >
-      <mat-icon class="mat-icon-s">view_day</mat-icon>
+      Add to board
     </button>
-    <mat-checkbox class="btn-m" disableRipple formControlName="markdown"
+    <priority-select
+      [priority]="todo.priority"
+      [handleChange]="changePriority"
+    ></priority-select>
+    <mat-checkbox class="btn" disableRipple formControlName="markdown"
       >Markdown</mat-checkbox
     >
-    <mat-checkbox class="btn-m" formControlName="done" disableRipple
+    <mat-checkbox class="btn" formControlName="done" disableRipple
       >Done</mat-checkbox
     >
     <confirm-button (action)="deleteTodo()" icon="delete"></confirm-button>

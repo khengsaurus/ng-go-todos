@@ -227,7 +227,7 @@ body {
 }
 
 .link {
-  transition: 200ms;
+  transition: $transition-fast;
   &:hover {
     cursor: pointer;
     color: $highlight;
@@ -235,11 +235,26 @@ body {
 }
 
 .btn {
-  &-m {
+  @mixin base {
     @include flex-(row);
     @include center;
-    width: 100px !important;
     height: 37px;
+  }
+  @include base;
+  width: fit-content;
+  padding: 0px $gap-m;
+
+  &-s {
+    @include base;
+    width: 80px !important;
+  }
+  &-m {
+    @include base;
+    width: 100px !important;
+  }
+  &-l {
+    @include base;
+    width: 120px !important;
   }
 }
 

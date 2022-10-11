@@ -7,7 +7,7 @@
   padding: $gap-m;
   background: $grey-66;
   min-height: $board-min-height;
-  transition: 500ms;
+  transition: $transition-normal;
 
   mat-card-header {
     @include flex-(row);
@@ -69,7 +69,7 @@
         font-weight: 400;
         color: gainsboro;
         margin: 0px;
-        transition: 200ms;
+        transition: $transition-fast;
       }
       .dropzone {
         @include flex-(column);

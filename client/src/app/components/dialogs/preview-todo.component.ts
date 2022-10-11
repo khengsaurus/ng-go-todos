@@ -6,20 +6,12 @@ import { ITodo } from 'src/types';
   selector: 'preview-todo',
   template: `
     <div class="dialog-content">
-      <div class="header baseline-end">
+      <div class="footer baseline-end">
         <p class="label">Priority:</p>
-        <mat-form-field appearance="standard" [ngStyle]="{ width: '60px' }">
-          <mat-select
-            [value]="todo.priority.toString()"
-            [ngStyle]="{ paddingLeft: '2px' }"
-            (selectionChange)="priorityChange($event)"
-          >
-            <mat-option value="0">None</mat-option>
-            <mat-option value="1">1</mat-option>
-            <mat-option value="2">2</mat-option>
-            <mat-option value="3">3</mat-option>
-          </mat-select>
-        </mat-form-field>
+        <priority-select
+          [priority]="todo.priority"
+          [handleChange]="changePriority"
+        ></priority-select>
         <mat-checkbox [checked]="todo.done" class="btn-m" disableRipple
           >Done</mat-checkbox
         >
@@ -49,7 +41,7 @@ export class PreviewTodoDialog {
     this.dialogRef.close();
   }
 
-  priorityChange(e: any) {
-    console.log(e);
+  changePriority(e: any) {
+    console.log('TODO');
   }
 }

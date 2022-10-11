@@ -172,4 +172,8 @@ export class TodoEditor implements OnInit, OnChanges, OnDestroy {
       }
     });
   }
+
+  changePriority(event: any) {
+    console.log('TODO');
+  }
 }

@@ -50,10 +50,10 @@ export class TodoCard implements OnChanges {
 
     const dialogRef = this.dialog.open(PreviewTodoDialog, {
       autoFocus: false,
+      minHeight: '200px',
+      maxHeight: 'calc(100vh - 100px)',
       minWidth: '600px',
       maxWidth: '80vw',
-      minHeight: '200px',
-      maxHeight: '90vh',
       data: {},
     });
 
