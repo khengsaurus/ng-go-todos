@@ -15,3 +15,8 @@ export function scrollEle(id: string, x = 0, y = 0) {
     ele.scrollTo(x, y);
   }
 }
+
+export function haltEvent(e: Event) {
+  e.stopPropagation();
+  e.preventDefault();
+}

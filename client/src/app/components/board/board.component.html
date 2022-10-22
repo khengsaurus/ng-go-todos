@@ -22,8 +22,14 @@
       *ngFor="let todo of todos; index as index; trackBy: trackById"
       [cdkDragData]="todo"
     >
-      <todo-card [todo]="todo" [triggerModal]="true">
-        <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+      <todo-card
+        [todo]="todo"
+        [triggerModal]="true"
+        [editCallback]="editCallback"
+      >
+        <mat-icon cdkDragHandle halt-event (click)="haltEvent($event)"
+          >drag_indicator</mat-icon
+        >
       </todo-card>
     </div>
   </div>

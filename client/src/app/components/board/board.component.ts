@@ -1,14 +1,13 @@
 import {
   CdkDragDrop,
-  CdkDragExit,
   CdkDragRelease,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { tap } from 'rxjs';
 import { BoardsService, TodosService, UserService } from 'src/app/services';
-import { trackById } from 'src/app/utils';
-import { IBoard, ITodo } from 'src/types';
+import { haltEvent, trackById } from 'src/app/utils';
+import { IBoard, ITodo, Nullable } from 'src/types';
 
 const initBoard: IBoard = {
   id: '',
@@ -30,6 +29,8 @@ export class Board implements OnChanges {
   minHeight: string = '0px';
   todos: ITodo[] = [];
   toDelete: ITodo[] = [];
+  editCallback = this._editCallback.bind(this);
+  haltEvent = haltEvent;
 
   constructor(
     private userService: UserService,
@@ -137,6 +138,10 @@ export class Board implements OnChanges {
   private renderTodos(todos: ITodo[], duplicate = false) {
     this.todos = duplicate ? [...todos] : todos;
     this.minHeight = `${todos.length * 66 - 10}px`;
+  }
+
+  _editCallback(todo?: Nullable<ITodo>) {
+    this.todos = this.todos?.map((t) => (t.id === todo?.id ? todo : t));
   }
 
   trackById = trackById;

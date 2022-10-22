@@ -29,6 +29,7 @@ export class TodoCard implements OnChanges {
   @Input() todo: Nullable<ITodo> = null;
   @Input() active = false;
   @Input() triggerModal = false;
+  @Input() editCallback = (todo: Nullable<ITodo>) => {};
   todoTitle: string = '';
 
   constructor(private dialog: MatDialog) {}
@@ -58,5 +59,6 @@ export class TodoCard implements OnChanges {
     });
 
     dialogRef.componentInstance.todo = this.todo;
+    dialogRef.componentInstance.onDestory = this.editCallback;
   }
 }

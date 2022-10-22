@@ -26,7 +26,7 @@ import {
   PreviewTodoDialog,
   SelectBoardDialog,
 } from './dialogs';
-import { PrioritySelect } from './form/priority-select.component';
+import { DropdownSelect } from './form/dropdown-select.component';
 import { MarkdownViewer } from './markdown-viewer/markdown-viewer.component';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
@@ -61,7 +61,7 @@ const declarations = [
   MarkdownViewer,
   NewBoardDialog,
   PreviewTodoDialog,
-  PrioritySelect,
+  DropdownSelect,
   SelectBoardDialog,
   TodoCard,
   TodoEditor,
