@@ -22,7 +22,7 @@ func InitRedisClient() *RedisClient {
 
 	if consts.Container {
 		fmt.Println("Redis config: local")
-		redisAddress := fmt.Sprintf("%s:6379", os.Getenv("REDIS_SERVICE"))
+		redisAddress := fmt.Sprintf("%s:6379", os.Getenv("REDIS_URI_C"))
 		opts = (&redis.Options{
 			Addr:     redisAddress,
 			Password: "",

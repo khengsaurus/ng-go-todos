@@ -11,17 +11,36 @@ services:
       - 27017:27017
     volumes:
       - mongodata:/data/db
-    command: mongod --quiet --logpath /dev/null 
+    command: mongod --quiet --logpath /dev/null
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - 4566:4566
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=ap-southeast-1
+      - DEBUG=2
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
   web:
     build: .
     ports:
       - 8080:8080
+    depends_on:
+      - redis
+      - mongo
+      - localstack
     environment:
       CONTAINER: true
       PORT: 8080
-      REDIS_SERVICE: redis
-      MONGO_SERVICE: mongodb://mongo:27017
+      REDIS_URI_C: redis
+      MONGODB_URI_C: mongodb://mongo:27017
+      AWS_URI_C: http://localhost:4566
 
 volumes:
   mongodata: {}

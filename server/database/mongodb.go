@@ -21,7 +21,7 @@ func InitMongoClient(connect bool) *MongoClient {
 	var uri string
 	if consts.Container {
 		fmt.Println("Mongo config: local")
-		uri = os.Getenv("MONGO_SERVICE")
+		uri = os.Getenv("MONGODB_URI_C")
 	} else {
 		fmt.Println("Mongo config: remote")
 		uri = os.Getenv("MONGODB_URI")
@@ -42,7 +42,7 @@ func (mongoClient *MongoClient) Connect(ctx context.Context) error {
 	fmt.Println("MongoClient.Connect called")
 	var uri string
 	if consts.Container {
-		uri = os.Getenv("MONGO_SERVICE")
+		uri = os.Getenv("MONGODB_URI_C")
 	} else {
 		uri = os.Getenv("MONGODB_URI")
 	}
