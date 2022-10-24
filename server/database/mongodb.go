@@ -17,7 +17,7 @@ type MongoClient struct {
 	instance *mongo.Client
 }
 
-func InitMongoClient(connect bool) *MongoClient {
+func InitMongoClient() *MongoClient {
 	var uri string
 	if consts.Container {
 		fmt.Println("Mongo config: local")
@@ -117,11 +117,3 @@ func GetTxnSessionConfig() *options.TransactionOptions {
 	rc := readconcern.Snapshot()
 	return options.Transaction().SetWriteConcern(wc).SetReadConcern(rc)
 }
-
-// func (mongoClient *MongoClient) GetCollection(name string) (*mongo.Collection, error) {
-// 	database := mongoClient.instance.Database(consts.MongoDatabase)
-// 	if database == nil {
-// 		return nil, fmt.Errorf("MongoClient.GetCollection failed: %s", consts.MongoDatabase)
-// 	}
-// 	return database.Collection(name), nil
-// }

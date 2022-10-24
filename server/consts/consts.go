@@ -11,6 +11,7 @@ var (
 	Container        = os.Getenv("CONTAINER") == "true"
 	RedisClientKey   = ContextKey("redis_client")
 	MongoClientKey   = ContextKey("mongo_client")
+	AWSSessionKey    = ContextKey("aws_session")
 	MongoDatabase    = "ng-gql-go"
 	UsersCollection  = "users"
 	TodosCollection  = "todos"

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
+	"github.com/khengsaurus/ng-gql-todos/consts"
 	"github.com/khengsaurus/ng-gql-todos/database"
 	"github.com/khengsaurus/ng-gql-todos/graph"
 	"github.com/khengsaurus/ng-gql-todos/graph/generated"
@@ -31,12 +31,12 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middlewares.EnableCors)
 
-	redisClient := database.InitRedisClient()
-	mongoClient := database.InitMongoClient(true)
-	defer mongoClient.Disconnect(context.TODO(), "main")
-
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	wrappedServer := middlewares.WithRedisClient(redisClient, middlewares.WithMongoClient(mongoClient, server))
+	wrappedServer :=
+		middlewares.AttachToContext(consts.MongoClientKey, database.InitMongoClient(),
+			middlewares.AttachToContext(consts.RedisClientKey, database.InitRedisClient(),
+				server),
+		)
 
 	router.HandleFunc(route_test, testHandler)
 	router.Handle(route_pg, playground.Handler("GraphQL playground", route_api))
