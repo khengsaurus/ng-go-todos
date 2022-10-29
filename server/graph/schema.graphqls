@@ -90,9 +90,6 @@ type Query {
   #
   getBoard(boardId: String!): Board
   getBoards(userId: String!, fresh: Boolean!): GetBoardsRes
-  #
-  getSignedPutUrl(userId: String!, todoId: String!, fileName: String!): String!
-  getSignedGetUrl(key: String!): String!
 }
 
 type Mutation {

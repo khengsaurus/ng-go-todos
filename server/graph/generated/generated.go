@@ -82,14 +82,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetBoard        func(childComplexity int, boardID string) int
-		GetBoards       func(childComplexity int, userID string, fresh bool) int
-		GetSignedGetURL func(childComplexity int, key string) int
-		GetSignedPutURL func(childComplexity int, userID string, todoID string, fileName string) int
-		GetTodo         func(childComplexity int, todoID string) int
-		GetTodos        func(childComplexity int, userID string, fresh bool) int
-		GetUser         func(childComplexity int, email string) int
-		GetUsers        func(childComplexity int) int
+		GetBoard  func(childComplexity int, boardID string) int
+		GetBoards func(childComplexity int, userID string, fresh bool) int
+		GetTodo   func(childComplexity int, todoID string) int
+		GetTodos  func(childComplexity int, userID string, fresh bool) int
+		GetUser   func(childComplexity int, email string) int
+		GetUsers  func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -135,8 +133,6 @@ type QueryResolver interface {
 	GetTodos(ctx context.Context, userID string, fresh bool) (*model.GetTodosRes, error)
 	GetBoard(ctx context.Context, boardID string) (*model.Board, error)
 	GetBoards(ctx context.Context, userID string, fresh bool) (*model.GetBoardsRes, error)
-	GetSignedPutURL(ctx context.Context, userID string, todoID string, fileName string) (string, error)
-	GetSignedGetURL(ctx context.Context, key string) (string, error)
 }
 
 type executableSchema struct {
@@ -410,30 +406,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetBoards(childComplexity, args["userId"].(string), args["fresh"].(bool)), true
-
-	case "Query.getSignedGetUrl":
-		if e.complexity.Query.GetSignedGetURL == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getSignedGetUrl_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSignedGetURL(childComplexity, args["key"].(string)), true
-
-	case "Query.getSignedPutUrl":
-		if e.complexity.Query.GetSignedPutURL == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getSignedPutUrl_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSignedPutURL(childComplexity, args["userId"].(string), args["todoId"].(string), args["fileName"].(string)), true
 
 	case "Query.getTodo":
 		if e.complexity.Query.GetTodo == nil {
@@ -742,8 +714,8 @@ type Query {
   getBoard(boardId: String!): Board
   getBoards(userId: String!, fresh: Boolean!): GetBoardsRes
   #
-  getSignedPutUrl(userId: String!, todoId: String!, fileName: String!): String!
-  getSignedGetUrl(key: String!): String!
+  # getSignedPutUrl(userId: String!, todoId: String!, fileName: String!): String!
+  # getSignedGetUrl(key: String!): String!
 }
 
 type Mutation {
@@ -1145,54 +1117,6 @@ func (ec *executionContext) field_Query_getBoards_args(ctx context.Context, rawA
 		}
 	}
 	args["fresh"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getSignedGetUrl_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["key"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["key"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getSignedPutUrl_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["userId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["todoId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("todoId"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["todoId"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["fileName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileName"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["fileName"] = arg2
 	return args, nil
 }
 
@@ -2963,116 +2887,6 @@ func (ec *executionContext) fieldContext_Query_getBoards(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_getBoards_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getSignedPutUrl(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getSignedPutUrl(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSignedPutURL(rctx, fc.Args["userId"].(string), fc.Args["todoId"].(string), fc.Args["fileName"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getSignedPutUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getSignedPutUrl_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getSignedGetUrl(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getSignedGetUrl(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSignedGetURL(rctx, fc.Args["key"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getSignedGetUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getSignedGetUrl_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -6265,52 +6079,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getBoards(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "getSignedPutUrl":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getSignedPutUrl(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "getSignedGetUrl":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getSignedGetUrl(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 

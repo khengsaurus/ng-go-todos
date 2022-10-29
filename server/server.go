@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 	"github.com/khengsaurus/ng-gql-todos/consts"
+	"github.com/khengsaurus/ng-gql-todos/controllers"
 	"github.com/khengsaurus/ng-gql-todos/database"
 	"github.com/khengsaurus/ng-gql-todos/graph"
 	"github.com/khengsaurus/ng-gql-todos/graph/generated"
@@ -17,9 +18,10 @@ import (
 )
 
 var (
-	route_api  = "/api"
-	route_test = "/test"
-	route_pg   = "/playground"
+	route_gql    = "/gql_api"
+	route_rest   = "/rest_api"
+	route_test   = "/test"
+	route_gql_pg = "/playground"
 )
 
 func main() {
@@ -38,9 +40,10 @@ func main() {
 				server),
 		)
 
-	router.HandleFunc(route_test, testHandler)
-	router.Handle(route_pg, playground.Handler("GraphQL playground", route_api))
-	router.Handle(route_api, wrappedServer)
+	router.HandleFunc(route_test, test)
+	router.Route(route_rest, controllers.RestHandler)
+	router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
+	router.Handle(route_gql, wrappedServer)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router)
 	if err != nil {
@@ -48,7 +51,7 @@ func main() {
 	}
 }
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
+func test(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Success"))
 }

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/khengsaurus/ng-gql-todos/consts"
 	"github.com/khengsaurus/ng-gql-todos/database"
 	"github.com/khengsaurus/ng-gql-todos/graph/generated"
@@ -572,19 +571,6 @@ func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool
 		Boards: boards,
 		Cache:  false,
 	}, nil
-}
-
-// GetSignedPutURL is the resolver for the getSignedPutUrl field.
-func (r *queryResolver) GetSignedPutURL(ctx context.Context, userID string, todoID string, fileName string) (string, error) {
-	fmt.Println("GetSignedPutURL called")
-	key := fmt.Sprintf("%s/%s_%s_%s", userID, todoID, uuid.New(), fileName)
-	return database.GetSignedPutURL(key)
-}
-
-// GetSignedGetURL is the resolver for the getSignedGetUrl field.
-func (r *queryResolver) GetSignedGetURL(ctx context.Context, key string) (string, error) {
-	fmt.Println("GetSignedGetURL called")
-	return database.GetSignedGetURL(key)
 }
 
 // Mutation returns generated.MutationResolver implementation.
