@@ -136,6 +136,24 @@ export const DELETE_TODO = gql`
   }
 `;
 
+/* ------------------------- FILES ------------------------- */
+
+// TODO: remove
+
+export interface IUPLOAD_FILE {
+  getSignedPutUrl: string;
+}
+
+export const UPLOAD_FILE = gql`
+  query GetSignedPutURL(
+    $userId: String!
+    $todoId: String!
+    $fileName: String!
+  ) {
+    getSignedPutUrl(userId: $userId, todoId: $todoId, fileName: $fileName)
+  }
+`;
+
 /* ------------------------- BOARDS ------------------------- */
 
 export interface IGET_BOARDS {

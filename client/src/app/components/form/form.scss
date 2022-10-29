@@ -4,6 +4,10 @@
   @include flex-(row);
 
   p.label {
-    margin: 2px $gap-m 0px 0px;
+    margin: 2px $gap-s 0px 0px;
+  }
+
+  &::ng-deep .mat-form-field-underline {
+    display: none;
   }
 }

@@ -1,12 +1,13 @@
 @import "../../../styles.scss";
 
 $half-w: calc(50% - 2 * $gap-l - 1px);
+$toolbar-h: 48px;
 
 @mixin toolbar {
   @include flex-(row);
   align-items: center;
   position: absolute;
-  height: 48px;
+  height: $toolbar-h;
   right: 0px;
 }
 
@@ -24,7 +25,7 @@ form.todo-container {
     font-size: 16px;
     color: gainsboro;
     padding: $textarea-offset-v $gap-l;
-    height: calc($content-height - 2 * $textarea-offset-v);
+    height: calc($content-height - 2 * $textarea-offset-v - $toolbar-h);
     width: 100%;
 
     // Override defaults
@@ -46,7 +47,7 @@ form.todo-container {
 
   .markdown-viewer {
     @include no-scrollbar;
-    height: calc($content-height - $gap-l);
+    height: calc($content-height - $gap-l - $toolbar-h);
     width: calc(50% - 2 * $gap-l);
     padding: 0px $gap-l;
     transition: $transition-slow;
@@ -64,10 +65,15 @@ form.todo-container {
   .todo-footer {
     @include toolbar;
     bottom: 0px;
-    // background-color: $black-33;
+    background-color: $grey-66;
+    width: 100%;
     .pt-2px,
     .mat-checkbox {
       padding-top: 2px;
+    }
+    .right {
+      @include flex-(row);
+      margin-left: auto;
     }
   }
 }

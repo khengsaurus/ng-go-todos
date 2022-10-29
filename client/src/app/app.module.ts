@@ -18,8 +18,8 @@ import { TodosPage } from './pages/todos-page/todos-page.component';
 import { BoardsPage } from './pages/boards-page/boards-page.component';
 
 const uri = environment.production
-  ? environment.prodApiURL
-  : environment.devApiURL;
+  ? environment.prodGqlApi
+  : environment.devGqlApi;
 
 @NgModule({
   declarations: [

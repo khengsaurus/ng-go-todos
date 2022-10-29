@@ -5,8 +5,8 @@ import { HttpLink } from 'apollo-angular/http';
 import { environment } from 'src/environments/environment';
 
 const uri = environment.production
-  ? environment.prodApiURL
-  : environment.devApiURL;
+  ? environment.prodGqlApi
+  : environment.devGqlApi;
 
 export function createApollo(httpLink: HttpLink): ApolloClientOptions<any> {
   return {

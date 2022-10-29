@@ -262,3 +262,7 @@ body {
   margin: $gap-s !important;
   font-size: 14px;
 }
+
+.no-scrollbar {
+  @include no-scrollbar;
+}

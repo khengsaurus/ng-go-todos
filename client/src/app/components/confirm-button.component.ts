@@ -6,11 +6,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     <div class="row center">
       <button
         mat-button
-        class="btn-m"
+        class="btn-s"
         color="warn"
         (click)="canAction ? confirmAction() : promptAction()"
       >
-        <mat-icon>{{ icon }}</mat-icon>
+        <mat-icon *ngIf="!canAction" class="mat-icon-s">{{ icon }}</mat-icon>
         <span>{{ canAction ? 'Confirm' : label }}</span>
       </button>
     </div>

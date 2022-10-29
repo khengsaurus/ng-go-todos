@@ -1,14 +1,16 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, tap } from 'rxjs';
 import { EditTodoDirective } from 'src/app/directives/edit-todo.directive';
-import { BoardsService, TodosService, UserService } from 'src/app/services';
+import {
+  BoardsService,
+  FilesService,
+  TodosService,
+  UserService,
+} from 'src/app/services';
 import { scrollEle } from 'src/app/utils';
 import { ITodo, Nullable } from 'src/types';
 import { SelectBoardDialog } from '../dialogs/select-board.component';
-
-const autoDelay = 1000;
-const updateKeys = ['text', 'markdown', 'priority', 'done'];
 
 @Component({
   selector: 'todo-editor',
@@ -22,6 +24,7 @@ export class TodoEditor extends EditTodoDirective {
   constructor(
     protected override userService: UserService,
     protected override todosService: TodosService,
+    private filesService: FilesService,
     private boardsService: BoardsService,
     private dialog: MatDialog
   ) {
@@ -62,5 +65,17 @@ export class TodoEditor extends EditTodoDirective {
         this.todosService.addTodoToBoardCB({ ...this.todo, boardId });
       }
     });
+  }
+
+  getUploadURL() {
+    this.filesService
+      .getSignedPutURL$(this.todo?.id)
+      ?.pipe(
+        tap((url) => {
+          // TODO: upload file
+          console.log(url);
+        })
+      )
+      ?.subscribe();
   }
 }

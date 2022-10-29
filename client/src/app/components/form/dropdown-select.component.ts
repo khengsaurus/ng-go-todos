@@ -10,13 +10,10 @@ import { ControlContainer, FormGroupDirective } from '@angular/forms';
     },
   ],
   template: `
-    <div class="btn dropdown-select">
-      <p class="label">{{ label }}:</p>
-      <mat-form-field appearance="standard" [ngStyle]="{ width: '60px' }">
-        <mat-select
-          formControlName="{{ controlName }}"
-          [ngStyle]="{ paddingLeft: '2px' }"
-        >
+    <div class="btn-m dropdown-select">
+      <p class="label">{{ label }}</p>
+      <mat-form-field appearance="standard" [ngStyle]="{ width: '30px' }">
+        <mat-select formControlName="{{ controlName }}">
           <mat-option *ngFor="let val of options" [value]="val">{{
             val
           }}</mat-option>

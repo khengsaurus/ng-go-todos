@@ -16,26 +16,36 @@
   </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
-    <button
-      *ngIf="!todo.boardId"
-      mat-button
-      class="btn pt-2px"
-      disableRipple
-      (click)="addToBoard()"
-    >
-      Add to board
-    </button>
-    <dropdown-select
-      label="Priority"
-      controlName="priority"
-      [options]="[1, 2, 3]"
-    ></dropdown-select>
-    <mat-checkbox class="btn" disableRipple formControlName="markdown"
-      >Markdown</mat-checkbox
-    >
-    <mat-checkbox class="btn" formControlName="done" disableRipple
-      >Done</mat-checkbox
-    >
-    <confirm-button (action)="deleteTodo()" icon="delete"></confirm-button>
+    <div class="right">
+      <button
+        *ngIf="!todo.boardId"
+        mat-button
+        class="btn mat-icon-s"
+        matTooltip="Add to board"
+        (click)="addToBoard()"
+      >
+        <mat-icon>unarchive</mat-icon>
+      </button>
+      <button
+        mat-button
+        class="btn mat-icon-s"
+        matTooltip="Attach file"
+        (click)="getUploadURL()"
+      >
+        <mat-icon>attach_file</mat-icon>
+      </button>
+      <dropdown-select
+        label="Priority"
+        controlName="priority"
+        [options]="[1, 2, 3]"
+      ></dropdown-select>
+      <mat-checkbox class="btn" disableRipple formControlName="markdown"
+        >M↓</mat-checkbox
+      >
+      <mat-checkbox class="btn" formControlName="done" disableRipple
+        >Done</mat-checkbox
+      >
+      <confirm-button (action)="deleteTodo()" icon="delete"></confirm-button>
+    </div>
   </div>
 </form>
