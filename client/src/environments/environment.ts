@@ -9,8 +9,8 @@ export const environment = {
   firebase,
   devGqlApi: 'http://localhost:8080/gql_api',
   prodGqlApi: 'http://localhost:8080/gql_api',
-  devRestApi: 'http://localhost:8080/http_api',
-  prodRestApi: 'http://localhost:8080/http_api',
+  devRestApi: 'http://localhost:8080/rest_api',
+  prodRestApi: 'http://localhost:8080/rest_api',
 };
 
 /*

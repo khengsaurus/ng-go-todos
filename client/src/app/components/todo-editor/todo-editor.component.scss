@@ -66,6 +66,7 @@ form.todo-container {
     @include toolbar;
     bottom: 0px;
     background-color: $grey-66;
+    border-top: $default-border;
     width: 100%;
     .pt-2px,
     .mat-checkbox {

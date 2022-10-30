@@ -30,6 +30,7 @@ export interface ITodo {
   boardId: string;
   createdAt: any;
   updatedAt: any;
+  fileKeys: string[];
 }
 
 export interface IBoard {

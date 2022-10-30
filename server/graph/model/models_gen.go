@@ -50,6 +50,7 @@ type Todo struct {
 	Tag       string    `json:"tag" bson:"tag"`
 	Markdown  bool      `json:"markdown" bson:"markdown"`
 	Done      bool      `json:"done" bson:"done"`
+	FileKeys  []*string `json:"fileKeys" bson:"fileKeys"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }

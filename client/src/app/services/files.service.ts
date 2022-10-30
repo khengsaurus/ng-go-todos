@@ -14,10 +14,11 @@ const config = {
 @Injectable({ providedIn: 'root' })
 export class FilesService {
   constructor(private http: HttpClient, private userService: UserService) {}
+  private api_route = `${uri}/files`;
 
   getSignedPutURL$(todoId?: string, fileName = 'file-name') {
     const userId = this.userService.currentUser?.id;
     if (!todoId || !userId) return null;
-    return this.http.post(uri, { userId, todoId, fileName }, config);
+    return this.http.post(this.api_route, { userId, todoId, fileName }, config);
   }
 }

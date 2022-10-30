@@ -89,12 +89,13 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 	currTime := time.Now()
 	result, err := todosColl.InsertOne(ctx, bson.D{
 		{Key: "userId", Value: userId},
+		{Key: "boardId", Value: nil},
 		{Key: "text", Value: newTodo.Text},
 		{Key: "priority", Value: 2},
 		{Key: "tag", Value: "white"},
 		{Key: "markdown", Value: false},
 		{Key: "done", Value: false},
-		{Key: "boardId", Value: nil},
+		{Key: "fileKeys", Value: []*string{}},
 		{Key: "createdAt", Value: currTime},
 		{Key: "updatedAt", Value: currTime},
 	})
@@ -109,6 +110,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 			Tag:      "white",
 			Markdown: false,
 			Done:     false,
+			FileKeys: []*string{},
 		}, err
 	}
 
@@ -181,6 +183,31 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 
 	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(userID))
+	return true, nil
+}
+
+// AddRmTodoFile is the resolver for the addRmTodoFile field.
+func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, rm bool) (bool, error) {
+	var err error
+	if consts.Container {
+		if rm {
+			err = RmFileFromTodoAsync(ctx, todoID, fileKey)
+		} else {
+			err = AddFileToTodoAsync(ctx, todoID, fileKey)
+		}
+	} else {
+		if rm {
+			err = RmFileFromTodoTxn(ctx, todoID, fileKey)
+		} else {
+			err = AddFileToTodoTxn(ctx, todoID, fileKey)
+
+		}
+	}
+
+	if err != nil {
+		return false, nil
+	}
+
 	return true, nil
 }
 
@@ -300,33 +327,26 @@ func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardI
 	return true, nil
 }
 
-// AddTodoToBoard is the resolver for the addTodoToBoard field.
-func (r *mutationResolver) AddTodoToBoard(ctx context.Context, userID string, todoID string, boardID string) (bool, error) {
+// AddRmBoardTodo is the resolver for the addRmBoardTodo field.
+func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, todoID string, boardID string, rm bool) (bool, error) {
 	var err error
 	if consts.Container {
-		err = AddTodoToBoardAsync(ctx, todoID, boardID)
+		if rm {
+			err = RemoveTodoFromBoardAsync(ctx, todoID, boardID)
+		} else {
+			err = AddTodoToBoardAsync(ctx, todoID, boardID)
+		}
 	} else {
-		err = AddTodoToBoardTxn(ctx, todoID, boardID)
+		if rm {
+			err = RemoveTodoFromBoardTxn(ctx, todoID, boardID)
+		} else {
+			err = AddTodoToBoardTxn(ctx, todoID, boardID)
+
+		}
 	}
 
 	if err != nil {
 		return false, nil
-	}
-
-	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))
-	return true, nil
-}
-
-// RemoveTodoFromBoard is the resolver for the removeTodoFromBoard field.
-func (r *mutationResolver) RemoveTodoFromBoard(ctx context.Context, userID string, todoID string, boardID string) (bool, error) {
-	var err error
-	if consts.Container {
-		err = RemoveTodoFromBoardAsync(ctx, todoID, boardID)
-	} else {
-		err = RemoveTodoFromBoardTxn(ctx, todoID, boardID)
-	}
-	if err != nil {
-		return false, err
 	}
 
 	database.RemoveKeyFromRedis(ctx, utils.GetUserBoardsKey(userID))

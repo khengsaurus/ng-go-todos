@@ -33,17 +33,17 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middlewares.EnableCors)
 
-	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	wrappedServer :=
+	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	wrappedHandler :=
 		middlewares.AttachToContext(consts.MongoClientKey, database.InitMongoClient(),
 			middlewares.AttachToContext(consts.RedisClientKey, database.InitRedisClient(),
-				server),
+				handler),
 		)
 
 	router.HandleFunc(route_test, test)
-	router.Route(route_rest, controllers.RestHandler)
+	router.Route(route_rest, controllers.RestRouter)
 	router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
-	router.Handle(route_gql, wrappedServer)
+	router.Handle(route_gql, wrappedHandler)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router)
 	if err != nil {

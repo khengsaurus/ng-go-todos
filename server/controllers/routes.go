@@ -1,8 +1,12 @@
 package controllers
 
-import "github.com/go-chi/chi"
+import (
+	"github.com/go-chi/chi"
+)
 
-var RestHandler = func(router chi.Router) {
-	router.Post("/", GetSignedPutURL)
-	router.Get("/{key}", GetSignedPutURL)
+var RestRouter = func(restApi chi.Router) {
+	restApi.Route("/files", func(filesApi chi.Router) {
+		filesApi.Post("/", GetSignedPutURL)
+		filesApi.Get("/{key}", GetSignedGetURL)
+	})
 }

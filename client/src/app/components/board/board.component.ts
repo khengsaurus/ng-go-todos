@@ -96,16 +96,14 @@ export class Board implements OnChanges {
   }
 
   deleteTodoDrop(event: CdkDragDrop<ITodo[]>) {
-    const oldTodos = [...this.todos];
-    const newTodos = [...this.todos];
     const toRemove = event.item.data as ITodo;
     if (toRemove?.id) {
-      this.renderTodos(newTodos);
+      const oldTodos = [...this.todos];
       this.boardsService
         .removeTodoFromBoard$(toRemove.id, this.board.id)
         .pipe(
           tap((res) => {
-            if (!res.data?.removeTodoFromBoard) {
+            if (!res.data?.addRmBoardTodo) {
               this.renderTodos(oldTodos);
             } else {
               this.boardsService.addRmTodoOnBoard(

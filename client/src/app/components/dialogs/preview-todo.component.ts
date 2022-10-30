@@ -6,29 +6,7 @@ import { ITodo, Nullable } from 'src/types';
 
 @Component({
   selector: 'preview-todo',
-  template: `
-    <div class="dialog-content">
-      <div class="todo-text">
-        <markdown-viewer
-          *ngIf="todo?.markdown"
-          [text]="todo?.text || ''"
-          [format]="true"
-          class="markdown-viewer"
-        ></markdown-viewer>
-        <div *ngIf="!todo?.markdown">{{ todo?.text }}</div>
-      </div>
-      <form [formGroup]="todoForm" class="footer baseline-end">
-        <dropdown-select
-          label="Priority"
-          controlName="priority"
-          [options]="[1, 2, 3]"
-        ></dropdown-select>
-        <mat-checkbox class="btn" formControlName="done" disableRipple
-          >Done</mat-checkbox
-        >
-      </form>
-    </div>
-  `,
+  templateUrl: './preview-todo.component.html',
   styleUrls: ['./dialog.scss'],
 })
 export class PreviewTodoDialog extends EditTodoDirective implements OnDestroy {

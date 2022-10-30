@@ -220,31 +220,18 @@ export const MOVE_BOARDS = gql`
 
 /* ---------------------- TODO - BOARDS ---------------------- */
 
-export interface IADD_TODO_TO_BOARD {
-  addTodoToBoard: boolean;
+export interface IADD_RM_BOARD_TODO {
+  addRmBoardTodo: boolean;
 }
 
-export const ADD_TODO_TO_BOARD = gql`
-  mutation AddTodoToBoard(
+export const ADD_RM_BOARD_TODO = gql`
+  mutation AddRmBoardTodo(
     $userId: String!
     $todoId: String!
     $boardId: String!
+    $rm: Boolean!
   ) {
-    addTodoToBoard(userId: $userId, todoId: $todoId, boardId: $boardId)
-  }
-`;
-
-export interface IREMOVE_TODO_FROM_BOARD {
-  removeTodoFromBoard: boolean;
-}
-
-export const REMOVE_TODO_FROM_BOARD = gql`
-  mutation RemoveTodoFromBoard(
-    $userId: String!
-    $todoId: String!
-    $boardId: String!
-  ) {
-    removeTodoFromBoard(userId: $userId, todoId: $todoId, boardId: $boardId)
+    addRmBoardTodo(userId: $userId, todoId: $todoId, boardId: $boardId, rm: $rm)
   }
 `;
 

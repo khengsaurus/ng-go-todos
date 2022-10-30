@@ -7,19 +7,17 @@ import { IBoard, ITodo, IUser, Nullable } from 'src/types';
 import { UserService } from '.';
 import { NewBoardDialog } from 'src/app/components/dialogs';
 import {
-  ADD_TODO_TO_BOARD,
+  ADD_RM_BOARD_TODO,
   CREATE_BOARD,
   DELETE_BOARD,
   GET_BOARDS,
-  IADD_TODO_TO_BOARD,
+  IADD_RM_BOARD_TODO,
   ICREATE_BOARD,
   IDELETE_BOARD,
   IGET_BOARDS,
   IMOVE_TODOS,
-  IREMOVE_TODO_FROM_BOARD,
   ISHIFT_TODO_BETWEEN_BOARDS,
   MOVE_TODOS,
-  REMOVE_TODO_FROM_BOARD,
   SHIFT_TODO_BETWEEN_BOARDS,
 } from './queries';
 
@@ -134,20 +132,21 @@ export class BoardsService {
   addTodoToBoard$(
     todo: ITodo,
     boardId: string
-  ): Observable<MutationResult<IADD_TODO_TO_BOARD>> {
+  ): Observable<MutationResult<IADD_RM_BOARD_TODO>> {
     return this.apollo
-      .mutate<IADD_TODO_TO_BOARD>({
-        mutation: ADD_TODO_TO_BOARD,
+      .mutate<IADD_RM_BOARD_TODO>({
+        mutation: ADD_RM_BOARD_TODO,
         variables: {
           userId: this.userService.currentUser?.id,
           todoId: todo.id,
           boardId,
+          rm: false,
         },
-        optimisticResponse: { addTodoToBoard: true },
+        optimisticResponse: { addRmBoardTodo: true },
       })
       .pipe(
         tap((res) => {
-          if (res?.data?.addTodoToBoard) {
+          if (res?.data?.addRmBoardTodo) {
             this.addRmTodoOnBoard(todo, boardId);
           }
         })
@@ -155,10 +154,15 @@ export class BoardsService {
   }
 
   removeTodoFromBoard$(todoId: string, boardId: string) {
-    return this.apollo.mutate<IREMOVE_TODO_FROM_BOARD>({
-      mutation: REMOVE_TODO_FROM_BOARD,
-      variables: { userId: this.userService.currentUser?.id, todoId, boardId },
-      optimisticResponse: { removeTodoFromBoard: true },
+    return this.apollo.mutate<IADD_RM_BOARD_TODO>({
+      mutation: ADD_RM_BOARD_TODO,
+      variables: {
+        userId: this.userService.currentUser?.id,
+        todoId,
+        boardId,
+        rm: true,
+      },
+      optimisticResponse: { addRmBoardTodo: true },
     });
   }
 
