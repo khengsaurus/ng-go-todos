@@ -18,9 +18,15 @@ func EnableCors(h http.Handler) http.Handler {
 	return c.Handler(h)
 }
 
-func AttachToContext(key consts.ContextKey, client interface{}, next http.Handler) http.Handler {
+func WithContext(key consts.ContextKey, client interface{}) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return WithContextFn(key, client, next)
+	}
+}
+
+func WithContextFn(key consts.ContextKey, client interface{}, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqWithStore := r.WithContext(context.WithValue(r.Context(), key, client))
-		next.ServeHTTP(w, reqWithStore)
+		ctx := context.WithValue(r.Context(), key, client)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

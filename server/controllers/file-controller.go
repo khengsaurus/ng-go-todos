@@ -27,13 +27,15 @@ func GetSignedPutURL(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
+		// TODO check if shd be 400 instead
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	key := fmt.Sprintf("%s/%s_%s_%s", req.UserID, req.TodoID, uuid.New(), req.FileName)
-	url, err := database.GetSignedPutURL(key)
+	url, err := database.GetSignedPutURL(r.Context(), key)
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -50,7 +52,7 @@ func GetSignedGetURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := database.GetSignedGetURL(key)
+	url, err := database.GetSignedGetURL(r.Context(), key)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
+	GQLHandler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
+	ChiMiddleware "github.com/go-chi/chi/middleware"
 	"github.com/joho/godotenv"
 	"github.com/khengsaurus/ng-go-todos/consts"
 	"github.com/khengsaurus/ng-go-todos/controllers"
@@ -30,20 +32,32 @@ func main() {
 		panic(envErr)
 	}
 
+	mongoClient := database.InitMongoClient()
+	s3Client := database.InitS3Client()
+	redisClient := database.InitRedisClient()
+
 	router := chi.NewRouter()
 	router.Use(middlewares.EnableCors)
+	router.Use(ChiMiddleware.Timeout(30 * time.Second))
 
-	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	wrappedHandler :=
-		middlewares.AttachToContext(consts.MongoClientKey, database.InitMongoClient(),
-			middlewares.AttachToContext(consts.RedisClientKey, database.InitRedisClient(),
-				handler),
+	GQLHandlerInstance := GQLHandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	wrappedGQLHandler :=
+		middlewares.WithContextFn(consts.MongoClientKey, mongoClient,
+			middlewares.WithContextFn(consts.RedisClientKey, redisClient,
+				GQLHandlerInstance,
+			),
 		)
 
+	router.Handle(route_gql, wrappedGQLHandler)
+	router.Route(route_rest, func(restRouter chi.Router) {
+		// Only files api requires s3Client
+		restRouter.Use(middlewares.WithContext(consts.S3ClientKey, s3Client))
+		controllers.RestRouter(restRouter)
+	})
+
+	// Dev
 	router.HandleFunc(route_test, test)
-	router.Route(route_rest, controllers.RestRouter)
 	router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
-	router.Handle(route_gql, wrappedHandler)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router)
 	if err != nil {

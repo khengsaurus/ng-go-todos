@@ -36,15 +36,14 @@ func InitRedisClient() *RedisClient {
 			DB:       0,
 		})
 	}
-	rdb := redis.NewClient(opts)
 
-	return &RedisClient{instance: rdb}
+	return &RedisClient{instance: redis.NewClient(opts)}
 }
 
 func GetRedisClient(ctx context.Context) (*RedisClient, error) {
 	redisClient, ok := ctx.Value(consts.RedisClientKey).(*RedisClient)
 	if !ok {
-		return nil, fmt.Errorf("couldn't find %s in context", consts.RedisClientKey)
+		return nil, fmt.Errorf("couldn't find %s in request context", consts.RedisClientKey)
 	}
 	return redisClient, nil
 }

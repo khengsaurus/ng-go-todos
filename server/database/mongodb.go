@@ -78,7 +78,7 @@ func (mongoClient *MongoClient) Disconnect(ctx context.Context, trace string) {
 func GetCollection(ctx context.Context, name string) (*mongo.Collection, error) {
 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
 	if !ok {
-		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+		return nil, fmt.Errorf("couldn't find %s in request context", consts.MongoClientKey)
 	}
 	mongoClient.Ping(ctx)
 
@@ -92,7 +92,7 @@ func GetCollection(ctx context.Context, name string) (*mongo.Collection, error) 
 func GetSession(ctx context.Context) (mongo.Session, *mongo.Database, error) {
 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
 	if !ok {
-		return nil, nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+		return nil, nil, fmt.Errorf("couldn't find %s in request context", consts.MongoClientKey)
 	}
 	mongoClient.Ping(ctx)
 	database := mongoClient.instance.Database(consts.MongoDatabase)
@@ -106,7 +106,7 @@ func GetSession(ctx context.Context) (mongo.Session, *mongo.Database, error) {
 func GetMongoDb(ctx context.Context) (*mongo.Database, error) {
 	mongoClient, ok := ctx.Value(consts.MongoClientKey).(*MongoClient)
 	if !ok {
-		return nil, fmt.Errorf("couldn't find %s in context", consts.MongoClientKey)
+		return nil, fmt.Errorf("couldn't find %s in request context", consts.MongoClientKey)
 	}
 	mongoClient.Ping(ctx)
 	return mongoClient.instance.Database(consts.MongoDatabase), nil
