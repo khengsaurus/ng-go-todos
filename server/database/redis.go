@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/khengsaurus/ng-gql-todos/consts"
-	"github.com/khengsaurus/ng-gql-todos/graph/model"
-	"github.com/khengsaurus/ng-gql-todos/utils"
+	"github.com/khengsaurus/ng-go-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/graph/model"
+	"github.com/khengsaurus/ng-go-todos/utils"
 )
 
 type RedisClient struct {

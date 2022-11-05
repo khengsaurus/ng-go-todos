@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/khengsaurus/ng-gql-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/consts"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"

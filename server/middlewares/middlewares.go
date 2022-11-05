@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/khengsaurus/ng-gql-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/consts"
 	"github.com/rs/cors"
 )
 

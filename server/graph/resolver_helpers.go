@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/khengsaurus/ng-gql-todos/consts"
-	"github.com/khengsaurus/ng-gql-todos/database"
-	"github.com/khengsaurus/ng-gql-todos/graph/model"
+	"github.com/khengsaurus/ng-go-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/database"
+	"github.com/khengsaurus/ng-go-todos/graph/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

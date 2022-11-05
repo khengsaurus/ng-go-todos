@@ -1,7 +1,7 @@
 import boto3
 
 REGION = 'ap-southeast-1'
-BUCKET_NAME = 'ng-gql-go'
+BUCKET_NAME = 'ng-go-todos'
 
 BUCKET_CONFIG = {'LocationConstraint': REGION}
 BUCKET_CORS_CONFIG = {

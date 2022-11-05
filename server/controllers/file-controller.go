@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
-	"github.com/khengsaurus/ng-gql-todos/database"
-	"github.com/khengsaurus/ng-gql-todos/utils"
+	"github.com/khengsaurus/ng-go-todos/database"
+	"github.com/khengsaurus/ng-go-todos/utils"
 )
 
 type PutUrlReqBody struct {

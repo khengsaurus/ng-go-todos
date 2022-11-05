@@ -1,4 +1,4 @@
-module github.com/khengsaurus/ng-gql-todos
+module github.com/khengsaurus/ng-go-todos
 
 go 1.19
 

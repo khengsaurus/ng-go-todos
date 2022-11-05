@@ -9,12 +9,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
-	"github.com/khengsaurus/ng-gql-todos/consts"
-	"github.com/khengsaurus/ng-gql-todos/controllers"
-	"github.com/khengsaurus/ng-gql-todos/database"
-	"github.com/khengsaurus/ng-gql-todos/graph"
-	"github.com/khengsaurus/ng-gql-todos/graph/generated"
-	"github.com/khengsaurus/ng-gql-todos/middlewares"
+	"github.com/khengsaurus/ng-go-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/controllers"
+	"github.com/khengsaurus/ng-go-todos/database"
+	"github.com/khengsaurus/ng-go-todos/graph"
+	"github.com/khengsaurus/ng-go-todos/graph/generated"
+	"github.com/khengsaurus/ng-go-todos/middlewares"
 )
 
 var (

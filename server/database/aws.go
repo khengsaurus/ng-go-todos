@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	AWSSession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/khengsaurus/ng-gql-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/consts"
 )
 
 func InitAWSSession() (*AWSSession.Session, error) {
