@@ -16,6 +16,11 @@
   </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
+    <div class="left">
+      <div *ngFor="let file of todo?.files">
+        <div>{{ file.name }}</div>
+      </div>
+    </div>
     <div class="right">
       <button
         *ngIf="!todo.boardId"
@@ -30,9 +35,15 @@
         mat-button
         class="btn mat-icon-s"
         matTooltip="Attach file"
-        (click)="getUploadURL()"
+        (click)="fileInput.click()"
       >
         <mat-icon>attach_file</mat-icon>
+        <input
+          #fileInput
+          hidden
+          type="file"
+          (change)="handleAttachFile($event)"
+        />
       </button>
       <dropdown-select
         label="Priority"

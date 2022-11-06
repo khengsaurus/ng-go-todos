@@ -7,10 +7,8 @@ import { firebase } from './configuration';
 export const environment = {
   production: false,
   firebase,
-  devGqlApi: 'http://localhost:8080/gql_api',
-  prodGqlApi: 'http://localhost:8080/gql_api',
-  devRestApi: 'http://localhost:8080/rest_api',
-  prodRestApi: 'http://localhost:8080/rest_api',
+  gqlApi: 'http://localhost:8080/gql_api',
+  restApi: 'http://localhost:8080/rest_api',
 };
 
 /*

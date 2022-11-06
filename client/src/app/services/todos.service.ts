@@ -5,9 +5,11 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { ITodo } from 'src/types';
 import { UserService } from '.';
 import {
+  ADD_RM_TODO_FILE,
   CREATE_TODO,
   DELETE_TODO,
   GET_TODOS,
+  IADD_RM_TODO_FILE,
   ICREATE_TODO,
   IDELETE_TODO,
   IGET_TODOS,
@@ -145,6 +147,31 @@ export class TodosService {
             return true;
           }
           throw new Error('Failed to delete todo');
+        })
+      );
+  }
+
+  addRmTodoFile(todo: ITodo, fileKey: string, fileName: string, rm = false) {
+    return this.apollo
+      .mutate<IADD_RM_TODO_FILE>({
+        mutation: ADD_RM_TODO_FILE,
+        variables: { todoId: todo.id, fileKey, fileName, rm },
+      })
+      .pipe(
+        map((res) => {
+          if (res.data?.addRmTodoFile) {
+            if (rm) {
+              console.log('Removed file from todo');
+            } else {
+              console.log('Added file to todo');
+            }
+            return true;
+          }
+          throw new Error(
+            `Failed to ${rm ? 'remove file from' : 'add file to'} todo ${
+              todo.id
+            }`
+          );
         })
       );
   }

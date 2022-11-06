@@ -4,13 +4,9 @@ import { ApolloClientOptions, InMemoryCache } from '@apollo/client/core';
 import { HttpLink } from 'apollo-angular/http';
 import { environment } from 'src/environments/environment';
 
-const uri = environment.production
-  ? environment.prodGqlApi
-  : environment.devGqlApi;
-
 export function createApollo(httpLink: HttpLink): ApolloClientOptions<any> {
   return {
-    link: httpLink.create({ uri }),
+    link: httpLink.create({ uri: environment.gqlApi }),
     cache: new InMemoryCache(),
   };
 }

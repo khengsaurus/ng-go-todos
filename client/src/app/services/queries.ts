@@ -20,6 +20,10 @@ const fragments = {
       markdown
       done
       boardId
+      files {
+        key
+        name
+      }
     }
   `,
   BoardRepr: gql`
@@ -138,19 +142,23 @@ export const DELETE_TODO = gql`
 
 /* ------------------------- FILES ------------------------- */
 
-// TODO: remove
-
-export interface IUPLOAD_FILE {
-  getSignedPutUrl: string;
+export interface IADD_RM_TODO_FILE {
+  addRmTodoFile: boolean;
 }
 
-export const UPLOAD_FILE = gql`
-  query GetSignedPutURL(
-    $userId: String!
+export const ADD_RM_TODO_FILE = gql`
+  mutation AddRmTodoFile(
     $todoId: String!
+    $fileKey: String!
     $fileName: String!
+    $rm: Boolean!
   ) {
-    getSignedPutUrl(userId: $userId, todoId: $todoId, fileName: $fileName)
+    addRmTodoFile(
+      todoId: $todoId
+      fileKey: $fileKey
+      fileName: $fileName
+      rm: $rm
+    )
   }
 `;
 

@@ -17,10 +17,6 @@ import { HomePage } from './pages/home-page/home-page.component';
 import { TodosPage } from './pages/todos-page/todos-page.component';
 import { BoardsPage } from './pages/boards-page/boards-page.component';
 
-const uri = environment.production
-  ? environment.prodGqlApi
-  : environment.devGqlApi;
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -47,7 +43,7 @@ const uri = environment.production
       useFactory: (httpLink: HttpLink) => {
         return {
           cache: new InMemoryCache(),
-          link: httpLink.create({ uri }),
+          link: httpLink.create({ uri: environment.gqlApi }),
         };
       },
       deps: [HttpLink],

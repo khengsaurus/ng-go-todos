@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom, tap } from 'rxjs';
+import { firstValueFrom, of, switchMap, tap } from 'rxjs';
 import { EditTodoDirective } from 'src/app/directives/edit-todo.directive';
 import {
   BoardsService,
@@ -67,15 +67,26 @@ export class TodoEditor extends EditTodoDirective {
     });
   }
 
-  getUploadURL() {
+  handleAttachFile(event: any) {
+    const file = (event?.target?.files || [undefined])[0];
+    if (!this.todo?.id || !file) return;
+    let key = '';
     this.filesService
-      .getSignedPutURL$(this.todo?.id)
-      ?.pipe(
-        tap((url) => {
-          // TODO: upload file
-          console.log(url);
+      .uploadFile$(this.todo.id, file)
+      .pipe(
+        switchMap((k) => {
+          key = k;
+          return this.todosService.addRmTodoFile(this.todo!, k, file.name);
+        }),
+        tap((success) => {
+          if (success) {
+            this.todosService.updateTodo$({
+              ...this.todo,
+              files: [...(this.todo?.files || []), { key, name: file.name }],
+            });
+          }
         })
       )
-      ?.subscribe();
+      .subscribe();
   }
 }

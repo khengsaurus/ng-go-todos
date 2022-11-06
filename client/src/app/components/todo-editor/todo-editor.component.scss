@@ -76,5 +76,8 @@ form.todo-container {
       @include flex-(row);
       margin-left: auto;
     }
+    .left {
+      @include flex-(row);
+    }
   }
 }

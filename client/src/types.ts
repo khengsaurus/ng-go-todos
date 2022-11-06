@@ -19,6 +19,11 @@ export interface IUser {
   email?: string;
 }
 
+export interface IFile {
+  key: string;
+  name: string;
+}
+
 export interface ITodo {
   id: string;
   userId: string;
@@ -30,7 +35,7 @@ export interface ITodo {
   boardId: string;
   createdAt: any;
   updatedAt: any;
-  fileKeys: string[];
+  files: IFile[];
 }
 
 export interface IBoard {
