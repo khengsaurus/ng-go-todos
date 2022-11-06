@@ -68,11 +68,14 @@ query getTodos($userId: String!, $fresh: Boolean!) {
     cache
     todos {
       text
-      userId
       id
-      createdAt
-      updatedAt
       boardId
+      markdown
+      done
+      files {
+        key
+        name
+      }
     }
   }
 }
@@ -80,9 +83,17 @@ query getTodos($userId: String!, $fresh: Boolean!) {
 query getTodo($todoId: String!) {
   getTodo(todoId: $todoId) {
     userId
+    id
     text
+    boardId
+    markdown
+    done
     createdAt
     updatedAt
+    files {
+      key
+      name
+    }
   }
 }
 
@@ -133,16 +144,13 @@ mutation deleteBoard($userId: String!, $boardId: String!) {
   deleteBoard(userId: $userId, boardId: $boardId)
 }
 
-mutation addTodoToBoard($userId: String!, $boardId: String!, $todoId: String!) {
-  addTodoToBoard(userId: $userId, boardId: $boardId, todoId: $todoId)
-}
-
-mutation removeTodoFromBoard(
+mutation addRmBoardTodo(
   $userId: String!
   $boardId: String!
   $todoId: String!
+  $rm: Boolean!
 ) {
-  removeTodoFromBoard(userId: $userId, boardId: $boardId, todoId: $todoId)
+  addRmBoardTodo(userId: $userId, boardId: $boardId, todoId: $todoId, rm: $rm)
 }
 ```
 
@@ -166,9 +174,11 @@ Request variables
   "updateTodo": {
     "id": "",
     "userId": "",
+    "boardId": "",
     "text": "",
     "tag": "",
     "priority": 2,
+    "markdown": true,
     "done": false
   },
   "newBoard": {

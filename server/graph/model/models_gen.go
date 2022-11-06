@@ -16,6 +16,11 @@ type Board struct {
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
 
+type File struct {
+	Key  string `json:"key" bson:"key"`
+	Name string `json:"name" bson:"name"`
+}
+
 type GetBoardsRes struct {
 	Boards []*Board `json:"boards" bson:"boards"`
 	Cache  bool     `json:"cache" bson:"cache"`
@@ -50,7 +55,7 @@ type Todo struct {
 	Tag       string    `json:"tag" bson:"tag"`
 	Markdown  bool      `json:"markdown" bson:"markdown"`
 	Done      bool      `json:"done" bson:"done"`
-	FileKeys  []*string `json:"fileKeys" bson:"fileKeys"`
+	Files     []*File   `json:"files" bson:"files"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }

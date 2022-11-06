@@ -55,6 +55,11 @@ type ComplexityRoot struct {
 		UserID    func(childComplexity int) int
 	}
 
+	File struct {
+		Key  func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
 	GetBoardsRes struct {
 		Boards func(childComplexity int) int
 		Cache  func(childComplexity int) int
@@ -67,7 +72,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddRmBoardTodo         func(childComplexity int, userID string, todoID string, boardID string, rm bool) int
-		AddRmTodoFile          func(childComplexity int, todoID string, fileKey string, rm bool) int
+		AddRmTodoFile          func(childComplexity int, todoID string, fileKey string, fileName string, rm bool) int
 		CreateBoard            func(childComplexity int, newBoard model.NewBoard) int
 		CreateTodo             func(childComplexity int, newTodo model.NewTodo) int
 		CreateUser             func(childComplexity int, newUser model.NewUser) int
@@ -94,7 +99,7 @@ type ComplexityRoot struct {
 		BoardID   func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		Done      func(childComplexity int) int
-		FileKeys  func(childComplexity int) int
+		Files     func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Markdown  func(childComplexity int) int
 		Priority  func(childComplexity int) int
@@ -118,7 +123,7 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error)
 	UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (bool, error)
 	DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error)
-	AddRmTodoFile(ctx context.Context, todoID string, fileKey string, rm bool) (bool, error)
+	AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, rm bool) (bool, error)
 	CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error)
 	UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (bool, error)
 	DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error)
@@ -200,6 +205,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Board.UserID(childComplexity), true
 
+	case "File.key":
+		if e.complexity.File.Key == nil {
+			break
+		}
+
+		return e.complexity.File.Key(childComplexity), true
+
+	case "File.name":
+		if e.complexity.File.Name == nil {
+			break
+		}
+
+		return e.complexity.File.Name(childComplexity), true
+
 	case "GetBoardsRes.boards":
 		if e.complexity.GetBoardsRes.Boards == nil {
 			break
@@ -250,7 +269,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddRmTodoFile(childComplexity, args["todoId"].(string), args["fileKey"].(string), args["rm"].(bool)), true
+		return e.complexity.Mutation.AddRmTodoFile(childComplexity, args["todoId"].(string), args["fileKey"].(string), args["fileName"].(string), args["rm"].(bool)), true
 
 	case "Mutation.createBoard":
 		if e.complexity.Mutation.CreateBoard == nil {
@@ -472,12 +491,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Done(childComplexity), true
 
-	case "Todo.fileKeys":
-		if e.complexity.Todo.FileKeys == nil {
+	case "Todo.files":
+		if e.complexity.Todo.Files == nil {
 			break
 		}
 
-		return e.complexity.Todo.FileKeys(childComplexity), true
+		return e.complexity.Todo.Files(childComplexity), true
 
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
@@ -649,7 +668,7 @@ type Todo {
   tag: String!
   markdown: Boolean!
   done: Boolean!
-  fileKeys: [String]!
+  files: [File]!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -662,6 +681,11 @@ type Board {
   todoIds: [String]!
   createdAt: Time!
   updatedAt: Time!
+}
+
+type File {
+  key: String!
+  name: String!
 }
 
 # --------------- Inputs ---------------
@@ -731,7 +755,12 @@ type Mutation {
   createTodo(newTodo: NewTodo!): Todo!
   updateTodo(updateTodo: UpdateTodo!): Boolean!
   deleteTodo(userId: String!, todoId: String!): Boolean!
-  addRmTodoFile(todoId: String!, fileKey: String!, rm: Boolean!): Boolean!
+  addRmTodoFile(
+    todoId: String!
+    fileKey: String!
+    fileName: String!
+    rm: Boolean!
+  ): Boolean!
   #
   createBoard(newBoard: NewBoard!): Board!
   updateBoard(updateBoard: UpdateBoard!): Boolean!
@@ -824,15 +853,24 @@ func (ec *executionContext) field_Mutation_addRmTodoFile_args(ctx context.Contex
 		}
 	}
 	args["fileKey"] = arg1
-	var arg2 bool
-	if tmp, ok := rawArgs["rm"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rm"))
-		arg2, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+	var arg2 string
+	if tmp, ok := rawArgs["fileName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileName"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["rm"] = arg2
+	args["fileName"] = arg2
+	var arg3 bool
+	if tmp, ok := rawArgs["rm"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rm"))
+		arg3, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["rm"] = arg3
 	return args, nil
 }
 
@@ -842,7 +880,7 @@ func (ec *executionContext) field_Mutation_createBoard_args(ctx context.Context,
 	var arg0 model.NewBoard
 	if tmp, ok := rawArgs["newBoard"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newBoard"))
-		arg0, err = ec.unmarshalNNewBoard2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐNewBoard(ctx, tmp)
+		arg0, err = ec.unmarshalNNewBoard2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐNewBoard(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -857,7 +895,7 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 	var arg0 model.NewTodo
 	if tmp, ok := rawArgs["newTodo"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newTodo"))
-		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐNewTodo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐNewTodo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -872,7 +910,7 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	var arg0 model.NewUser
 	if tmp, ok := rawArgs["newUser"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newUser"))
-		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐNewUser(ctx, tmp)
+		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐNewUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1058,7 +1096,7 @@ func (ec *executionContext) field_Mutation_updateBoard_args(ctx context.Context,
 	var arg0 model.UpdateBoard
 	if tmp, ok := rawArgs["updateBoard"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updateBoard"))
-		arg0, err = ec.unmarshalNUpdateBoard2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUpdateBoard(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateBoard2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUpdateBoard(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1073,7 +1111,7 @@ func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, 
 	var arg0 model.UpdateTodo
 	if tmp, ok := rawArgs["updateTodo"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updateTodo"))
-		arg0, err = ec.unmarshalNUpdateTodo2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUpdateTodo(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateTodo2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUpdateTodo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1388,7 +1426,7 @@ func (ec *executionContext) _Board_todos(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*model.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1415,8 +1453,8 @@ func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "fileKeys":
-				return ec.fieldContext_Todo_fileKeys(ctx, field)
+			case "files":
+				return ec.fieldContext_Todo_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -1560,6 +1598,94 @@ func (ec *executionContext) fieldContext_Board_updatedAt(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _File_key(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_key(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_name(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _GetBoardsRes_boards(ctx context.Context, field graphql.CollectedField, obj *model.GetBoardsRes) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_GetBoardsRes_boards(ctx, field)
 	if err != nil {
@@ -1588,7 +1714,7 @@ func (ec *executionContext) _GetBoardsRes_boards(ctx context.Context, field grap
 	}
 	res := resTmp.([]*model.Board)
 	fc.Result = res
-	return ec.marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
+	return ec.marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GetBoardsRes_boards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1692,7 +1818,7 @@ func (ec *executionContext) _GetTodosRes_todos(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1719,8 +1845,8 @@ func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, 
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "fileKeys":
-				return ec.fieldContext_Todo_fileKeys(ctx, field)
+			case "files":
+				return ec.fieldContext_Todo_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -1804,7 +1930,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1924,7 +2050,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1951,8 +2077,8 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "fileKeys":
-				return ec.fieldContext_Todo_fileKeys(ctx, field)
+			case "files":
+				return ec.fieldContext_Todo_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -2099,7 +2225,7 @@ func (ec *executionContext) _Mutation_addRmTodoFile(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddRmTodoFile(rctx, fc.Args["todoId"].(string), fc.Args["fileKey"].(string), fc.Args["rm"].(bool))
+		return ec.resolvers.Mutation().AddRmTodoFile(rctx, fc.Args["todoId"].(string), fc.Args["fileKey"].(string), fc.Args["fileName"].(string), fc.Args["rm"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2168,7 +2294,7 @@ func (ec *executionContext) _Mutation_createBoard(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Board)
 	fc.Result = res
-	return ec.marshalNBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
+	return ec.marshalNBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createBoard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2566,7 +2692,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2631,7 +2757,7 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2682,7 +2808,7 @@ func (ec *executionContext) _Query_getTodo(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2709,8 +2835,8 @@ func (ec *executionContext) fieldContext_Query_getTodo(ctx context.Context, fiel
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
-			case "fileKeys":
-				return ec.fieldContext_Todo_fileKeys(ctx, field)
+			case "files":
+				return ec.fieldContext_Todo_files(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "updatedAt":
@@ -2758,7 +2884,7 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.GetTodosRes)
 	fc.Result = res
-	return ec.marshalOGetTodosRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetTodosRes(ctx, field.Selections, res)
+	return ec.marshalOGetTodosRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐGetTodosRes(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getTodos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2816,7 +2942,7 @@ func (ec *executionContext) _Query_getBoard(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.Board)
 	fc.Result = res
-	return ec.marshalOBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
+	return ec.marshalOBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getBoard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2884,7 +3010,7 @@ func (ec *executionContext) _Query_getBoards(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.GetBoardsRes)
 	fc.Result = res
-	return ec.marshalOGetBoardsRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetBoardsRes(ctx, field.Selections, res)
+	return ec.marshalOGetBoardsRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐGetBoardsRes(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getBoards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3398,8 +3524,8 @@ func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_fileKeys(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_fileKeys(ctx, field)
+func (ec *executionContext) _Todo_files(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_files(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3412,7 +3538,7 @@ func (ec *executionContext) _Todo_fileKeys(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.FileKeys, nil
+		return obj.Files, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3424,19 +3550,25 @@ func (ec *executionContext) _Todo_fileKeys(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]*model.File)
 	fc.Result = res
-	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Todo_fileKeys(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Todo_files(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Todo",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "key":
+				return ec.fieldContext_File_key(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	return fc, nil
@@ -5798,6 +5930,41 @@ func (ec *executionContext) _Board(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var fileImplementors = []string{"File"}
+
+func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *model.File) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fileImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("File")
+		case "key":
+
+			out.Values[i] = ec._File_key(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+
+			out.Values[i] = ec._File_name(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var getBoardsResImplementors = []string{"GetBoardsRes"}
 
 func (ec *executionContext) _GetBoardsRes(ctx context.Context, sel ast.SelectionSet, obj *model.GetBoardsRes) graphql.Marshaler {
@@ -6246,9 +6413,9 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "fileKeys":
+		case "files":
 
-			out.Values[i] = ec._Todo_fileKeys(ctx, field, obj)
+			out.Values[i] = ec._Todo_files(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -6642,11 +6809,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNBoard2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v model.Board) graphql.Marshaler {
+func (ec *executionContext) marshalNBoard2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v model.Board) graphql.Marshaler {
 	return ec._Board(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v []*model.Board) graphql.Marshaler {
+func (ec *executionContext) marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v []*model.Board) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6670,7 +6837,7 @@ func (ec *executionContext) marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋng�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx, sel, v[i])
+			ret[i] = ec.marshalOBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6684,7 +6851,7 @@ func (ec *executionContext) marshalNBoard2ᚕᚖgithubᚗcomᚋkhengsaurusᚋng�
 	return ret
 }
 
-func (ec *executionContext) marshalNBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v *model.Board) graphql.Marshaler {
+func (ec *executionContext) marshalNBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v *model.Board) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6707,6 +6874,44 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v []*model.File) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOFile2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐFile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -6739,17 +6944,17 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewBoard2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐNewBoard(ctx context.Context, v interface{}) (model.NewBoard, error) {
+func (ec *executionContext) unmarshalNNewBoard2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐNewBoard(ctx context.Context, v interface{}) (model.NewBoard, error) {
 	res, err := ec.unmarshalInputNewBoard(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐNewTodo(ctx context.Context, v interface{}) (model.NewTodo, error) {
+func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐNewTodo(ctx context.Context, v interface{}) (model.NewTodo, error) {
 	res, err := ec.unmarshalInputNewTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
 	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -6842,11 +7047,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalNTodo2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v model.Todo) graphql.Marshaler {
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6870,7 +7075,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋng�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalOTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6884,7 +7089,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋkhengsaurusᚋng�
 	return ret
 }
 
-func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6894,21 +7099,21 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgq
 	return ec._Todo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUpdateBoard2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUpdateBoard(ctx context.Context, v interface{}) (model.UpdateBoard, error) {
+func (ec *executionContext) unmarshalNUpdateBoard2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUpdateBoard(ctx context.Context, v interface{}) (model.UpdateBoard, error) {
 	res, err := ec.unmarshalInputUpdateBoard(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateTodo2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUpdateTodo(ctx context.Context, v interface{}) (model.UpdateTodo, error) {
+func (ec *executionContext) unmarshalNUpdateTodo2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUpdateTodo(ctx context.Context, v interface{}) (model.UpdateTodo, error) {
 	res, err := ec.unmarshalInputUpdateTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6932,7 +7137,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkhengsaurusᚋng�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalOUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6946,7 +7151,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkhengsaurusᚋng�
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -7209,7 +7414,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v *model.Board) graphql.Marshaler {
+func (ec *executionContext) marshalOBoard2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐBoard(ctx context.Context, sel ast.SelectionSet, v *model.Board) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -7242,14 +7447,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOGetBoardsRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetBoardsRes(ctx context.Context, sel ast.SelectionSet, v *model.GetBoardsRes) graphql.Marshaler {
+func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v *model.File) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._File(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOGetBoardsRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐGetBoardsRes(ctx context.Context, sel ast.SelectionSet, v *model.GetBoardsRes) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GetBoardsRes(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGetTodosRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐGetTodosRes(ctx context.Context, sel ast.SelectionSet, v *model.GetTodosRes) graphql.Marshaler {
+func (ec *executionContext) marshalOGetTodosRes2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐGetTodosRes(ctx context.Context, sel ast.SelectionSet, v *model.GetTodosRes) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -7288,14 +7500,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Todo(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgqlᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋkhengsaurusᚋngᚑgoᚑtodosᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

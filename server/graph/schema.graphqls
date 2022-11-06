@@ -18,7 +18,7 @@ type Todo {
   tag: String!
   markdown: Boolean!
   done: Boolean!
-  fileKeys: [String]!
+  files: [File]!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -31,6 +31,11 @@ type Board {
   todoIds: [String]!
   createdAt: Time!
   updatedAt: Time!
+}
+
+type File {
+  key: String!
+  name: String!
 }
 
 # --------------- Inputs ---------------
@@ -100,7 +105,12 @@ type Mutation {
   createTodo(newTodo: NewTodo!): Todo!
   updateTodo(updateTodo: UpdateTodo!): Boolean!
   deleteTodo(userId: String!, todoId: String!): Boolean!
-  addRmTodoFile(todoId: String!, fileKey: String!, rm: Boolean!): Boolean!
+  addRmTodoFile(
+    todoId: String!
+    fileKey: String!
+    fileName: String!
+    rm: Boolean!
+  ): Boolean!
   #
   createBoard(newBoard: NewBoard!): Board!
   updateBoard(updateBoard: UpdateBoard!): Boolean!

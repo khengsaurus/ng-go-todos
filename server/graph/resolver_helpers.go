@@ -70,7 +70,10 @@ func (cbCtx CallbackContext) CreateBoardCB(
 	return board, nil
 }
 
-func CreateBoardTxn(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
+func CreateBoardTxn(
+	ctx context.Context,
+	newBoard model.NewBoard,
+) (*model.Board, error) {
 	fmt.Println("CreateBoard called - transaction mode")
 
 	session, db, err := database.GetSession(ctx)
@@ -80,21 +83,24 @@ func CreateBoardTxn(ctx context.Context, newBoard model.NewBoard) (*model.Board,
 	defer session.EndSession(ctx)
 
 	var board *model.Board
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		board, err = cbCtx.CreateBoardCB(newBoard)
-		if err != nil {
-			return err
-		}
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			board, err = cbCtx.CreateBoardCB(newBoard)
+			if err != nil {
+				return err
+			}
 
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("CreateBoard - transaction error: %v\nCreateBoard - aborting transaction\n", err)
@@ -108,7 +114,10 @@ func CreateBoardTxn(ctx context.Context, newBoard model.NewBoard) (*model.Board,
 	return board, nil
 }
 
-func CreateBoardAsync(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
+func CreateBoardAsync(
+	ctx context.Context,
+	newBoard model.NewBoard,
+) (*model.Board, error) {
 	fmt.Println("CreateBoard called - async mode")
 
 	db, err := database.GetMongoDb(ctx)
@@ -161,19 +170,22 @@ func DeleteTodoTxn(ctx context.Context, userID string, todoID string) error {
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.DeleteTodoCB(todoID, userID); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.DeleteTodoCB(todoID, userID); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("DeleteTodo - transaction error: %v\nDeleteTodo - aborting transaction\n", err)
@@ -201,7 +213,11 @@ func DeleteTodoAsync(ctx context.Context, userID string, todoID string) error {
 
 /* -------------------------------------- Add file to todo --------------------------------------*/
 
-func (cbCtx CallbackContext) AddFileToTodoCB(todoID string, fileKey string) error {
+func (cbCtx CallbackContext) AddFileToTodoCB(
+	todoID string,
+	fileKey string,
+	fileName string,
+) error {
 	todosColl := cbCtx.db.Collection(consts.TodosCollection)
 
 	todoId, err := primitive.ObjectIDFromHex(todoID)
@@ -209,7 +225,11 @@ func (cbCtx CallbackContext) AddFileToTodoCB(todoID string, fileKey string) erro
 		return err
 	}
 	todoFilter := bson.M{"_id": todoId}
-	todoUpdate := bson.M{"$push": bson.M{"fileKeys": fileKey}}
+	todoUpdate := bson.M{
+		"$push": bson.M{
+			"files": bson.M{"key": fileKey, "name": fileName},
+		},
+	}
 	if _, err = todosColl.UpdateOne(cbCtx.ctx, todoFilter, todoUpdate); err != nil {
 		return err
 	}
@@ -217,7 +237,12 @@ func (cbCtx CallbackContext) AddFileToTodoCB(todoID string, fileKey string) erro
 	return nil
 }
 
-func AddFileToTodoTxn(ctx context.Context, todoID string, fileKey string) error {
+func AddFileToTodoTxn(
+	ctx context.Context,
+	todoID string,
+	fileKey string,
+	fileName string,
+) error {
 	fmt.Println("AddFileToTodo called - transaction mode")
 
 	session, db, err := database.GetSession(ctx)
@@ -226,20 +251,23 @@ func AddFileToTodoTxn(ctx context.Context, todoID string, fileKey string) error 
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.AddFileToTodoCB(todoID, fileKey); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.AddFileToTodoCB(todoID, fileKey, fileName); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
 
-		return nil
-	})
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("AddFileToTodo - transaction error: %v\nAddFileToTodo - aborting transaction\n", err)
@@ -253,7 +281,12 @@ func AddFileToTodoTxn(ctx context.Context, todoID string, fileKey string) error 
 	return nil
 }
 
-func AddFileToTodoAsync(ctx context.Context, todoID string, fileKey string) error {
+func AddFileToTodoAsync(
+	ctx context.Context,
+	todoID string,
+	fileKey string,
+	fileName string,
+) error {
 	fmt.Println("AddFileToTodo called - async mode")
 
 	db, err := database.GetMongoDb(ctx)
@@ -262,12 +295,16 @@ func AddFileToTodoAsync(ctx context.Context, todoID string, fileKey string) erro
 	}
 
 	cbCtx := &CallbackContext{ctx: ctx, db: db}
-	return cbCtx.AddFileToTodoCB(todoID, fileKey)
+	return cbCtx.AddFileToTodoCB(todoID, fileKey, fileName)
 }
 
 /* ------------------------------------ Remove file from todo ------------------------------------*/
 
-func (cbCtx CallbackContext) RemoveFileFromFromTodoCB(todoID string, fileKey string) error {
+func (cbCtx CallbackContext) RemoveFileFromFromTodoCB(
+	todoID string,
+	fileKey string,
+	fileName string,
+) error {
 	todosColl := cbCtx.db.Collection(consts.TodosCollection)
 	todoId, err := primitive.ObjectIDFromHex(todoID)
 	if err != nil {
@@ -275,7 +312,7 @@ func (cbCtx CallbackContext) RemoveFileFromFromTodoCB(todoID string, fileKey str
 	}
 
 	todoFilter := bson.M{"_id": todoId}
-	todoUpdate := bson.M{"$pull": bson.M{"fileKeys": todoID}}
+	todoUpdate := bson.M{"$pull": bson.M{"files": bson.M{"name": fileName}}}
 	if _, err = todosColl.UpdateOne(cbCtx.ctx, todoFilter, todoUpdate); err != nil {
 		return err
 	}
@@ -283,7 +320,12 @@ func (cbCtx CallbackContext) RemoveFileFromFromTodoCB(todoID string, fileKey str
 	return nil
 }
 
-func RmFileFromTodoTxn(ctx context.Context, todoID string, fileKey string) error {
+func RmFileFromTodoTxn(
+	ctx context.Context,
+	todoID string,
+	fileKey string,
+	fileName string,
+) error {
 	fmt.Println("RmFileFromTodo called - transaction mode")
 
 	session, db, err := database.GetSession(ctx)
@@ -292,20 +334,22 @@ func RmFileFromTodoTxn(ctx context.Context, todoID string, fileKey string) error
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey, fileName); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
 
-		return nil
-	})
+			return nil
+		})
 
 	if err != nil {
 		fmt.Printf("RmFileFromTodo - transaction error: %v\nRmFileFromTodo - aborting transaction\n", err)
@@ -319,7 +363,12 @@ func RmFileFromTodoTxn(ctx context.Context, todoID string, fileKey string) error
 	return nil
 }
 
-func RmFileFromTodoAsync(ctx context.Context, todoID string, fileKey string) error {
+func RmFileFromTodoAsync(
+	ctx context.Context,
+	todoID string,
+	fileKey string,
+	fileName string,
+) error {
 	fmt.Println("RmFileFromTodo called - async mode")
 
 	db, err := database.GetMongoDb(ctx)
@@ -328,7 +377,7 @@ func RmFileFromTodoAsync(ctx context.Context, todoID string, fileKey string) err
 	}
 
 	cbCtx := &CallbackContext{ctx: ctx, db: db}
-	return cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey)
+	return cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey, fileName)
 }
 
 /* ---------------------------------------- Delete board ----------------------------------------*/
@@ -372,7 +421,11 @@ func DeleteBoardCB(
 	return nil
 }
 
-func DeleteBoardTxn(ctx context.Context, userID string, boardID string) error {
+func DeleteBoardTxn(
+	ctx context.Context,
+	userID string,
+	boardID string,
+) error {
 	fmt.Println("DeleteBoard called - transaction mode")
 
 	session, db, err := database.GetSession(ctx)
@@ -381,19 +434,22 @@ func DeleteBoardTxn(ctx context.Context, userID string, boardID string) error {
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		if err = DeleteBoardCB(ctx, db, userID, boardID); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			if err = DeleteBoardCB(ctx, db, userID, boardID); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
 
-		return nil
-	})
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("DeleteBoard - transaction error: %v\nDeleteBoard - aborting transaction\n", err)
@@ -455,19 +511,22 @@ func DeleteUserTxn(ctx context.Context, userID string) error {
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.DeleteUserCB(userID); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.DeleteUserCB(userID); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("DeleteUser - transaction error: %v\nDeleteUser - aborting transaction\n", err)
@@ -496,7 +555,10 @@ func DeleteUserAsync(ctx context.Context, userID string) error {
 /* -------------------------------------- Add todo to board --------------------------------------*/
 // Set boardId on todo & add todo to board
 
-func (cbCtx CallbackContext) AddTodoToBoardCB(todoID string, boardID string) error {
+func (cbCtx CallbackContext) AddTodoToBoardCB(
+	todoID string,
+	boardID string,
+) error {
 	todosColl := cbCtx.db.Collection(consts.TodosCollection)
 	boardsColl := cbCtx.db.Collection(consts.BoardsCollection)
 
@@ -545,19 +607,22 @@ func AddTodoToBoardTxn(ctx context.Context, todoID string, boardID string) error
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.AddTodoToBoardCB(todoID, boardID); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.AddTodoToBoardCB(todoID, boardID); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("AddTodoToBoard - transaction error: %v\nAddTodoToBoard - aborting transaction\n", err)
@@ -571,7 +636,11 @@ func AddTodoToBoardTxn(ctx context.Context, todoID string, boardID string) error
 	return nil
 }
 
-func AddTodoToBoardAsync(ctx context.Context, todoID string, boardID string) error {
+func AddTodoToBoardAsync(
+	ctx context.Context,
+	todoID string,
+	boardID string,
+) error {
 	fmt.Println("AddTodoToBoard called - async mode")
 
 	db, err := database.GetMongoDb(ctx)
@@ -585,7 +654,10 @@ func AddTodoToBoardAsync(ctx context.Context, todoID string, boardID string) err
 
 /* ------------------------------------ Remove todo from board ------------------------------------*/
 
-func (cbCtx CallbackContext) RemoveTodoFromBoardCB(todoID string, boardID string) error {
+func (cbCtx CallbackContext) RemoveTodoFromBoardCB(
+	todoID string,
+	boardID string,
+) error {
 	todosColl := cbCtx.db.Collection(consts.TodosCollection)
 	todoId, err := primitive.ObjectIDFromHex(todoID)
 	if err != nil {
@@ -629,19 +701,22 @@ func RemoveTodoFromBoardTxn(
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.RemoveTodoFromBoardCB(todoID, boardID); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.RemoveTodoFromBoardCB(todoID, boardID); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("RemoveTodoFromBoard - transaction error: %v\nRemoveTodoFromBoard - aborting transaction\n", err)
@@ -702,7 +777,11 @@ func (cbCtx CallbackContext) ShiftTodoBetweenBoardsCB(
 		"todos":   todoId,
 		"todoIds": todoID,
 	}}
-	if _, err = boardsColl.UpdateOne(cbCtx.ctx, fromBoardFilter, fromBoardUpdate); err != nil {
+	if _, err = boardsColl.UpdateOne(
+		cbCtx.ctx,
+		fromBoardFilter,
+		fromBoardUpdate,
+	); err != nil {
 		return err
 	}
 
@@ -724,7 +803,11 @@ func (cbCtx CallbackContext) ShiftTodoBetweenBoardsCB(
 		},
 	}
 
-	if _, err = boardsColl.UpdateOne(cbCtx.ctx, toBoardFilter, toBoardUpdate); err != nil {
+	if _, err = boardsColl.UpdateOne(
+		cbCtx.ctx,
+		toBoardFilter,
+		toBoardUpdate,
+	); err != nil {
 		return err
 	}
 
@@ -746,19 +829,22 @@ func ShiftTodoBetweenBoardsTxn(
 	}
 	defer session.EndSession(ctx)
 
-	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) error {
-		if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
-			return err
-		}
-		cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-		if err = cbCtx.ShiftTodoBetweenBoardsCB(todoID, fromBoard, toBoard, toIndex); err != nil {
-			return err
-		}
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			return err
-		}
-		return nil
-	})
+	err = mongo.WithSession(
+		ctx, session,
+		func(sessionContext mongo.SessionContext) error {
+			if err = session.StartTransaction(database.GetTxnSessionConfig()); err != nil {
+				return err
+			}
+			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
+			if err = cbCtx.ShiftTodoBetweenBoardsCB(todoID, fromBoard, toBoard, toIndex); err != nil {
+				return err
+			}
+			if err = session.CommitTransaction(sessionContext); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 
 	if err != nil {
 		fmt.Printf("ShiftTodoBetweenBoards - transaction error: %v\nShiftTodoBetweenBoards - aborting transaction\n", err)

@@ -95,7 +95,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 		{Key: "tag", Value: "white"},
 		{Key: "markdown", Value: false},
 		{Key: "done", Value: false},
-		{Key: "fileKeys", Value: []*string{}},
+		{Key: "files", Value: []*string{}},
 		{Key: "createdAt", Value: currTime},
 		{Key: "updatedAt", Value: currTime},
 	})
@@ -110,7 +110,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 			Tag:      "white",
 			Markdown: false,
 			Done:     false,
-			FileKeys: []*string{},
+			Files:    []*model.File{},
 		}, err
 	}
 
@@ -187,19 +187,19 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 }
 
 // AddRmTodoFile is the resolver for the addRmTodoFile field.
-func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, rm bool) (bool, error) {
+func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, rm bool) (bool, error) {
 	var err error
 	if consts.Container {
 		if rm {
-			err = RmFileFromTodoAsync(ctx, todoID, fileKey)
+			err = RmFileFromTodoAsync(ctx, todoID, fileKey, fileName)
 		} else {
-			err = AddFileToTodoAsync(ctx, todoID, fileKey)
+			err = AddFileToTodoAsync(ctx, todoID, fileKey, fileName)
 		}
 	} else {
 		if rm {
-			err = RmFileFromTodoTxn(ctx, todoID, fileKey)
+			err = RmFileFromTodoTxn(ctx, todoID, fileKey, fileName)
 		} else {
-			err = AddFileToTodoTxn(ctx, todoID, fileKey)
+			err = AddFileToTodoTxn(ctx, todoID, fileKey, fileName)
 
 		}
 	}

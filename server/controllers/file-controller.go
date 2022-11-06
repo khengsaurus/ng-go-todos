@@ -19,6 +19,7 @@ type PutUrlReqBody struct {
 
 type Res struct {
 	Url string `json:"url"`
+	Key string `json:"key"`
 }
 
 func GetSignedPutURL(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,7 @@ func GetSignedPutURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Json200(&Res{Url: url}, w)
+	utils.Json200(&Res{Url: url, Key: key}, w)
 }
 
 func GetSignedGetURL(w http.ResponseWriter, r *http.Request) {
