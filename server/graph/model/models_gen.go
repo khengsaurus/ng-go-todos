@@ -17,8 +17,9 @@ type Board struct {
 }
 
 type File struct {
-	Key  string `json:"key" bson:"key"`
-	Name string `json:"name" bson:"name"`
+	Key      string `json:"key" bson:"key"`
+	Name     string `json:"name" bson:"name"`
+	Uploaded string `json:"uploaded" bson:"uploaded"`
 }
 
 type GetBoardsRes struct {
@@ -70,12 +71,12 @@ type UpdateBoard struct {
 type UpdateTodo struct {
 	ID       string  `json:"id" bson:"_id"`
 	UserID   string  `json:"userId" bson:"userId"`
+	BoardID  *string `json:"boardId" bson:"boardId"`
 	Text     *string `json:"text" bson:"text"`
 	Priority *int    `json:"priority" bson:"priority"`
 	Tag      *string `json:"tag" bson:"tag"`
 	Markdown *bool   `json:"markdown" bson:"markdown"`
 	Done     *bool   `json:"done" bson:"done"`
-	BoardID  *string `json:"boardId" bson:"boardId"`
 }
 
 type User struct {

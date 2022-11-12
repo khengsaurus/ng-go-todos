@@ -103,7 +103,7 @@ func CreateBoardTxn(
 	)
 
 	if err != nil {
-		fmt.Printf("CreateBoard - transaction error: %v\nCreateBoard - aborting transaction\n", err)
+		fmt.Printf("CreateBoard - txn error: %v\nCreateBoard - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return nil, abortErr
 		} else {
@@ -188,7 +188,7 @@ func DeleteTodoTxn(ctx context.Context, userID string, todoID string) error {
 	)
 
 	if err != nil {
-		fmt.Printf("DeleteTodo - transaction error: %v\nDeleteTodo - aborting transaction\n", err)
+		fmt.Printf("DeleteTodo - txn error: %v\nDeleteTodo - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -217,6 +217,7 @@ func (cbCtx CallbackContext) AddFileToTodoCB(
 	todoID string,
 	fileKey string,
 	fileName string,
+	uploaded string,
 ) error {
 	todosColl := cbCtx.db.Collection(consts.TodosCollection)
 
@@ -227,7 +228,11 @@ func (cbCtx CallbackContext) AddFileToTodoCB(
 	todoFilter := bson.M{"_id": todoId}
 	todoUpdate := bson.M{
 		"$push": bson.M{
-			"files": bson.M{"key": fileKey, "name": fileName},
+			"files": bson.M{
+				"key":      fileKey,
+				"name":     fileName,
+				"uploaded": uploaded,
+			},
 		},
 	}
 	if _, err = todosColl.UpdateOne(cbCtx.ctx, todoFilter, todoUpdate); err != nil {
@@ -242,6 +247,7 @@ func AddFileToTodoTxn(
 	todoID string,
 	fileKey string,
 	fileName string,
+	uploaded string,
 ) error {
 	fmt.Println("AddFileToTodo called - transaction mode")
 
@@ -258,7 +264,7 @@ func AddFileToTodoTxn(
 				return err
 			}
 			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-			if err = cbCtx.AddFileToTodoCB(todoID, fileKey, fileName); err != nil {
+			if err = cbCtx.AddFileToTodoCB(todoID, fileKey, fileName, uploaded); err != nil {
 				return err
 			}
 			if err = session.CommitTransaction(sessionContext); err != nil {
@@ -270,7 +276,7 @@ func AddFileToTodoTxn(
 	)
 
 	if err != nil {
-		fmt.Printf("AddFileToTodo - transaction error: %v\nAddFileToTodo - aborting transaction\n", err)
+		fmt.Printf("AddFileToTodo - txn error: %v\nAddFileToTodo - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -286,6 +292,7 @@ func AddFileToTodoAsync(
 	todoID string,
 	fileKey string,
 	fileName string,
+	uploaded string,
 ) error {
 	fmt.Println("AddFileToTodo called - async mode")
 
@@ -295,7 +302,7 @@ func AddFileToTodoAsync(
 	}
 
 	cbCtx := &CallbackContext{ctx: ctx, db: db}
-	return cbCtx.AddFileToTodoCB(todoID, fileKey, fileName)
+	return cbCtx.AddFileToTodoCB(todoID, fileKey, fileName, uploaded)
 }
 
 /* ------------------------------------ Remove file from todo ------------------------------------*/
@@ -352,7 +359,7 @@ func RmFileFromTodoTxn(
 		})
 
 	if err != nil {
-		fmt.Printf("RmFileFromTodo - transaction error: %v\nRmFileFromTodo - aborting transaction\n", err)
+		fmt.Printf("RmFileFromTodo - txn error: %v\nRmFileFromTodo - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -452,7 +459,7 @@ func DeleteBoardTxn(
 	)
 
 	if err != nil {
-		fmt.Printf("DeleteBoard - transaction error: %v\nDeleteBoard - aborting transaction\n", err)
+		fmt.Printf("DeleteBoard - txn error: %v\nDeleteBoard - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -529,7 +536,7 @@ func DeleteUserTxn(ctx context.Context, userID string) error {
 	)
 
 	if err != nil {
-		fmt.Printf("DeleteUser - transaction error: %v\nDeleteUser - aborting transaction\n", err)
+		fmt.Printf("DeleteUser - txn error: %v\nDeleteUser - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -625,7 +632,7 @@ func AddTodoToBoardTxn(ctx context.Context, todoID string, boardID string) error
 	)
 
 	if err != nil {
-		fmt.Printf("AddTodoToBoard - transaction error: %v\nAddTodoToBoard - aborting transaction\n", err)
+		fmt.Printf("AddTodoToBoard - txn error: %v\nAddTodoToBoard - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -719,7 +726,7 @@ func RemoveTodoFromBoardTxn(
 	)
 
 	if err != nil {
-		fmt.Printf("RemoveTodoFromBoard - transaction error: %v\nRemoveTodoFromBoard - aborting transaction\n", err)
+		fmt.Printf("RemoveTodoFromBoard - txn error: %v\nRemoveTodoFromBoard - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {
@@ -847,7 +854,7 @@ func ShiftTodoBetweenBoardsTxn(
 	)
 
 	if err != nil {
-		fmt.Printf("ShiftTodoBetweenBoards - transaction error: %v\nShiftTodoBetweenBoards - aborting transaction\n", err)
+		fmt.Printf("ShiftTodoBetweenBoards - txn error: %v\nShiftTodoBetweenBoards - aborting txn\n", err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return abortErr
 		} else {

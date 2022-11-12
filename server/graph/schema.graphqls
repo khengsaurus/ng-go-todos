@@ -36,6 +36,7 @@ type Board {
 type File {
   key: String!
   name: String!
+  uploaded: String!
 }
 
 # --------------- Inputs ---------------
@@ -58,12 +59,12 @@ input NewBoard {
 input UpdateTodo {
   id: String!
   userId: String!
+  boardId: String
   text: String
   priority: Int
   tag: String
   markdown: Boolean
   done: Boolean
-  boardId: String
 }
 
 input UpdateBoard {
@@ -109,8 +110,10 @@ type Mutation {
     todoId: String!
     fileKey: String!
     fileName: String!
+    uploaded: String!
     rm: Boolean!
   ): Boolean!
+  rmTodoFiles(todoId: String!): Boolean!
   #
   createBoard(newBoard: NewBoard!): Board!
   updateBoard(updateBoard: UpdateBoard!): Boolean!

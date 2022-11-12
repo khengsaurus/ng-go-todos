@@ -56,8 +56,9 @@ type ComplexityRoot struct {
 	}
 
 	File struct {
-		Key  func(childComplexity int) int
-		Name func(childComplexity int) int
+		Key      func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Uploaded func(childComplexity int) int
 	}
 
 	GetBoardsRes struct {
@@ -72,7 +73,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddRmBoardTodo         func(childComplexity int, userID string, todoID string, boardID string, rm bool) int
-		AddRmTodoFile          func(childComplexity int, todoID string, fileKey string, fileName string, rm bool) int
+		AddRmTodoFile          func(childComplexity int, todoID string, fileKey string, fileName string, uploaded string, rm bool) int
 		CreateBoard            func(childComplexity int, newBoard model.NewBoard) int
 		CreateTodo             func(childComplexity int, newTodo model.NewTodo) int
 		CreateUser             func(childComplexity int, newUser model.NewUser) int
@@ -81,6 +82,7 @@ type ComplexityRoot struct {
 		DeleteUser             func(childComplexity int, userID string) int
 		MoveBoards             func(childComplexity int, userID string, boardIds []string) int
 		MoveTodos              func(childComplexity int, userID string, boardID string, todoIds []string) int
+		RmTodoFiles            func(childComplexity int, todoID string) int
 		ShiftTodoBetweenBoards func(childComplexity int, userID string, todoID string, fromBoard string, toBoard string, toIndex int) int
 		UpdateBoard            func(childComplexity int, updateBoard model.UpdateBoard) int
 		UpdateTodo             func(childComplexity int, updateTodo model.UpdateTodo) int
@@ -123,7 +125,8 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error)
 	UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (bool, error)
 	DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error)
-	AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, rm bool) (bool, error)
+	AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, uploaded string, rm bool) (bool, error)
+	RmTodoFiles(ctx context.Context, todoID string) (bool, error)
 	CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error)
 	UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (bool, error)
 	DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error)
@@ -219,6 +222,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.File.Name(childComplexity), true
 
+	case "File.uploaded":
+		if e.complexity.File.Uploaded == nil {
+			break
+		}
+
+		return e.complexity.File.Uploaded(childComplexity), true
+
 	case "GetBoardsRes.boards":
 		if e.complexity.GetBoardsRes.Boards == nil {
 			break
@@ -269,7 +279,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddRmTodoFile(childComplexity, args["todoId"].(string), args["fileKey"].(string), args["fileName"].(string), args["rm"].(bool)), true
+		return e.complexity.Mutation.AddRmTodoFile(childComplexity, args["todoId"].(string), args["fileKey"].(string), args["fileName"].(string), args["uploaded"].(string), args["rm"].(bool)), true
 
 	case "Mutation.createBoard":
 		if e.complexity.Mutation.CreateBoard == nil {
@@ -366,6 +376,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.MoveTodos(childComplexity, args["userId"].(string), args["boardId"].(string), args["todoIds"].([]string)), true
+
+	case "Mutation.rmTodoFiles":
+		if e.complexity.Mutation.RmTodoFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_rmTodoFiles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RmTodoFiles(childComplexity, args["todoId"].(string)), true
 
 	case "Mutation.shiftTodoBetweenBoards":
 		if e.complexity.Mutation.ShiftTodoBetweenBoards == nil {
@@ -686,6 +708,7 @@ type Board {
 type File {
   key: String!
   name: String!
+  uploaded: String!
 }
 
 # --------------- Inputs ---------------
@@ -708,12 +731,12 @@ input NewBoard {
 input UpdateTodo {
   id: String!
   userId: String!
+  boardId: String
   text: String
   priority: Int
   tag: String
   markdown: Boolean
   done: Boolean
-  boardId: String
 }
 
 input UpdateBoard {
@@ -759,8 +782,10 @@ type Mutation {
     todoId: String!
     fileKey: String!
     fileName: String!
+    uploaded: String!
     rm: Boolean!
   ): Boolean!
+  rmTodoFiles(todoId: String!): Boolean!
   #
   createBoard(newBoard: NewBoard!): Board!
   updateBoard(updateBoard: UpdateBoard!): Boolean!
@@ -862,15 +887,24 @@ func (ec *executionContext) field_Mutation_addRmTodoFile_args(ctx context.Contex
 		}
 	}
 	args["fileName"] = arg2
-	var arg3 bool
-	if tmp, ok := rawArgs["rm"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rm"))
-		arg3, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+	var arg3 string
+	if tmp, ok := rawArgs["uploaded"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uploaded"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["rm"] = arg3
+	args["uploaded"] = arg3
+	var arg4 bool
+	if tmp, ok := rawArgs["rm"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rm"))
+		arg4, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["rm"] = arg4
 	return args, nil
 }
 
@@ -1036,6 +1070,21 @@ func (ec *executionContext) field_Mutation_moveTodos_args(ctx context.Context, r
 		}
 	}
 	args["todoIds"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_rmTodoFiles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["todoId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("todoId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["todoId"] = arg0
 	return args, nil
 }
 
@@ -1686,6 +1735,50 @@ func (ec *executionContext) fieldContext_File_name(ctx context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _File_uploaded(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_uploaded(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Uploaded, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_uploaded(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _GetBoardsRes_boards(ctx context.Context, field graphql.CollectedField, obj *model.GetBoardsRes) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_GetBoardsRes_boards(ctx, field)
 	if err != nil {
@@ -2225,7 +2318,7 @@ func (ec *executionContext) _Mutation_addRmTodoFile(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddRmTodoFile(rctx, fc.Args["todoId"].(string), fc.Args["fileKey"].(string), fc.Args["fileName"].(string), fc.Args["rm"].(bool))
+		return ec.resolvers.Mutation().AddRmTodoFile(rctx, fc.Args["todoId"].(string), fc.Args["fileKey"].(string), fc.Args["fileName"].(string), fc.Args["uploaded"].(string), fc.Args["rm"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2260,6 +2353,61 @@ func (ec *executionContext) fieldContext_Mutation_addRmTodoFile(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addRmTodoFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_rmTodoFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_rmTodoFiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RmTodoFiles(rctx, fc.Args["todoId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_rmTodoFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_rmTodoFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3567,6 +3715,8 @@ func (ec *executionContext) fieldContext_Todo_files(ctx context.Context, field g
 				return ec.fieldContext_File_key(ctx, field)
 			case "name":
 				return ec.fieldContext_File_name(ctx, field)
+			case "uploaded":
+				return ec.fieldContext_File_uploaded(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
@@ -5775,7 +5925,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "text", "priority", "tag", "markdown", "done", "boardId"}
+	fieldsInOrder := [...]string{"id", "userId", "boardId", "text", "priority", "tag", "markdown", "done"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5795,6 +5945,14 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
 			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "boardId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boardId"))
+			it.BoardID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5835,14 +5993,6 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
 			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "boardId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boardId"))
-			it.BoardID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5950,6 +6100,13 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 		case "name":
 
 			out.Values[i] = ec._File_name(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "uploaded":
+
+			out.Values[i] = ec._File_uploaded(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -6103,6 +6260,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addRmTodoFile(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rmTodoFiles":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_rmTodoFiles(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {

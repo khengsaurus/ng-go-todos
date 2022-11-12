@@ -187,25 +187,47 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 }
 
 // AddRmTodoFile is the resolver for the addRmTodoFile field.
-func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, rm bool) (bool, error) {
+func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, uploaded string, rm bool) (bool, error) {
 	var err error
 	if consts.Container {
 		if rm {
 			err = RmFileFromTodoAsync(ctx, todoID, fileKey, fileName)
 		} else {
-			err = AddFileToTodoAsync(ctx, todoID, fileKey, fileName)
+			err = AddFileToTodoAsync(ctx, todoID, fileKey, fileName, uploaded)
 		}
 	} else {
 		if rm {
 			err = RmFileFromTodoTxn(ctx, todoID, fileKey, fileName)
 		} else {
-			err = AddFileToTodoTxn(ctx, todoID, fileKey, fileName)
+			err = AddFileToTodoTxn(ctx, todoID, fileKey, fileName, uploaded)
 
 		}
 	}
 
 	if err != nil {
 		return false, nil
+	}
+
+	return true, nil
+}
+
+// RmTodoFiles is the resolver for the rmTodoFiles field.
+func (r *mutationResolver) RmTodoFiles(ctx context.Context, todoID string) (bool, error) {
+	db, err := database.GetMongoDb(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	todoId, err := primitive.ObjectIDFromHex(todoID)
+	if err != nil {
+		return false, err
+	}
+
+	todosColl := db.Collection(consts.TodosCollection)
+	todoUpdate := bson.M{"$set": bson.M{"files": []*model.File{}}}
+
+	if _, err = todosColl.UpdateOne(ctx, bson.M{"_id": todoId}, todoUpdate); err != nil {
+		return false, err
 	}
 
 	return true, nil
