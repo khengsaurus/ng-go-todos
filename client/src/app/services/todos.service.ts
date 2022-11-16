@@ -84,6 +84,7 @@ export class TodosService {
   }
 
   updateTodo$(updateTodo: Partial<ITodo>) {
+    console.log('updateTodo$ called');
     return this.apollo
       .mutate<IUPDATE_TODO>({
         mutation: UPDATE_TODO,
@@ -151,27 +152,23 @@ export class TodosService {
       );
   }
 
-  addRmTodoFile(todo: ITodo, fileKey: string, fileName: string, rm = false) {
+  addRmTodoFile$(todo: ITodo, fileKey: string, fileName: string, rm = false) {
+    const uploaded = rm ? '' : `${new Date().valueOf()}`;
     return this.apollo
       .mutate<IADD_RM_TODO_FILE>({
         mutation: ADD_RM_TODO_FILE,
-        variables: { todoId: todo.id, fileKey, fileName, rm },
+        variables: { todoId: todo.id, fileKey, fileName, rm, uploaded },
       })
       .pipe(
         map((res) => {
           if (res.data?.addRmTodoFile) {
             if (rm) {
-              console.log('Removed file from todo');
+              return '-1';
             } else {
-              console.log('Added file to todo');
+              return uploaded;
             }
-            return true;
           }
-          throw new Error(
-            `Failed to ${rm ? 'remove file from' : 'add file to'} todo ${
-              todo.id
-            }`
-          );
+          throw new Error(`Failed to ${rm ? `remove` : `add`} file ${fileKey}`);
         })
       );
   }

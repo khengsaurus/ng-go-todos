@@ -11,7 +11,7 @@ import { ITodo, Nullable } from 'src/types';
 })
 export class PreviewTodoDialog extends EditTodoDirective implements OnDestroy {
   @Input() override todo: Nullable<ITodo> = null;
-  @Input() onDestory = (todo: Nullable<ITodo>) => {};
+  @Input() onDestory = (_: Nullable<ITodo>) => { };
 
   constructor(
     protected override userService: UserService,

@@ -6,6 +6,11 @@ h3 {
   text-align: center;
 }
 
+.dialog-container {
+  @include flex-(column);
+  height: 100%;
+}
+
 .dialog-content {
   @include flex-(column);
   overflow-y: scroll;
@@ -52,4 +57,7 @@ h3 {
   @include flex-(row);
   @include center;
   margin-top: $gap-xl;
+  &.spaced {
+    justify-content: space-between;
+  }
 }

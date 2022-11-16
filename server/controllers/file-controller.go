@@ -28,13 +28,12 @@ func GetSignedPutURL(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
-		// TODO check if shd be 400 instead
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	key := fmt.Sprintf("%s/%s_%s_%s", req.UserID, req.TodoID, uuid.New(), req.FileName)
-	url, err := database.GetSignedPutURL(r.Context(), key)
+	key := fmt.Sprintf("%s_%s_%s", req.TodoID, uuid.New(), req.FileName)
+	url, err := database.GetSignedPutURL(r.Context(), fmt.Sprintf("%s/%s", req.UserID, key))
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -46,17 +45,38 @@ func GetSignedPutURL(w http.ResponseWriter, r *http.Request) {
 
 func GetSignedGetURL(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetSignedGetURL called")
-	key := chi.URLParam(r, "key")
+	userId := chi.URLParam(r, "user_id")
+	key := chi.URLParam(r, "file_key")
 
-	if key == "" {
+	if userId == "" || key == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	url, err := database.GetSignedGetURL(r.Context(), key)
+	url, err := database.GetSignedGetURL(r.Context(), fmt.Sprintf("%s/%s", userId, key))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	utils.Json200(&Res{Url: url}, w)
+}
+
+func DeleteFile(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DeleteFile called")
+	userId := chi.URLParam(r, "user_id")
+	key := chi.URLParam(r, "file_key")
+
+	if userId == "" || key == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	_, err := database.DeleteObject(r.Context(), fmt.Sprintf("%s/%s", userId, key))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

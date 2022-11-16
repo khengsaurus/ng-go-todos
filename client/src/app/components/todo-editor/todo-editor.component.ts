@@ -74,19 +74,42 @@ export class TodoEditor extends EditTodoDirective {
     this.filesService
       .uploadFile$(this.todo.id, file)
       .pipe(
-        switchMap((k) => {
-          key = k;
-          return this.todosService.addRmTodoFile(this.todo!, k, file.name);
+        switchMap((fileKey) => {
+          key = fileKey;
+          return fileKey
+            ? this.todosService.addRmTodoFile$(this.todo!, fileKey, file.name)
+            : of('');
         }),
-        tap((success) => {
-          if (success) {
-            this.todosService.updateTodo$({
-              ...this.todo,
-              files: [...(this.todo?.files || []), { key, name: file.name }],
-            });
+        tap((uploaded) => {
+          if (uploaded) {
+            const files = [
+              ...(this.todo!.files || []),
+              { key, name: file.name, uploaded },
+            ];
+            this.todo = { ...this.todo, files } as ITodo;
           }
         })
       )
       .subscribe();
   }
+
+  removeCallback = ((fileKey: string) => {
+    this.todosService
+      .addRmTodoFile$(this.todo!, fileKey, '', true)
+      .pipe(
+        switchMap((res) => {
+          return res === '-1'
+            ? this.filesService.deleteFile$(this.todo!, fileKey)
+            : of(true);
+        }),
+        tap((err) => {
+          if (!err) {
+            const files =
+              this.todo!.files?.filter((f) => f.key !== fileKey) || [];
+            this.todo = { ...this.todo, files } as ITodo;
+          }
+        })
+      )
+      .subscribe();
+  }).bind(this);
 }

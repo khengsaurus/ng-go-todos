@@ -5,31 +5,14 @@ import { PreviewTodoDialog } from '../dialogs';
 
 @Component({
   selector: 'todo-card',
-  template: `
-    <mat-card
-      class="todo"
-      [class]="todo?.tag"
-      [class.active]="active"
-      (click)="triggerModal ? openBoardDialog() : null"
-    >
-      <div class="row">
-        <div class="content">
-          <mat-card-subtitle class="todo-title">{{
-            todoTitle
-          }}</mat-card-subtitle>
-          <mat-icon *ngIf="todo?.done" class="check">check</mat-icon>
-        </div>
-        <ng-content></ng-content>
-      </div>
-    </mat-card>
-  `,
+  templateUrl: './todo-card.component.html',
   styleUrls: ['./cards.scss'],
 })
 export class TodoCard implements OnChanges {
   @Input() todo: Nullable<ITodo> = null;
   @Input() active = false;
   @Input() triggerModal = false;
-  @Input() editCallback = (todo: Nullable<ITodo>) => {};
+  @Input() editCallback = (_: Nullable<ITodo>) => {};
   todoTitle: string = '';
 
   constructor(private dialog: MatDialog) {}

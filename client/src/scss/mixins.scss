@@ -17,7 +17,7 @@
 }
 
 @mixin icon-button {
-  color: $highlight;
+  @include btn-orange;
   transition: $transition-normal;
   transform: translateY(-1px);
 }

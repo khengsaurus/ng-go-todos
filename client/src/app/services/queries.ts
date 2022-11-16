@@ -23,6 +23,7 @@ const fragments = {
       files {
         key
         name
+        uploaded
       }
     }
   `,
@@ -151,12 +152,14 @@ export const ADD_RM_TODO_FILE = gql`
     $todoId: String!
     $fileKey: String!
     $fileName: String!
+    $uploaded: String!
     $rm: Boolean!
   ) {
     addRmTodoFile(
       todoId: $todoId
       fileKey: $fileKey
       fileName: $fileName
+      uploaded: $uploaded
       rm: $rm
     )
   }

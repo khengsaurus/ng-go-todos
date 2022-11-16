@@ -7,7 +7,7 @@
   overflow-x: scroll;
 
   mat-icon.cdk-drag-handle {
-    @include hover-($highlight);
+    @include hover-orange;
     @include hover-scale-(0.9, 1);
     cursor: move;
   }

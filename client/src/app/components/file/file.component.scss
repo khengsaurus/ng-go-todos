@@ -1,0 +1,46 @@
+@import "../../../styles.scss";
+
+$file-w: 80px;
+
+.file {
+  @include flex-(row);
+  align-items: center;
+  width: $file-w;
+  padding: $gap-xs;
+  margin: $gap-s;
+  .label {
+    @include ellipsis;
+    font-size: 12px;
+    width: $file-w;
+    min-width: $file-w;
+    transition: $transition-normal;
+  }
+  .buttons {
+    @include flex-(row);
+    opacity: 0;
+    height: 100%;
+    width: fit-content;
+    transition: $transition-normal;
+    pointer-events: none;
+    mat-icon {
+      @include btn-orange;
+    }
+    &:hover {
+      pointer-events: all;
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    .label {
+      opacity: 0.25;
+    }
+    .buttons {
+      pointer-events: all;
+      transform: none;
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+  }
+}

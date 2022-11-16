@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
-import { UserService } from './user.service';
-import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { saveAs } from 'file-saver';
 import { of, switchMap, tap } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { IFile, ITodo } from 'src/types';
+import { UserService } from './user.service';
 
 const config = { headers: { Authorization: 'Bearer -' } };
 const MAX_MB = 10;
@@ -37,12 +39,13 @@ export class FilesService {
             if (presignRes?.key && presignRes?.url) {
               return fetch(presignRes.url, {
                 method: 'put',
-                headers: environment.production
-                  ? { 'Content-Type': 'multipart/form-data' }
-                  : {
-                      'Content-Type': 'application/json',
-                      'x-amz-acl': 'public-read-write',
-                    },
+                // headers: environment.production
+                //   ? { 'Content-Type': 'multipart/form-data' }
+                //   : {
+                //       'Content-Type': 'application/json',
+                //       'x-amz-acl': 'public-read-write',
+                //     },
+                headers: { 'Content-Type': 'multipart/form-data' },
                 body: file,
               })
                 .then((uploadRes) => {
@@ -64,5 +67,25 @@ export class FilesService {
           })
         )
       : of('');
+  }
+
+  downloadFile$(userId: string, file: IFile) {
+    const { name, key } = file;
+    return this.http.get(`${this.api_route}/${userId}/${key}`, config).pipe(
+      switchMap((res: any) => {
+        const url = res?.url;
+        return url ? this.http.get(url, { responseType: 'blob' }) : of(null);
+      }),
+      tap((blob) => {
+        if (blob) saveAs(blob, name);
+      })
+    );
+  }
+
+  deleteFile$(todo: ITodo, fileKey: string) {
+    return this.http.delete(
+      `${this.api_route}/${todo.userId}/${fileKey}`,
+      config
+    );
   }
 }

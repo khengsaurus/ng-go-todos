@@ -1,15 +1,19 @@
+import os
 import boto3
+from dotenv import load_dotenv
 
-REGION = 'ap-southeast-1'
-BUCKET_NAME = 'ng-go-todos'
+load_dotenv()
+
+REGION = os.getenv("AWS_REGION")
+BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
 
 BUCKET_CONFIG = {'LocationConstraint': REGION}
 BUCKET_CORS_CONFIG = {
     "CORSRules": [
         {
             "AllowedHeaders": ["*"],
-            "AllowedMethods": ["HEAD", "GET", "POST", "PUT", "DELETE"],
             "AllowedOrigins": ["*"],
+            "AllowedMethods": ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
             "ExposeHeaders": ["ETag"],
             "MaxAgeSeconds": 86400
         }

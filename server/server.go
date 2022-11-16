@@ -27,7 +27,7 @@ var (
 )
 
 func main() {
-	envErr := godotenv.Load("local.env")
+	envErr := godotenv.Load(".env")
 	if envErr != nil {
 		panic(envErr)
 	}

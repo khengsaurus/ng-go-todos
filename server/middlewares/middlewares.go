@@ -12,6 +12,7 @@ func EnableCors(h http.Handler) http.Handler {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowCredentials: true,
 	})
 

@@ -20,10 +20,9 @@ services:
       - "4510-4559:4510-4559"
     environment:
       - SERVICES=s3
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=ap-southeast-1
       - DEBUG=2
+      - HOSTNAME_EXTERNAL=127.0.0.1
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
@@ -36,11 +35,11 @@ services:
       - mongo
       - localstack
     environment:
-      CONTAINER: true
-      PORT: 8080
-      REDIS_URI_C: redis
-      MONGODB_URI_C: mongodb://mongo:27017
-      AWS_URI_C: http://localhost:4566
+      - CONTAINER=true
+      - PORT=8080
+      - REDIS_URI_C=redis
+      - MONGODB_URI_C=mongodb://mongo:27017
+      - AWS_URI_C=http://127.0.0.1:4566
 
 volumes:
   mongodata: {}

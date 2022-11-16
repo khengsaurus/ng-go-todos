@@ -22,6 +22,7 @@ export interface IUser {
 export interface IFile {
   key: string;
   name: string;
+  uploaded: string;
 }
 
 export interface ITodo {

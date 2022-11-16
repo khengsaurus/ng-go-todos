@@ -53,10 +53,12 @@ func GetSignedPutURL(ctx context.Context, key string) (string, error) {
 		return "", fmt.Errorf("couldn't find %s in request context", consts.S3ClientKey)
 	}
 
-	req, _ := s3Client.instance.PutObjectRequest(&s3.PutObjectInput{
-		Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
-		Key:    aws.String(key),
-	})
+	req, _ := s3Client.instance.PutObjectRequest(
+		&s3.PutObjectInput{
+			Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
+			Key:    aws.String(key),
+		},
+	)
 
 	return req.Presign(1 * time.Minute)
 }
@@ -67,10 +69,31 @@ func GetSignedGetURL(ctx context.Context, key string) (string, error) {
 		return "", fmt.Errorf("couldn't find %s in request context", consts.S3ClientKey)
 	}
 
-	req, _ := s3Client.instance.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
-		Key:    aws.String(key),
-	})
+	req, _ := s3Client.instance.GetObjectRequest(
+		&s3.GetObjectInput{
+			Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
+			Key:    aws.String(key),
+		},
+	)
 
 	return req.Presign(10 * time.Minute)
+}
+
+func DeleteObject(ctx context.Context, key string) (bool, error) {
+	fmt.Println("DeleteObject called")
+	s3Client, ok := ctx.Value(consts.S3ClientKey).(*S3Client)
+	if !ok {
+		return false, fmt.Errorf("couldn't find %s in request context", consts.S3ClientKey)
+	}
+
+	if _, err := s3Client.instance.DeleteObject(
+		&s3.DeleteObjectInput{
+			Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
+			Key:    aws.String(key),
+		},
+	); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

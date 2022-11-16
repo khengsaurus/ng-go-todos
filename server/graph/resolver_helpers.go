@@ -310,7 +310,6 @@ func AddFileToTodoAsync(
 func (cbCtx CallbackContext) RemoveFileFromFromTodoCB(
 	todoID string,
 	fileKey string,
-	fileName string,
 ) error {
 	todosColl := cbCtx.db.Collection(consts.TodosCollection)
 	todoId, err := primitive.ObjectIDFromHex(todoID)
@@ -319,7 +318,7 @@ func (cbCtx CallbackContext) RemoveFileFromFromTodoCB(
 	}
 
 	todoFilter := bson.M{"_id": todoId}
-	todoUpdate := bson.M{"$pull": bson.M{"files": bson.M{"name": fileName}}}
+	todoUpdate := bson.M{"$pull": bson.M{"files": bson.M{"key": fileKey}}}
 	if _, err = todosColl.UpdateOne(cbCtx.ctx, todoFilter, todoUpdate); err != nil {
 		return err
 	}
@@ -331,7 +330,6 @@ func RmFileFromTodoTxn(
 	ctx context.Context,
 	todoID string,
 	fileKey string,
-	fileName string,
 ) error {
 	fmt.Println("RmFileFromTodo called - transaction mode")
 
@@ -348,7 +346,7 @@ func RmFileFromTodoTxn(
 				return err
 			}
 			cbCtx := &CallbackContext{ctx: sessionContext, db: db}
-			if err = cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey, fileName); err != nil {
+			if err = cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey); err != nil {
 				return err
 			}
 			if err = session.CommitTransaction(sessionContext); err != nil {
@@ -374,7 +372,6 @@ func RmFileFromTodoAsync(
 	ctx context.Context,
 	todoID string,
 	fileKey string,
-	fileName string,
 ) error {
 	fmt.Println("RmFileFromTodo called - async mode")
 
@@ -384,7 +381,7 @@ func RmFileFromTodoAsync(
 	}
 
 	cbCtx := &CallbackContext{ctx: ctx, db: db}
-	return cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey, fileName)
+	return cbCtx.RemoveFileFromFromTodoCB(todoID, fileKey)
 }
 
 /* ---------------------------------------- Delete board ----------------------------------------*/

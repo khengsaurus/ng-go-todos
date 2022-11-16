@@ -191,13 +191,13 @@ func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fil
 	var err error
 	if consts.Container {
 		if rm {
-			err = RmFileFromTodoAsync(ctx, todoID, fileKey, fileName)
+			err = RmFileFromTodoAsync(ctx, todoID, fileKey)
 		} else {
 			err = AddFileToTodoAsync(ctx, todoID, fileKey, fileName, uploaded)
 		}
 	} else {
 		if rm {
-			err = RmFileFromTodoTxn(ctx, todoID, fileKey, fileName)
+			err = RmFileFromTodoTxn(ctx, todoID, fileKey)
 		} else {
 			err = AddFileToTodoTxn(ctx, todoID, fileKey, fileName, uploaded)
 

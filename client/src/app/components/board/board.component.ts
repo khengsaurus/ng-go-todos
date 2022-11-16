@@ -29,7 +29,6 @@ export class Board implements OnChanges {
   minHeight: string = '0px';
   todos: ITodo[] = [];
   toDelete: ITodo[] = [];
-  editCallback = this._editCallback.bind(this);
   haltEvent = haltEvent;
 
   constructor(
@@ -138,9 +137,9 @@ export class Board implements OnChanges {
     this.minHeight = `${todos.length * 66 - 10}px`;
   }
 
-  _editCallback(todo?: Nullable<ITodo>) {
+  editCallback = ((todo?: Nullable<ITodo>) => {
     this.todos = this.todos?.map((t) => (t.id === todo?.id ? todo : t));
-  }
+  }).bind(this);
 
   trackById = trackById;
 }

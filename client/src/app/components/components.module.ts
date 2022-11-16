@@ -22,10 +22,12 @@ import { Board } from './board/board.component';
 import { TodoCard } from './cards/todo-card.component';
 import { ConfirmButton } from './confirm-button.component';
 import {
+  ConfirmDialog,
   NewBoardDialog,
   PreviewTodoDialog,
   SelectBoardDialog,
 } from './dialogs';
+import { FileComponent } from './file/file.component';
 import { DropdownSelect } from './form/dropdown-select.component';
 import { MarkdownViewer } from './markdown-viewer/markdown-viewer.component';
 import { AppShell } from './shell/shell.component';
@@ -58,6 +60,8 @@ const declarations = [
   AppShell,
   Board,
   ConfirmButton,
+  ConfirmDialog,
+  FileComponent,
   MarkdownViewer,
   NewBoardDialog,
   PreviewTodoDialog,
