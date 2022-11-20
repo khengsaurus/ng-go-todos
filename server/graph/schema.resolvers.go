@@ -59,10 +59,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool, error) {
 	var err error
+	cb := DeleteUser(userID)
 	if consts.Container {
-		err = DeleteUserAsync(ctx, userID)
+		_, err = AsAsync(ctx, cb, "DeleteUser", false)
 	} else {
-		err = DeleteUserTxn(ctx, userID)
+		_, err = WithTransaction(ctx, cb, "DeleteUser", false)
 	}
 	if err != nil {
 		return false, err
@@ -172,10 +173,11 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 // DeleteTodo is the resolver for the deleteTodo field.
 func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error) {
 	var err error
+	cb := DeleteTodo(userID, todoID)
 	if consts.Container {
-		err = DeleteTodoAsync(ctx, userID, todoID)
+		_, err = AsAsync(ctx, cb, "DeleteTodo", false)
 	} else {
-		err = DeleteTodoTxn(ctx, userID, todoID)
+		_, err = WithTransaction(ctx, cb, "DeleteTodo", false)
 	}
 	if err != nil {
 		return false, err
@@ -189,18 +191,20 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 // AddRmTodoFile is the resolver for the addRmTodoFile field.
 func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, uploaded string, rm bool) (bool, error) {
 	var err error
-	if consts.Container {
-		if rm {
-			err = RmFileFromTodoAsync(ctx, todoID, fileKey)
+	if rm {
+		cb := RmFileFromFromTodo(todoID, fileKey)
+		if consts.Container {
+			_, err = AsAsync(ctx, cb, "RemoveFileFromTodo", false)
 		} else {
-			err = AddFileToTodoAsync(ctx, todoID, fileKey, fileName, uploaded)
+			_, err = WithTransaction(ctx, cb, "RemoveFileFromTodo", false)
 		}
 	} else {
-		if rm {
-			err = RmFileFromTodoTxn(ctx, todoID, fileKey)
-		} else {
-			err = AddFileToTodoTxn(ctx, todoID, fileKey, fileName, uploaded)
 
+		cb := AddFileToTodo(todoID, fileKey, fileName, uploaded)
+		if consts.Container {
+			_, err = AsAsync(ctx, cb, "AddFileToTodo", false)
+		} else {
+			_, err = WithTransaction(ctx, cb, "AddFileToTodo", false)
 		}
 	}
 
@@ -237,10 +241,11 @@ func (r *mutationResolver) RmTodoFiles(ctx context.Context, todoID string) (bool
 func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
 	var board *model.Board
 	var err error
+	cb := CreateBoard(newBoard)
 	if consts.Container {
-		board, err = CreateBoardAsync(ctx, newBoard)
+		board, err = AsAsync(ctx, cb, "CreateBoard", nil)
 	} else {
-		board, err = CreateBoardTxn(ctx, newBoard)
+		board, err = WithTransaction(ctx, cb, "CreateBoard", nil)
 	}
 	if err != nil {
 		return nil, err
@@ -284,10 +289,11 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 // DeleteBoard is the resolver for the deleteBoard field.
 func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error) {
 	var err error
+	cb := DeleteBoard(userID, boardID)
 	if consts.Container {
-		err = DeleteBoardAsync(ctx, userID, boardID)
+		_, err = AsAsync(ctx, cb, "DeleteBoard", false)
 	} else {
-		err = DeleteBoardTxn(ctx, userID, boardID)
+		_, err = WithTransaction(ctx, cb, "DeleteBoard", false)
 	}
 	if err != nil {
 		return false, err
@@ -352,18 +358,21 @@ func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardI
 // AddRmBoardTodo is the resolver for the addRmBoardTodo field.
 func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, todoID string, boardID string, rm bool) (bool, error) {
 	var err error
-	if consts.Container {
-		if rm {
-			err = RemoveTodoFromBoardAsync(ctx, todoID, boardID)
+
+	if rm {
+		cb := RmTodoFromBoard(todoID, boardID)
+		if consts.Container {
+			_, err = AsAsync(ctx, cb, "RmTodoFromBoard", false)
 		} else {
-			err = AddTodoToBoardAsync(ctx, todoID, boardID)
+			_, err = WithTransaction(ctx, cb, "RmTodoFromBoard", false)
 		}
 	} else {
-		if rm {
-			err = RemoveTodoFromBoardTxn(ctx, todoID, boardID)
-		} else {
-			err = AddTodoToBoardTxn(ctx, todoID, boardID)
 
+		cb := AddTodoToBoard(todoID, boardID)
+		if consts.Container {
+			_, err = AsAsync(ctx, cb, "AddTodoToBoard", false)
+		} else {
+			_, err = WithTransaction(ctx, cb, "AddTodoToBoard", false)
 		}
 	}
 
@@ -378,10 +387,11 @@ func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, to
 // ShiftTodoBetweenBoards is the resolver for the shiftTodoBetweenBoards field.
 func (r *mutationResolver) ShiftTodoBetweenBoards(ctx context.Context, userID string, todoID string, fromBoard string, toBoard string, toIndex int) (bool, error) {
 	var err error
+	cb := ShiftTodoBwBoards(todoID, fromBoard, toBoard, toIndex)
 	if consts.Container {
-		err = ShiftTodoBetweenBoardsAsync(ctx, todoID, fromBoard, toBoard, toIndex)
+		_, err = AsAsync(ctx, cb, "ShiftTodoBwBoards", false)
 	} else {
-		err = ShiftTodoBetweenBoardsTxn(ctx, todoID, fromBoard, toBoard, toIndex)
+		_, err = WithTransaction(ctx, cb, "ShiftTodoBwBoards", false)
 	}
 	if err != nil {
 		return false, err
