@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { ITodo } from 'src/types';
+import { ITodo, Nullable } from 'src/types';
 import { UserService } from '.';
 import {
   ADD_RM_TODO_FILE,
@@ -26,6 +26,7 @@ interface ITodosSubject {
 export class TodosService {
   currentUserTodos$: Subject<ITodosSubject>;
   resetTodoEditor$: Subject<boolean>;
+  selectedTodo: Nullable<ITodo> = null;
   // Hacky way to update subject value https://stackoverflow.com/questions/51037295/
   _todosCopy: ITodo[] = [];
 
@@ -142,9 +143,11 @@ export class TodosService {
       .pipe(
         map((res) => {
           if (res.data?.deleteTodo) {
-            this.updateTodosSub(
-              this._todosCopy.filter((todo) => todo.id !== todoId)
-            );
+            const updatedTodos = this._todosCopy.filter((t) => t.id !== todoId);
+            this.updateTodosSub(updatedTodos);
+            if (this.selectedTodo?.id === todoId) {
+              this.selectTodo(updatedTodos.length ? updatedTodos[0] : null);
+            }
             return true;
           }
           throw new Error('Failed to delete todo');
@@ -183,6 +186,10 @@ export class TodosService {
       }
     }
     this.updateTodosSub(todos);
+  }
+
+  selectTodo(todo: Nullable<ITodo>) {
+    this.selectedTodo = todo;
   }
 
   private updateTodosSub(todos: ITodo[]) {

@@ -3,6 +3,7 @@
 mat-card.todo {
   background-color: $black-0 !important;
   transition: $transition-normal;
+  height: 24px;
   cursor: pointer;
   &.active {
     box-shadow: 0 0 0px 1px $highlight;

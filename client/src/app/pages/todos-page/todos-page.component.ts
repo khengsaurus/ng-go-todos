@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { takeWhile, tap } from 'rxjs';
 import { TodosService } from 'src/app/services';
 import { trackById } from 'src/app/utils';
-import { ITodo, Nullable } from 'src/types';
 
 @Component({
   selector: 'todo-cards-page',
@@ -11,7 +10,6 @@ import { ITodo, Nullable } from 'src/types';
 })
 export class TodosPage implements OnInit {
   sidenavOpen: boolean = true;
-  selectedTodo: Nullable<ITodo> = null;
   private hasAutoSelected = false;
 
   constructor(public todosService: TodosService) {}
@@ -23,7 +21,7 @@ export class TodosPage implements OnInit {
         tap((todosSub) => {
           if (todosSub?.todos?.length) {
             this.hasAutoSelected = true;
-            this.selectTodo(todosSub.todos[0]);
+            this.todosService.selectTodo(todosSub.todos[0]);
           }
         })
       )
@@ -33,14 +31,9 @@ export class TodosPage implements OnInit {
   toggleSidenav() {
     this.sidenavOpen = !this.sidenavOpen;
   }
-
-  selectTodo(todo: ITodo) {
-    this.selectedTodo = todo;
-  }
-
   handleNewTodo() {
     this.todosService.resetTodoEditor();
-    this.selectedTodo = null;
+    this.todosService.selectTodo(null);
   }
 
   transform(index: number) {

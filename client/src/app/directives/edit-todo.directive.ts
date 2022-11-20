@@ -66,7 +66,7 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
           this.text = changes?.text || '';
         }),
         debounce(() => interval(autoSaveDelay)),
-        tap((changes) => this.updateTodo(changes))
+        tap((todo) => this.updateTodo(todo)) // requries explicit pass ?
         // TODO tap auto-saved feedback
       )
       .subscribe();
@@ -129,7 +129,10 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
         .createTodo$(this.userService.currentUser.id, newTodo['text'])
         .pipe(
           tap((_todo) => {
-            if (_todo) this.todo = _todo;
+            if (_todo) {
+              this.todo = _todo;
+              this.todosService.selectTodo(_todo);
+            }
           })
         )
         .subscribe();

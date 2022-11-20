@@ -18,7 +18,7 @@
       <button
         mat-icon-button
         class="todos-sidenav-toggle bottom"
-        (click)="this.handleNewTodo()"
+        (click)="handleNewTodo()"
         disableRipple
       >
         <mat-icon class="mat-icon-s" [class.hide]="!sidenavOpen"
@@ -40,8 +40,8 @@
       >
         <todo-card
           [todo]="todo"
-          [active]="todo.id === selectedTodo?.id"
-          (click)="selectTodo(todo)"
+          [active]="todo.id === todosService.selectedTodo?.id"
+          (click)="todosService.selectTodo(todo)"
         ></todo-card>
       </div>
     </div>
@@ -51,7 +51,7 @@
   <mat-sidenav-content class="todo-content">
     <button
       mat-icon-button
-      [class]="'todos-sidenav-toggle top secondary'"
+      class="todos-sidenav-toggle top secondary"
       [class.hide]="sidenavOpen"
       (click)="toggleSidenav()"
       disableRipple
@@ -60,17 +60,17 @@
     </button>
     <button
       mat-icon-button
-      [class]="'todos-sidenav-toggle bottom secondary'"
+      class="todos-sidenav-toggle bottom secondary"
       [class.hide]="sidenavOpen"
-      (click)="this.handleNewTodo()"
+      (click)="handleNewTodo()"
       [ngStyle]="{ bottom: '4px' }"
       disableRipple
     >
       <mat-icon class="mat-icon-s">note_add</mat-icon>
     </button>
     <todo-editor
-      [todo]="this.selectedTodo"
-      [size]="this.sidenavOpen ? 2 : 3"
+      [todo]="todosService.selectedTodo"
+      [size]="sidenavOpen ? 2 : 3"
     ></todo-editor>
   </mat-sidenav-content>
 </mat-sidenav-container>
