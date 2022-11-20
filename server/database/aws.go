@@ -97,3 +97,18 @@ func DeleteObject(ctx context.Context, key string) (bool, error) {
 
 	return true, nil
 }
+
+func DeleteObjects(ctx context.Context, objects *s3.DeleteObjectsInput) (bool, error) {
+	fmt.Println("DeleteObjects called")
+	s3Client, ok := ctx.Value(consts.S3ClientKey).(*S3Client)
+	if !ok {
+		return false, fmt.Errorf("couldn't find %s in request context", consts.S3ClientKey)
+	}
+
+	_, err := s3Client.instance.DeleteObjects(objects)
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
+}

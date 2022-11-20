@@ -39,13 +39,13 @@ export class FilesService {
             if (presignRes?.key && presignRes?.url) {
               return fetch(presignRes.url, {
                 method: 'put',
-                // headers: environment.production
-                //   ? { 'Content-Type': 'multipart/form-data' }
-                //   : {
-                //       'Content-Type': 'application/json',
-                //       'x-amz-acl': 'public-read-write',
-                //     },
-                headers: { 'Content-Type': 'multipart/form-data' },
+                headers: environment.production
+                  ? { 'Content-Type': 'multipart/form-data' }
+                  : {
+                      'Content-Type': 'application/json',
+                      'x-amz-acl': 'public-read-write',
+                    },
+                // headers: { 'Content-Type': 'multipart/form-data' }, // <- remote AWS
                 body: file,
               })
                 .then((uploadRes) => {

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/khengsaurus/ng-go-todos/consts"
+	"github.com/khengsaurus/ng-go-todos/utils"
 	"github.com/rs/cors"
 )
 
@@ -29,5 +30,15 @@ func WithContextFn(key consts.ContextKey, client interface{}, next http.Handler)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), key, client)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func AdminValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !utils.ValidateAdmin(r.Header.Get("Authorization")) {
+			w.WriteHeader(http.StatusUnauthorized)
+		} else {
+			next.ServeHTTP(w, r)
+		}
 	})
 }

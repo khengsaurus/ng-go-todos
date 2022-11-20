@@ -20,3 +20,8 @@ func Json200(payload any, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }
+
+func ValidateAdmin(token string) bool {
+	// Simple validation for now
+	return token == "Bearer - admin"
+}

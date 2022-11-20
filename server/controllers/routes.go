@@ -11,3 +11,8 @@ var RestRouter = func(restApi chi.Router) {
 		filesApi.Post("/", GetSignedPutURL)
 	})
 }
+
+var AdminRouter = func(adminRouter chi.Router) {
+	adminRouter.Get("/", AdminGet)
+	adminRouter.Delete("/{action}", AdminDelete)
+}

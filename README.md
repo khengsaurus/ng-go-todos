@@ -74,7 +74,6 @@ query getTodos($userId: String!, $fresh: Boolean!) {
       done
       files {
         key
-        name
       }
     }
   }
@@ -92,7 +91,6 @@ query getTodo($todoId: String!) {
     updatedAt
     files {
       key
-      name
     }
   }
 }
@@ -152,6 +150,10 @@ mutation addRmBoardTodo(
 ) {
   addRmBoardTodo(userId: $userId, boardId: $boardId, todoId: $todoId, rm: $rm)
 }
+
+mutation rmTodoFiles($todoId: String!){
+  rmTodoFiles(todoId: $todoId)
+}
 ```
 
 Request variables
@@ -186,4 +188,11 @@ Request variables
     "name": ""
   }
 }
+```
+
+#### LocalStack bash commands
+
+```bash
+> awslocal s3 ls # LS S3 buckets
+> awslocal s3 ls <bucket-name> --recursive # LS S3 bucket contents
 ```

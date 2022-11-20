@@ -22,6 +22,7 @@ import (
 var (
 	route_gql    = "/gql_api"
 	route_rest   = "/rest_api"
+	route_admin  = "/admin"
 	route_test   = "/test"
 	route_gql_pg = "/playground"
 )
@@ -50,7 +51,6 @@ func main() {
 
 	router.Handle(route_gql, wrappedGQLHandler)
 	router.Route(route_rest, func(restRouter chi.Router) {
-		// Only files api requires s3Client
 		restRouter.Use(middlewares.WithContext(consts.S3ClientKey, s3Client))
 		controllers.RestRouter(restRouter)
 	})
@@ -58,6 +58,13 @@ func main() {
 	// Dev
 	router.HandleFunc(route_test, test)
 	router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
+
+	if consts.Container {
+		router.Route(route_admin, func(adminRouter chi.Router) {
+			adminRouter.Use(middlewares.AdminValidation)
+			controllers.AdminRouter(adminRouter)
+		})
+	}
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router)
 	if err != nil {
