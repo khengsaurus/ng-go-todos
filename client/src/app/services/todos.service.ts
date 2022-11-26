@@ -85,7 +85,6 @@ export class TodosService {
   }
 
   updateTodo$(updateTodo: Partial<ITodo>) {
-    console.log('updateTodo$ called');
     return this.apollo
       .mutate<IUPDATE_TODO>({
         mutation: UPDATE_TODO,

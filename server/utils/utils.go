@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/khengsaurus/ng-go-todos/consts"
 )
 
 func GetUserTodosKey(userId string) string {
-	return fmt.Sprintf("%s-todos", userId)
+	return fmt.Sprintf("%s_%s_todos", consts.RedisKeyPrefix, userId)
 }
 
 func GetUserBoardsKey(userId string) string {
-	return fmt.Sprintf("%s-boards", userId)
+	return fmt.Sprintf("%s_%s_boards", consts.RedisKeyPrefix, userId)
 }
 
 func Json200(payload any, w http.ResponseWriter) {

@@ -46,7 +46,6 @@ export interface IBoard {
   todos: ITodo[];
   createdAt: any;
   updatedAt: any;
-  todoIds?: string[]; // for sorting on server-side
 }
 
 export interface ILink {

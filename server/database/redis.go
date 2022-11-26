@@ -51,7 +51,8 @@ func GetRedisClient(ctx context.Context) (*RedisClient, error) {
 func GetRedisValue[M model.Todo | model.Board](
 	redisClient *RedisClient,
 	ctx context.Context,
-	cacheKey string) []*M {
+	cacheKey string,
+) []*M {
 	cacheValue, err := redisClient.instance.Get(ctx, cacheKey).Result()
 	if err == redis.Nil {
 		// Cached value does not exist. Return nil
@@ -61,7 +62,7 @@ func GetRedisValue[M model.Todo | model.Board](
 		return nil
 	} else {
 		// Cached value exists. Extend TTL & build response
-		redisClient.instance.Expire(ctx, cacheKey, consts.DefaultTTL).Result()
+		redisClient.instance.Expire(ctx, cacheKey, consts.RedisTTL).Result()
 		data := make([]*M, 0)
 		err := json.Unmarshal(
 			bytes.NewBufferString(cacheValue).Bytes(), &data)
@@ -87,7 +88,7 @@ func SetRedisValue[M model.Todo | model.Board](
 		ctx,
 		cacheKey,
 		bytes.NewBuffer(b).Bytes(),
-		consts.DefaultTTL,
+		consts.RedisTTL,
 	).Err()
 	if err != nil {
 		fmt.Printf("Failed to cache value for key %s\n", cacheKey)

@@ -367,7 +367,6 @@ func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, to
 			_, err = WithTransaction(ctx, cb, "RmTodoFromBoard", false)
 		}
 	} else {
-
 		cb := AddTodoToBoard(todoID, boardID)
 		if consts.Container {
 			_, err = AsAsync(ctx, cb, "AddTodoToBoard", false)

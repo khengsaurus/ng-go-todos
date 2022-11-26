@@ -213,6 +213,17 @@ export class BoardsService {
     this.updateBoards(boardsCopy);
   }
 
+  rmTodoFromBoards(todo: ITodo) {
+    const boards = [...this._boardsCopy];
+    for (const board of boards) {
+      if (board.todos?.some((t) => t.id === todo.id)) {
+        board.todos = board.todos.filter((t) => t.id !== todo.id);
+        this.currentUserBoards$.next(boards);
+        break;
+      }
+    }
+  }
+
   reorderBoards(boardIds: string[]) {
     const boards = boardIds
       .map((id) => this._boardsCopy.find((b) => b.id === id))

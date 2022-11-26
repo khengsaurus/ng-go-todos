@@ -72,17 +72,15 @@ func CreateBoard[R *model.Board](
 /* ---------------------------------------- Delete todo ----------------------------------------*/
 
 func DeleteTodo[R bool](
-	todoID string,
 	userID string,
+	todoID string,
 ) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		todosColl := db.Collection(consts.TodosCollection)
-		boardsColl := db.Collection(consts.BoardsCollection)
-
 		// Delete todo
+		todosColl := db.Collection(consts.TodosCollection)
 		todoId, err := primitive.ObjectIDFromHex(todoID)
 		if err != nil {
 			return false, err
@@ -92,6 +90,7 @@ func DeleteTodo[R bool](
 		}
 
 		// Delete todo from boards by user
+		boardsColl := db.Collection(consts.BoardsCollection)
 		userId, err := primitive.ObjectIDFromHex(userID)
 		if err != nil {
 			return false, err
@@ -224,23 +223,23 @@ func DeleteUser[R bool](
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		usersColl := db.Collection(consts.UsersCollection)
-		todosColl := db.Collection(consts.TodosCollection)
-		boardsColl := db.Collection(consts.BoardsCollection)
 		userId, err := primitive.ObjectIDFromHex(userID)
 		if err != nil {
 			return false, err
 		}
 
+		usersColl := db.Collection(consts.UsersCollection)
 		if _, err = usersColl.DeleteOne(ctx, bson.M{"_id": userId}); err != nil {
 			return false, err
 		}
 
+		todosColl := db.Collection(consts.TodosCollection)
 		userFilter := bson.M{"userId": userId}
 		if _, err = todosColl.DeleteMany(ctx, userFilter); err != nil {
 			return false, err
 		}
 
+		boardsColl := db.Collection(consts.BoardsCollection)
 		if _, err = boardsColl.DeleteMany(ctx, userFilter); err != nil {
 			return false, err
 		}
@@ -260,13 +259,12 @@ func AddTodoToBoard[R bool](
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		todosColl := db.Collection(consts.TodosCollection)
-		boardsColl := db.Collection(consts.BoardsCollection)
-
 		todoId, err := primitive.ObjectIDFromHex(todoID)
 		if err != nil {
 			return false, err
 		}
+
+		todosColl := db.Collection(consts.TodosCollection)
 		todoFilter := bson.M{"_id": todoId}
 		todoUpdate := bson.M{"$set": bson.M{"boardId": boardID}}
 		if _, err = todosColl.UpdateOne(ctx, todoFilter, todoUpdate); err != nil {
@@ -278,6 +276,7 @@ func AddTodoToBoard[R bool](
 			return false, err
 		}
 
+		boardsColl := db.Collection(consts.BoardsCollection)
 		boardFilter := bson.M{"_id": boardId}
 		boardUpdate := bson.M{
 			"$push": bson.M{
@@ -291,7 +290,6 @@ func AddTodoToBoard[R bool](
 				},
 			},
 		}
-
 		if _, err = boardsColl.UpdateOne(ctx, boardFilter, boardUpdate); err != nil {
 			return false, err
 		}
@@ -310,24 +308,24 @@ func RmTodoFromBoard[R bool](
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		todosColl := db.Collection(consts.TodosCollection)
 		todoId, err := primitive.ObjectIDFromHex(todoID)
 		if err != nil {
 			return false, err
 		}
 
+		todosColl := db.Collection(consts.TodosCollection)
 		todoFilter := bson.M{"_id": todoId}
 		todoUpdate := bson.M{"$set": bson.M{"boardId": ""}}
 		if _, err = todosColl.UpdateOne(ctx, todoFilter, todoUpdate); err != nil {
 			return false, err
 		}
 
-		boardsColl := db.Collection(consts.BoardsCollection)
 		boardId, err := primitive.ObjectIDFromHex(boardID)
 		if err != nil {
 			return false, err
 		}
 
+		boardsColl := db.Collection(consts.BoardsCollection)
 		boardFilter := bson.M{"_id": boardId}
 		boardUpdate := bson.M{"$pull": bson.M{
 			"todoIds": todoID,
@@ -354,23 +352,24 @@ func ShiftTodoBwBoards[R bool](
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		todosColl := db.Collection(consts.TodosCollection)
 		todoId, err := primitive.ObjectIDFromHex(todoID)
 		if err != nil {
 			return false, err
 		}
 
+		todosColl := db.Collection(consts.TodosCollection)
 		todoFilter := bson.M{"_id": todoId}
 		todoUpdate := bson.M{"$set": bson.M{"boardId": toBoard}}
 		if _, err = todosColl.UpdateOne(ctx, todoFilter, todoUpdate); err != nil {
 			return false, err
 		}
 
-		boardsColl := db.Collection(consts.BoardsCollection)
 		fromBoardId, err := primitive.ObjectIDFromHex(fromBoard)
 		if err != nil {
 			return false, err
 		}
+
+		boardsColl := db.Collection(consts.BoardsCollection)
 		fromBoardFilter := bson.M{"_id": fromBoardId}
 		fromBoardUpdate := bson.M{"$pull": bson.M{
 			"todos":   todoId,

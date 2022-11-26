@@ -44,7 +44,10 @@ export class TodoEditor extends EditTodoDirective {
           this.todo.id
         )
       )
-        .then(() => this.resetTodo())
+        .then(() => {
+          this.boardsService.rmTodoFromBoards(this.todo!);
+          this.resetTodo();
+        })
         .catch(console.error);
     }
   }
@@ -63,6 +66,7 @@ export class TodoEditor extends EditTodoDirective {
       if (this.todo && boardId) {
         this.boardsService.addTodoToBoard$(this.todo, boardId).subscribe();
         this.todosService.addTodoToBoardCB({ ...this.todo, boardId });
+        this.todo.boardId = boardId;
       }
     });
   }

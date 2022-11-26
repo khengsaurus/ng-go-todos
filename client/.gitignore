@@ -47,5 +47,5 @@ Thumbs.db
 .runtimeconfig.json
 
 # 
+.env
 Dockerfile
-src/environments/configuration.ts

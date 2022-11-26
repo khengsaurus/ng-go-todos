@@ -1,4 +1,4 @@
-import { firebase } from './configuration';
+import { firebase } from './firebaseConfig';
 
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
@@ -7,8 +7,8 @@ import { firebase } from './configuration';
 export const environment = {
   production: false,
   firebase,
-  gqlApi: 'http://localhost:8080/gql_api',
-  restApi: 'http://localhost:8080/rest_api',
+  gqlApi: `${process.env.NG_APP_SERVER_DEV}/${process.env.NG_APP_GQL_API}`,
+  restApi: `${process.env.NG_APP_SERVER_DEV}/${process.env.NG_APP_REST_API}`,
 };
 
 /*
