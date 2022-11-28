@@ -77,9 +77,7 @@ export class TodosService {
       .pipe(
         map((res) => res.data?.createTodo),
         tap((_newTodo) => {
-          if (_newTodo) {
-            this.updateTodosSub([_newTodo, ...this._todosCopy]);
-          }
+          if (_newTodo) this.updateTodosSub([_newTodo, ...this._todosCopy]);
         })
       );
   }
@@ -144,14 +142,22 @@ export class TodosService {
           if (res.data?.deleteTodo) {
             const updatedTodos = this._todosCopy.filter((t) => t.id !== todoId);
             this.updateTodosSub(updatedTodos);
-            if (this.selectedTodo?.id === todoId) {
+            if (this.selectedTodo?.id === todoId)
               this.selectTodo(updatedTodos.length ? updatedTodos[0] : null);
-            }
             return true;
           }
           throw new Error('Failed to delete todo');
         })
       );
+  }
+
+  addTodoToBoardCB(todo: ITodo) {
+    const todos = [];
+    for (const t of this._todosCopy) {
+      if (t.id === todo.id) todos.push(todo);
+      else todos.push(t);
+    }
+    this.updateTodosSub(todos);
   }
 
   addRmTodoFile$(todo: ITodo, fileKey: string, fileName: string, rm = false) {
@@ -163,32 +169,18 @@ export class TodosService {
       })
       .pipe(
         map((res) => {
-          if (res.data?.addRmTodoFile) {
-            if (rm) {
-              return '-1';
-            } else {
-              return uploaded;
-            }
-          }
+          if (res.data?.addRmTodoFile) return rm ? -1 : uploaded;
           throw new Error(`Failed to ${rm ? `remove` : `add`} file ${fileKey}`);
         })
       );
   }
 
-  addTodoToBoardCB(todo: ITodo) {
-    const todos = [];
-    for (const t of this._todosCopy) {
-      if (t.id === todo.id) {
-        todos.push(todo);
-      } else {
-        todos.push(t);
-      }
-    }
-    this.updateTodosSub(todos);
-  }
-
   selectTodo(todo: Nullable<ITodo>) {
     this.selectedTodo = todo;
+  }
+
+  screen(update: (todo: ITodo) => ITodo) {
+    this.updateTodosSub(this._todosCopy.map(update));
   }
 
   private updateTodosSub(todos: ITodo[]) {

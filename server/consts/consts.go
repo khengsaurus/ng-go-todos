@@ -8,7 +8,7 @@ import (
 type ContextKey string
 
 var (
-	Container        = os.Getenv("CONTAINER") == "true"
+	Local            = os.Getenv("LOCAL") == "true"
 	MongoClientKey   = ContextKey("mongo_client")
 	S3ClientKey      = ContextKey("s3_client")
 	RedisClientKey   = ContextKey("redis_client")

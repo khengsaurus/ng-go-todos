@@ -26,6 +26,7 @@ const initTodo = {
 @Inject('focusEditor')
 export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
   @Input() todo: Nullable<ITodo> = null;
+  updateCallback: (todo: ITodo) => void;
   scrollEditor: () => void;
   focusEditor: () => void;
   todoForm: FormGroup;
@@ -37,9 +38,11 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
   constructor(
     protected userService: UserService,
     protected todosService: TodosService,
+    updateCallback = () => {},
     scrollEditor = () => {},
     focusEditor = () => {}
   ) {
+    this.updateCallback = updateCallback;
     this.scrollEditor = scrollEditor;
     this.focusEditor = focusEditor;
     this.todoForm = new FormGroup({
@@ -66,7 +69,10 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
           this.text = changes?.text || '';
         }),
         debounce(() => interval(autoSaveDelay)),
-        tap((todo) => this.updateTodo(todo)) // requries explicit pass ?
+        tap((todo) => {
+          this.updateCallback(todo);
+          this.updateTodo(todo);
+        })
         // TODO tap auto-saved feedback
       )
       .subscribe();
@@ -74,9 +80,7 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
     this.resetSub = this.todosService.resetTodoEditor$
       .pipe(
         tap((signal) => {
-          if (signal) {
-            this.resetTodo();
-          }
+          if (signal) this.resetTodo();
         })
       )
       .subscribe();

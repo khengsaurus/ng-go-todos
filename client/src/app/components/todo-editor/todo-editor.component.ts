@@ -54,19 +54,18 @@ export class TodoEditor extends EditTodoDirective {
 
   addToBoard() {
     if (!this.todo) return;
-
     const dialogRef = this.dialog.open(SelectBoardDialog, {
       autoFocus: false,
       width: '244px',
       data: {},
     });
-
     dialogRef.componentInstance.todo = this.todo;
     dialogRef.componentInstance.selector.subscribe((boardId: string) => {
       if (this.todo && boardId) {
         this.boardsService.addTodoToBoard$(this.todo, boardId).subscribe();
-        this.todosService.addTodoToBoardCB({ ...this.todo, boardId });
-        this.todo.boardId = boardId;
+        const updatedTodo = { ...this.todo, boardId };
+        this.todosService.addTodoToBoardCB(updatedTodo);
+        this.todo = updatedTodo;
       }
     });
   }
@@ -116,4 +115,8 @@ export class TodoEditor extends EditTodoDirective {
       )
       .subscribe();
   }).bind(this);
+
+  get notOnBoard() {
+    return !this.todo?.boardId;
+  }
 }

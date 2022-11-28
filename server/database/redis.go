@@ -20,7 +20,7 @@ type RedisClient struct {
 func InitRedisClient() *RedisClient {
 	var opts *redis.Options
 
-	if consts.Container {
+	if consts.Local {
 		fmt.Println("Redis config: local")
 		redisAddress := fmt.Sprintf("%s:6379", os.Getenv("REDIS_URI_C"))
 		opts = (&redis.Options{

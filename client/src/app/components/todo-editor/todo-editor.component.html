@@ -27,7 +27,7 @@
     </div>
     <div class="right">
       <button
-        *ngIf="!todo.boardId"
+        *ngIf="notOnBoard"
         mat-button
         class="btn mat-icon-s"
         matTooltip="Add to board"
@@ -63,4 +63,5 @@
       <confirm-button (action)="deleteTodo()" icon="delete"></confirm-button>
     </div>
   </div>
+  <!-- <mat-spinner diameter="16" color="primary"></mat-spinner> -->
 </form>

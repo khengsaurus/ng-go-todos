@@ -8,10 +8,6 @@ Technologies
 • GraphQL
 • Angular
 
-## Server notes
-
-MongoDB only supports transaction writes when working with replica sets. As such, functions executed as transaction writes in this project are also called in 'async mode' when working with a single-node instance of MongoDB in a Dockerized environment.
-
 ### gqlgen
 
 [99designs/gqlgen](https://github.com/99designs/gqlgen) is used to generate much of the boilerplate required for a Go GraphQL server. BSON tags are then generated manually using this [script](https://github.com/99designs/gqlgen/issues/865#issuecomment-573043996).
@@ -151,7 +147,7 @@ mutation addRmBoardTodo(
   addRmBoardTodo(userId: $userId, boardId: $boardId, todoId: $todoId, rm: $rm)
 }
 
-mutation rmTodoFiles($todoId: String!){
+mutation rmTodoFiles($todoId: String!) {
   rmTodoFiles(todoId: $todoId)
 }
 ```

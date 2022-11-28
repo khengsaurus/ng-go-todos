@@ -59,7 +59,7 @@ func main() {
 	router.HandleFunc(route_test, test)
 	router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
 
-	if consts.Container {
+	if consts.Local {
 		router.Route(route_admin, func(adminRouter chi.Router) {
 			adminRouter.Use(middlewares.AdminValidation)
 			controllers.AdminRouter(adminRouter)

@@ -9,18 +9,7 @@ import { ControlContainer, FormGroupDirective } from '@angular/forms';
       useExisting: FormGroupDirective,
     },
   ],
-  template: `
-    <div class="btn-m dropdown-select">
-      <p class="label">{{ label }}</p>
-      <mat-form-field appearance="standard" [ngStyle]="{ width: '30px' }">
-        <mat-select formControlName="{{ controlName }}">
-          <mat-option *ngFor="let val of options" [value]="val">{{
-            val
-          }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-  `,
+  templateUrl: './dropdown-select.component.html',
   styleUrls: ['form.scss'],
 })
 export class DropdownSelect {

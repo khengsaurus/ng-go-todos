@@ -35,8 +35,8 @@ services:
       - mongo
       - localstack
     environment:
-      - CONTAINER=true
       - PORT=8080
+      - LOCAL=true
       - REDIS_URI_C=redis
       - MONGODB_URI_C=mongodb://mongo:27017
       - AWS_URI_C=http://127.0.0.1:4566

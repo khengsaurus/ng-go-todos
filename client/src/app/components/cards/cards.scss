@@ -6,7 +6,7 @@ mat-card.todo {
   height: 24px;
   cursor: pointer;
   &.active {
-    box-shadow: 0 0 0px 1px $highlight;
+    box-shadow: 0 0 0px 1px #f5ab63;
   }
   .content {
     @include flex-(row);

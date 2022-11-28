@@ -34,12 +34,10 @@ export class EmailLogin {
     const email = this.email?.value;
     const password = this.password?.value;
     try {
-      if (this.isLogin) {
+      if (this.isLogin)
         await this.authService.signinWithEmailPassword(email, password);
-      }
-      if (this.isSignup) {
+      if (this.isSignup)
         await this.authService.signupWithEmailPassword(email, password);
-      }
     } catch (err: any) {
       this.serverMessage = err?.message || 'Request failed!';
     }

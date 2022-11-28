@@ -8,8 +8,8 @@
 @import "./scss/overrides.scss";
 @import "./scss/variables.scss";
 
-$ng-go-todos-primary: mat.define-palette($custom-blue);
-$ng-go-todos-accent: mat.define-palette($custom-green);
+$ng-go-todos-primary: mat.define-palette($custom-orange);
+$ng-go-todos-accent: mat.define-palette($custom-magenta);
 
 // The warn palette is optional (defaults to red).
 $ng-go-todos-warn: mat.define-palette($custom-red);
@@ -46,8 +46,8 @@ $ng-go-todos-theme: mat.define-dark-theme(
 
 @mixin btn-orange {
   @include hover-orange;
-  // color: $custom-orange(700);
-  color: #f3a258;
+  // color: $custom-orange(600);
+  color: #f5ab63;
 }
 
 :root {

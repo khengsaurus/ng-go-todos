@@ -12,15 +12,16 @@ import (
 type rv interface {
 	bool | *model.Board | *model.Todo
 }
+
 type callback[R rv] func(ctx context.Context, db mongo.Database) (R, error)
 
-func WithTransaction[R rv](
+func AsTransaction[R rv](
 	ctx context.Context,
 	cb callback[R],
 	cbName string,
 	fallbackValue R,
 ) (R, error) {
-	fmt.Printf("WithTransaction - %s\n", cbName)
+	fmt.Printf("AsTransaction - %s\n", cbName)
 
 	session, db, err := database.GetSession(ctx)
 	if err != nil {
@@ -47,7 +48,7 @@ func WithTransaction[R rv](
 		})
 
 	if err != nil {
-		fmt.Printf("WithTransaction  - transaction error (%s): %v\nAborting transaction\n", cbName, err)
+		fmt.Printf("AsTransaction  - transaction error (%s): %v\nAborting transaction\n", cbName, err)
 		if abortErr := session.AbortTransaction(ctx); abortErr != nil {
 			return fallbackValue, abortErr
 		} else {
@@ -65,9 +66,11 @@ func AsAsync[R rv](
 	fallbackValue R,
 ) (R, error) {
 	fmt.Printf("AsAsync - %s\n", cbName)
+
 	db, err := database.GetMongoDb(ctx)
 	if err != nil {
 		return fallbackValue, err
 	}
+
 	return cb(ctx, *db)
 }

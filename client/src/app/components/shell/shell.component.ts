@@ -33,18 +33,9 @@ export class AppShell {
 }
 
 const sideLinksLoggedIn: Array<ILink> = [
-  {
-    route: Route.TODOS,
-    label: 'Todos',
-  },
-  {
-    route: Route.BOARDS,
-    label: 'Boards',
-  },
-  {
-    route: Route.USER_PROFILE,
-    label: 'Profile',
-  },
+  { route: Route.TODOS, label: 'Todos' },
+  { route: Route.BOARDS, label: 'Boards' },
+  { route: Route.USER_PROFILE, label: 'Profile' },
 ];
 
 const sideLinksLoggedOut: Array<ILink> = [

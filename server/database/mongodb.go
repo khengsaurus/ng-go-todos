@@ -19,7 +19,7 @@ type MongoClient struct {
 
 func InitMongoClient() *MongoClient {
 	var uri string
-	if consts.Container {
+	if consts.Local {
 		fmt.Println("Mongo config: local")
 		uri = os.Getenv("MONGODB_URI_C")
 	} else {
@@ -41,7 +41,7 @@ func InitMongoClient() *MongoClient {
 func (mongoClient *MongoClient) Connect(ctx context.Context) error {
 	fmt.Println("MongoClient.Connect called")
 	var uri string
-	if consts.Container {
+	if consts.Local {
 		uri = os.Getenv("MONGODB_URI_C")
 	} else {
 		uri = os.Getenv("MONGODB_URI")

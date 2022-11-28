@@ -4,7 +4,7 @@ import { Apollo, MutationResult } from 'apollo-angular';
 import { BehaviorSubject, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { IBoard, ITodo, IUser, Nullable } from 'src/types';
-import { UserService } from '.';
+import { TodosService, UserService } from '.';
 import { NewBoardDialog } from 'src/app/components/dialogs';
 import {
   ADD_RM_BOARD_TODO,
@@ -29,6 +29,7 @@ export class BoardsService {
   constructor(
     private apollo: Apollo,
     private userService: UserService,
+    private todosService: TodosService,
     private dialog: MatDialog
   ) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
@@ -69,9 +70,7 @@ export class BoardsService {
       .pipe(
         map((res) => res.data?.createBoard),
         tap((_newBoard) => {
-          if (_newBoard) {
-            this.updateBoards([...this._boardsCopy, _newBoard]);
-          }
+          if (_newBoard) this.updateBoards([...this._boardsCopy, _newBoard]);
         }),
         map((board) => board?.id)
       );
@@ -113,8 +112,9 @@ export class BoardsService {
       .pipe(
         tap((res) => {
           if (res.data?.deleteBoard) {
-            this.updateBoards(
-              this._boardsCopy.filter((board) => board.id !== boardId)
+            this.updateBoards(this._boardsCopy.filter((b) => b.id !== boardId));
+            this.todosService.screen((todo) =>
+              todo.boardId === boardId ? { ...todo, boardId: '' } : todo
             );
           }
         })
@@ -146,9 +146,7 @@ export class BoardsService {
       })
       .pipe(
         tap((res) => {
-          if (res?.data?.addRmBoardTodo) {
-            this.addRmTodoOnBoard(todo, boardId);
-          }
+          if (res?.data?.addRmBoardTodo) this.addRmTodoOnBoard(todo, boardId);
         })
       );
   }

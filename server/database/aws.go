@@ -23,7 +23,7 @@ type S3Client struct {
 func InitS3Client() *S3Client {
 	var awsSession *session.Session
 	var err error
-	if consts.Container {
+	if consts.Local {
 		fmt.Println("AWS config: local")
 		awsSession, err = session.NewSession(
 			&aws.Config{
