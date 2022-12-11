@@ -93,7 +93,6 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 		{Key: "boardId", Value: nil},
 		{Key: "text", Value: newTodo.Text},
 		{Key: "priority", Value: 2},
-		{Key: "tag", Value: "white"},
 		{Key: "markdown", Value: false},
 		{Key: "done", Value: false},
 		{Key: "files", Value: []*string{}},
@@ -108,7 +107,6 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 			UserID:   newTodo.UserID,
 			Text:     newTodo.Text,
 			Priority: 2,
-			Tag:      "white",
 			Markdown: false,
 			Done:     false,
 			Files:    []*model.File{},
@@ -149,9 +147,6 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 	}
 	if updateTodo.Priority != nil {
 		updateVals = append(updateVals, bson.E{Key: "priority", Value: updateTodo.Priority})
-	}
-	if updateTodo.Tag != nil {
-		updateVals = append(updateVals, bson.E{Key: "tag", Value: updateTodo.Tag})
 	}
 	if updateTodo.Markdown != nil {
 		updateVals = append(updateVals, bson.E{Key: "markdown", Value: updateTodo.Markdown})
@@ -270,13 +265,18 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 
 	filter := bson.D{{Key: "_id", Value: boardId}}
 	update := bson.D{{
-		Key: "$set",
-		Value: bson.D{
-			{Key: "todos", Value: updateBoard.Todos},
-			{Key: "name", Value: updateBoard.Name},
-			{Key: "updatedAt", Value: time.Now()},
-		},
+		Key:   "$set",
+		Value: bson.D{{Key: "updatedAt", Value: time.Now()}},
 	}}
+	if updateBoard.Todos != nil {
+		update = append(update, bson.E{Key: "todos", Value: updateBoard.Todos})
+	}
+	if updateBoard.Name != nil {
+		update = append(update, bson.E{Key: "name", Value: updateBoard.Name})
+	}
+	if updateBoard.Color != nil {
+		update = append(update, bson.E{Key: "color", Value: updateBoard.Color})
+	}
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err

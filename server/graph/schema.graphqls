@@ -15,7 +15,6 @@ type Todo {
   boardId: String!
   text: String!
   priority: Int!
-  tag: String!
   markdown: Boolean!
   done: Boolean!
   files: [File]!
@@ -27,6 +26,7 @@ type Board {
   id: ID!
   userId: String!
   name: String!
+  color: String!
   todos: [Todo]!
   todoIds: [String]!
   createdAt: Time!
@@ -54,6 +54,7 @@ input NewTodo {
 input NewBoard {
   userId: String!
   name: String!
+  color: String!
 }
 
 input UpdateTodo {
@@ -62,7 +63,6 @@ input UpdateTodo {
   boardId: String
   text: String
   priority: Int
-  tag: String
   markdown: Boolean
   done: Boolean
 }
@@ -70,8 +70,9 @@ input UpdateTodo {
 input UpdateBoard {
   id: String!
   userId: String!
-  name: String!
-  todos: [String]!
+  name: String
+  color: String
+  todos: [String]
 }
 
 # --------------- Return ---------------

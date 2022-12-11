@@ -3,7 +3,7 @@ import markdown from './markdown';
 
 @Component({
   selector: 'markdown-viewer',
-  template: ` <div [innerHTML]="innerHTML" class="contents"></div> `,
+  template: `<div [innerHTML]="innerHTML" class="contents"></div>`,
   styleUrls: ['./markdown-viewer.component.scss'],
 })
 export class MarkdownViewer implements OnChanges {
@@ -11,7 +11,6 @@ export class MarkdownViewer implements OnChanges {
   @Input() format: boolean = false;
   innerHTML: string = '';
 
-  constructor() {}
   ngOnChanges(changes: SimpleChanges): void {
     const setFormat = changes['format']?.currentValue;
     if ((setFormat === undefined && this.format) || setFormat) {

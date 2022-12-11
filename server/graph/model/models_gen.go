@@ -12,6 +12,7 @@ type Board struct {
 	Name      string    `json:"name" bson:"name"`
 	Todos     []*Todo   `json:"todos" bson:"todos"`
 	TodoIds   []*string `json:"todoIds" bson:"todoIds"`
+	Color     string    `json:"color" bson:"color"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
@@ -35,6 +36,7 @@ type GetTodosRes struct {
 type NewBoard struct {
 	UserID string `json:"userId" bson:"userId"`
 	Name   string `json:"name" bson:"name"`
+	Color  string `json:"color" bson:"color"`
 }
 
 type NewTodo struct {
@@ -53,7 +55,6 @@ type Todo struct {
 	BoardID   string    `json:"boardId" bson:"boardId"`
 	Text      string    `json:"text" bson:"text"`
 	Priority  int       `json:"priority" bson:"priority"`
-	Tag       string    `json:"tag" bson:"tag"`
 	Markdown  bool      `json:"markdown" bson:"markdown"`
 	Done      bool      `json:"done" bson:"done"`
 	Files     []*File   `json:"files" bson:"files"`
@@ -64,7 +65,8 @@ type Todo struct {
 type UpdateBoard struct {
 	ID     string    `json:"id" bson:"_id"`
 	UserID string    `json:"userId" bson:"userId"`
-	Name   string    `json:"name" bson:"name"`
+	Name   *string   `json:"name" bson:"name"`
+	Color  *string   `json:"color" bson:"color"`
 	Todos  []*string `json:"todos" bson:"todos"`
 }
 
@@ -74,7 +76,6 @@ type UpdateTodo struct {
 	BoardID  *string `json:"boardId" bson:"boardId"`
 	Text     *string `json:"text" bson:"text"`
 	Priority *int    `json:"priority" bson:"priority"`
-	Tag      *string `json:"tag" bson:"tag"`
 	Markdown *bool   `json:"markdown" bson:"markdown"`
 	Done     *bool   `json:"done" bson:"done"`
 }

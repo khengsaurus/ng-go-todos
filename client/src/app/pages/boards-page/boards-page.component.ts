@@ -31,14 +31,14 @@ export class BoardsPage implements OnInit, OnDestroy {
   dropBoard(event: CdkDragDrop<string[]>) {
     const { previousIndex, currentIndex } = event;
     if (previousIndex === currentIndex) return;
-    const orderedBoards = this.boards.map((board) => board.id);
-    moveItemInArray(orderedBoards, previousIndex, currentIndex);
+    const newBoardIds = this.boards.map((board) => board.id);
+    moveItemInArray(newBoardIds, previousIndex, currentIndex);
     const oldBoards = [...this.boards]; // reset on failure
-    const updatedBoards = [...this.boards];
-    moveItemInArray(updatedBoards, previousIndex, currentIndex);
-    this.boards = updatedBoards;
+    const newBoards = [...this.boards];
+    moveItemInArray(newBoards, previousIndex, currentIndex);
+    this.boards = newBoards;
     this.userService
-      .moveBoards$(orderedBoards)
+      .moveBoards$(newBoardIds)
       .pipe(
         tap((res) => {
           if (!res?.data?.moveBoards) this.boards = oldBoards;

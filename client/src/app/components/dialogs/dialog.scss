@@ -20,7 +20,7 @@ h3 {
   }
   .list-option {
     @include ellipsis;
-    background-color: $grey-66;
+    background-color: $gray-66;
     width: 100%;
     margin: $gap-xs 0px;
   }

@@ -47,7 +47,6 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
     this.focusEditor = focusEditor;
     this.todoForm = new FormGroup({
       text: new FormControl(initTodo.text),
-      tag: new FormControl(initTodo.tag),
       priority: new FormControl(initTodo.priority),
       markdown: new FormControl(initTodo.markdown),
       done: new FormControl(initTodo.done),
@@ -57,7 +56,6 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
     this.todoForm.patchValue({
       text: this.todo?.text || initTodo.text,
-      tag: this.todo?.tag || initTodo.tag,
       priority: this.todo?.priority || initTodo.priority,
       markdown: this.todo?.markdown || initTodo.markdown,
       done: this.todo?.done || initTodo.done,
@@ -91,7 +89,6 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
     if (newTodo) {
       this.todoForm.patchValue({
         text: newTodo.text,
-        tag: newTodo.tag,
         priority: newTodo.priority,
         markdown: newTodo.markdown,
         done: newTodo.done,

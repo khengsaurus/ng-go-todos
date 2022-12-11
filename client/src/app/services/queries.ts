@@ -16,7 +16,6 @@ const fragments = {
       userId
       text
       priority
-      tag
       markdown
       done
       boardId
@@ -32,12 +31,12 @@ const fragments = {
       id
       userId
       name
+      color
       todos {
         id
         userId
         text
         priority
-        tag
         markdown
         done
         boardId

@@ -1,0 +1,18 @@
+<div class="board-form">
+  <mat-form-field>
+    <input
+      placeholder="{{ initBoard?.name || 'Board name' }}"
+      matInput
+      [(ngModel)]="data.name"
+      #input
+    />
+  </mat-form-field>
+  <mat-button-toggle-group
+    #group="matButtonToggleGroup"
+    [(ngModel)]="data.color"
+  >
+    <mat-button-toggle *ngFor="let color of colors" [value]="color">
+      <mat-icon [ngClass]="color + '-c'">lens</mat-icon>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</div>

@@ -12,6 +12,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+/* ---------------------------------------- Delete user ----------------------------------------*/
+// Delete a user's doc and all user's todos and boards
+
+func DeleteUser[R bool](
+	userID string,
+) callback[R] {
+	return func(
+		ctx context.Context,
+		db mongo.Database,
+	) (R, error) {
+		userId, err := primitive.ObjectIDFromHex(userID)
+		if err != nil {
+			return false, err
+		}
+
+		usersColl := db.Collection(consts.UsersCollection)
+		if _, err = usersColl.DeleteOne(ctx, bson.M{"_id": userId}); err != nil {
+			return false, err
+		}
+
+		todosColl := db.Collection(consts.TodosCollection)
+		userFilter := bson.M{"userId": userId}
+		if _, err = todosColl.DeleteMany(ctx, userFilter); err != nil {
+			return false, err
+		}
+
+		boardsColl := db.Collection(consts.BoardsCollection)
+		if _, err = boardsColl.DeleteMany(ctx, userFilter); err != nil {
+			return false, err
+		}
+
+		return true, nil
+	}
+}
+
 /* ---------------------------------------- Create board ----------------------------------------*/
 // Create a new board and append its id to user's boardIds
 
@@ -34,6 +69,7 @@ func CreateBoard[R *model.Board](
 			{Key: "name", Value: newBoard.Name},
 			{Key: "todos", Value: []*model.Todo{}},
 			{Key: "todoIds", Value: []*string{}},
+			{Key: "color", Value: newBoard.Color},
 			{Key: "createdAt", Value: currTime},
 			{Key: "updatedAt", Value: currTime},
 		}
@@ -51,6 +87,7 @@ func CreateBoard[R *model.Board](
 				ID:      boardId,
 				Name:    newBoard.Name,
 				UserID:  newBoard.UserID,
+				Color:   newBoard.Color,
 				Todos:   []*model.Todo{},
 				TodoIds: []*string{},
 			}
@@ -69,38 +106,43 @@ func CreateBoard[R *model.Board](
 	}
 }
 
-/* ---------------------------------------- Delete todo ----------------------------------------*/
+/* ---------------------------------------- Delete board ----------------------------------------*/
 
-func DeleteTodo[R bool](
+func DeleteBoard[R bool](
 	userID string,
-	todoID string,
+	boardID string,
 ) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		// Delete todo
-		todosColl := db.Collection(consts.TodosCollection)
-		todoId, err := primitive.ObjectIDFromHex(todoID)
+		// Delete board
+		boardsColl := db.Collection(consts.BoardsCollection)
+		boardId, err := primitive.ObjectIDFromHex(boardID)
 		if err != nil {
 			return false, err
 		}
-		if _, err = todosColl.DeleteOne(ctx, bson.M{"_id": todoId}); err != nil {
+		if _, err = boardsColl.DeleteOne(ctx, bson.M{"_id": boardId}); err != nil {
 			return false, err
 		}
 
-		// Delete todo from boards by user
-		boardsColl := db.Collection(consts.BoardsCollection)
+		// Delete board from user
+		usersColl := db.Collection(consts.UsersCollection)
 		userId, err := primitive.ObjectIDFromHex(userID)
 		if err != nil {
 			return false, err
 		}
-		filter := bson.M{"userId": userId}
-		update := bson.M{"$pull": bson.M{
-			"todos":   todoId,
-			"todoIds": todoID,
-		}}
-		if _, err = boardsColl.UpdateMany(ctx, filter, update); err != nil {
+		userFilter := bson.M{"_id": userId}
+		userUpdate := bson.M{"$pull": bson.M{"boardIds": boardID}}
+		if _, err = usersColl.UpdateOne(ctx, userFilter, userUpdate); err != nil {
+			return false, err
+		}
+
+		// Delete board from any todos' boardId
+		todosColl := db.Collection(consts.TodosCollection)
+		todosFilter := bson.M{"boardId": boardID}
+		todosUpdate := bson.M{"$set": bson.M{"boardId": ""}}
+		if _, err = todosColl.UpdateMany(ctx, todosFilter, todosUpdate); err != nil {
 			return false, err
 		}
 
@@ -169,78 +211,38 @@ func RmFileFromFromTodo[R bool](
 	}
 }
 
-/* ---------------------------------------- Delete board ----------------------------------------*/
+/* ---------------------------------------- Delete todo ----------------------------------------*/
 
-func DeleteBoard[R bool](
+func DeleteTodo[R bool](
 	userID string,
-	boardID string,
+	todoID string,
 ) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
 	) (R, error) {
-		// Delete board
-		boardsColl := db.Collection(consts.BoardsCollection)
-		boardId, err := primitive.ObjectIDFromHex(boardID)
+		// Delete todo
+		todosColl := db.Collection(consts.TodosCollection)
+		todoId, err := primitive.ObjectIDFromHex(todoID)
 		if err != nil {
 			return false, err
 		}
-		if _, err = boardsColl.DeleteOne(ctx, bson.M{"_id": boardId}); err != nil {
+		if _, err = todosColl.DeleteOne(ctx, bson.M{"_id": todoId}); err != nil {
 			return false, err
 		}
 
-		// Delete board from user
-		usersColl := db.Collection(consts.UsersCollection)
+		// Delete todo from boards by user
+		boardsColl := db.Collection(consts.BoardsCollection)
 		userId, err := primitive.ObjectIDFromHex(userID)
 		if err != nil {
 			return false, err
 		}
-		userFilter := bson.M{"_id": userId}
-		userUpdate := bson.M{"$pull": bson.M{"boardIds": boardID}}
-		if _, err = usersColl.UpdateOne(ctx, userFilter, userUpdate); err != nil {
-			return false, err
-		}
-
-		// Delete board from any todos' boardId
-		todosColl := db.Collection(consts.TodosCollection)
-		todosFilter := bson.M{"boardId": boardID}
-		todosUpdate := bson.M{"$set": bson.M{"boardId": ""}}
-		if _, err = todosColl.UpdateMany(ctx, todosFilter, todosUpdate); err != nil {
-			return false, err
-		}
-
-		return true, nil
-	}
-}
-
-/* ---------------------------------------- Delete user ----------------------------------------*/
-// Delete a user's doc and all user's todos and boards
-
-func DeleteUser[R bool](
-	userID string,
-) callback[R] {
-	return func(
-		ctx context.Context,
-		db mongo.Database,
-	) (R, error) {
-		userId, err := primitive.ObjectIDFromHex(userID)
-		if err != nil {
-			return false, err
-		}
-
-		usersColl := db.Collection(consts.UsersCollection)
-		if _, err = usersColl.DeleteOne(ctx, bson.M{"_id": userId}); err != nil {
-			return false, err
-		}
-
-		todosColl := db.Collection(consts.TodosCollection)
-		userFilter := bson.M{"userId": userId}
-		if _, err = todosColl.DeleteMany(ctx, userFilter); err != nil {
-			return false, err
-		}
-
-		boardsColl := db.Collection(consts.BoardsCollection)
-		if _, err = boardsColl.DeleteMany(ctx, userFilter); err != nil {
+		filter := bson.M{"userId": userId}
+		update := bson.M{"$pull": bson.M{
+			"todos":   todoId,
+			"todoIds": todoID,
+		}}
+		if _, err = boardsColl.UpdateMany(ctx, filter, update); err != nil {
 			return false, err
 		}
 

@@ -46,6 +46,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Board struct {
+		Color     func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
@@ -105,7 +106,6 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Markdown  func(childComplexity int) int
 		Priority  func(childComplexity int) int
-		Tag       func(childComplexity int) int
 		Text      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 		UserID    func(childComplexity int) int
@@ -158,6 +158,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Board.color":
+		if e.complexity.Board.Color == nil {
+			break
+		}
+
+		return e.complexity.Board.Color(childComplexity), true
 
 	case "Board.createdAt":
 		if e.complexity.Board.CreatedAt == nil {
@@ -541,13 +548,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Priority(childComplexity), true
 
-	case "Todo.tag":
-		if e.complexity.Todo.Tag == nil {
-			break
-		}
-
-		return e.complexity.Todo.Tag(childComplexity), true
-
 	case "Todo.text":
 		if e.complexity.Todo.Text == nil {
 			break
@@ -687,7 +687,6 @@ type Todo {
   boardId: String!
   text: String!
   priority: Int!
-  tag: String!
   markdown: Boolean!
   done: Boolean!
   files: [File]!
@@ -701,6 +700,7 @@ type Board {
   name: String!
   todos: [Todo]!
   todoIds: [String]!
+  color: String!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -726,6 +726,7 @@ input NewTodo {
 input NewBoard {
   userId: String!
   name: String!
+  color: String!
 }
 
 input UpdateTodo {
@@ -734,7 +735,6 @@ input UpdateTodo {
   boardId: String
   text: String
   priority: Int
-  tag: String
   markdown: Boolean
   done: Boolean
 }
@@ -742,8 +742,9 @@ input UpdateTodo {
 input UpdateBoard {
   id: String!
   userId: String!
-  name: String!
-  todos: [String]!
+  name: String
+  color: String
+  todos: [String]
 }
 
 # --------------- Return ---------------
@@ -1496,8 +1497,6 @@ func (ec *executionContext) fieldContext_Board_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
-			case "tag":
-				return ec.fieldContext_Todo_tag(ctx, field)
 			case "markdown":
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
@@ -1547,6 +1546,50 @@ func (ec *executionContext) _Board_todoIds(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Board_todoIds(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Board",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Board_color(ctx context.Context, field graphql.CollectedField, obj *model.Board) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Board_color(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Color, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Board_color(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Board",
 		Field:      field,
@@ -1828,6 +1871,8 @@ func (ec *executionContext) fieldContext_GetBoardsRes_boards(ctx context.Context
 				return ec.fieldContext_Board_todos(ctx, field)
 			case "todoIds":
 				return ec.fieldContext_Board_todoIds(ctx, field)
+			case "color":
+				return ec.fieldContext_Board_color(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Board_createdAt(ctx, field)
 			case "updatedAt":
@@ -1932,8 +1977,6 @@ func (ec *executionContext) fieldContext_GetTodosRes_todos(ctx context.Context, 
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
-			case "tag":
-				return ec.fieldContext_Todo_tag(ctx, field)
 			case "markdown":
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
@@ -2164,8 +2207,6 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
-			case "tag":
-				return ec.fieldContext_Todo_tag(ctx, field)
 			case "markdown":
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
@@ -2463,6 +2504,8 @@ func (ec *executionContext) fieldContext_Mutation_createBoard(ctx context.Contex
 				return ec.fieldContext_Board_todos(ctx, field)
 			case "todoIds":
 				return ec.fieldContext_Board_todoIds(ctx, field)
+			case "color":
+				return ec.fieldContext_Board_color(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Board_createdAt(ctx, field)
 			case "updatedAt":
@@ -2977,8 +3020,6 @@ func (ec *executionContext) fieldContext_Query_getTodo(ctx context.Context, fiel
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "priority":
 				return ec.fieldContext_Todo_priority(ctx, field)
-			case "tag":
-				return ec.fieldContext_Todo_tag(ctx, field)
 			case "markdown":
 				return ec.fieldContext_Todo_markdown(ctx, field)
 			case "done":
@@ -3111,6 +3152,8 @@ func (ec *executionContext) fieldContext_Query_getBoard(ctx context.Context, fie
 				return ec.fieldContext_Board_todos(ctx, field)
 			case "todoIds":
 				return ec.fieldContext_Board_todoIds(ctx, field)
+			case "color":
+				return ec.fieldContext_Board_color(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Board_createdAt(ctx, field)
 			case "updatedAt":
@@ -3535,50 +3578,6 @@ func (ec *executionContext) fieldContext_Todo_priority(ctx context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Todo_tag(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_tag(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Tag, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Todo_tag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5765,7 +5764,7 @@ func (ec *executionContext) unmarshalInputNewBoard(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "name"}
+	fieldsInOrder := [...]string{"userId", "name", "color"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5785,6 +5784,14 @@ func (ec *executionContext) unmarshalInputNewBoard(ctx context.Context, obj inte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "color":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("color"))
+			it.Color, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5873,7 +5880,7 @@ func (ec *executionContext) unmarshalInputUpdateBoard(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "name", "todos"}
+	fieldsInOrder := [...]string{"id", "userId", "name", "color", "todos"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5900,7 +5907,15 @@ func (ec *executionContext) unmarshalInputUpdateBoard(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "color":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("color"))
+			it.Color, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5908,7 +5923,7 @@ func (ec *executionContext) unmarshalInputUpdateBoard(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("todos"))
-			it.Todos, err = ec.unmarshalNString2ᚕᚖstring(ctx, v)
+			it.Todos, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5925,7 +5940,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "userId", "boardId", "text", "priority", "tag", "markdown", "done"}
+	fieldsInOrder := [...]string{"id", "userId", "boardId", "text", "priority", "markdown", "done"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5969,14 +5984,6 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
 			it.Priority, err = ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "tag":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
-			it.Tag, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6051,6 +6058,13 @@ func (ec *executionContext) _Board(ctx context.Context, sel ast.SelectionSet, ob
 		case "todoIds":
 
 			out.Values[i] = ec._Board_todoIds(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "color":
+
+			out.Values[i] = ec._Board_color(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -6554,13 +6568,6 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 		case "priority":
 
 			out.Values[i] = ec._Todo_priority(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "tag":
-
-			out.Values[i] = ec._Todo_tag(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -7648,6 +7655,38 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	}
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

@@ -11,3 +11,10 @@
     display: none;
   }
 }
+
+.board-form {
+  mat-form-field {
+    width: 100%;
+  }
+  margin-bottom: $gap-m;
+}

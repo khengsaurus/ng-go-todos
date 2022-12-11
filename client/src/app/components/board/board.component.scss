@@ -5,7 +5,6 @@
   width: $board-width;
   margin: $gap-m;
   padding: $gap-m;
-  background: $grey-66;
   min-height: $board-min-height;
   transition: $transition-normal;
 
@@ -76,7 +75,7 @@
         @include center;
         transition: $transition-normal;
         &.cancel {
-          border: 2px dashed grey;
+          border: 2px dashed gray;
         }
         &.delete {
           border: 2px dashed indianred;
@@ -95,27 +94,4 @@ mat-icon.cdk-drag-handle {
   @include hover-scale-(0.8, 0.9);
   cursor: move;
   margin-left: auto;
-}
-
-.blue {
-  background: #71deff;
-  color: black;
-}
-.green {
-  background: #36e9b6;
-  color: black;
-}
-.yellow {
-  background: #ffcf44;
-  color: black;
-}
-.purple {
-  background: #b15cff;
-}
-.red {
-  background: #e74a4a;
-}
-.gray {
-  background: gray;
-  text-decoration: line-through;
 }

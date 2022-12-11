@@ -1,6 +1,6 @@
 # ng-go-todos
 
-Technologies
+## Technologies
 
 • Go
 • MongoDB
@@ -8,7 +8,11 @@ Technologies
 • GraphQL
 • Angular
 
-### gqlgen
+### Disclaimer
+
+The frontend for this app is adapted largely from Fireship.io's [Angular course](https://fireship.io/courses/angular/), but the use of Firebase is limited to user authentication. For all other services, this app employs both GraphQL and REST APIs with the server written in Go.
+
+## gqlgen
 
 [99designs/gqlgen](https://github.com/99designs/gqlgen) is used to generate much of the boilerplate required for a Go GraphQL server. BSON tags are then generated manually using this [script](https://github.com/99designs/gqlgen/issues/865#issuecomment-573043996).
 
@@ -112,7 +116,7 @@ query getBoard($boardId: String!) {
     id
     userId
     name
-    createdAt
+    color
     todos {
       id
       text
@@ -125,6 +129,7 @@ query getBoards($userId: String!) {
     cache
     boards {
       id
+      color
       todos {
         id
         text
@@ -174,14 +179,14 @@ Request variables
     "userId": "",
     "boardId": "",
     "text": "",
-    "tag": "",
     "priority": 2,
     "markdown": true,
     "done": false
   },
   "newBoard": {
     "userId": "",
-    "name": ""
+    "name": "",
+    "color": ""
   }
 }
 ```

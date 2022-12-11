@@ -4,9 +4,9 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { ThemePalette } from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { Board } from './board/board.component';
 import { TodoCard } from './cards/todo-card.component';
+import { BoardForm, DropdownSelect } from './form';
 import { ConfirmButton } from './confirm-button.component';
 import {
   ConfirmDialog,
@@ -30,7 +31,6 @@ import {
   SelectBoardDialog,
 } from './dialogs';
 import { FileComponent } from './file/file.component';
-import { DropdownSelect } from './form/dropdown-select.component';
 import { MarkdownViewer } from './markdown-viewer/markdown-viewer.component';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
@@ -41,6 +41,7 @@ const imports = [
   FormsModule,
   LayoutModule,
   MatButtonModule,
+  MatButtonToggleModule,
   MatCardModule,
   MatCheckboxModule,
   MatDialogModule,
@@ -62,6 +63,7 @@ const imports = [
 const declarations = [
   AppShell,
   Board,
+  BoardForm,
   ConfirmButton,
   ConfirmDialog,
   FileComponent,

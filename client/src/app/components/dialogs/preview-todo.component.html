@@ -11,7 +11,7 @@
   <form [formGroup]="todoForm" class="footer baseline-end">
     <dropdown-select
       label="Priority"
-      controlName="priority"
+      formControlName="priority"
       [options]="[1, 2, 3]"
     ></dropdown-select>
     <mat-checkbox class="btn" formControlName="done" disableRipple

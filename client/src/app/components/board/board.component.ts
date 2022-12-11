@@ -13,6 +13,7 @@ const initBoard: IBoard = {
   id: '',
   userId: '',
   name: '',
+  color: '',
   todos: [],
   createdAt: undefined,
   updatedAt: undefined,
@@ -29,6 +30,7 @@ export class Board implements OnChanges {
   minHeight: string = '0px';
   todos: ITodo[] = [];
   toDelete: ITodo[] = [];
+  className = 'board';
   haltEvent = haltEvent;
 
   constructor(
@@ -38,7 +40,8 @@ export class Board implements OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    const todos = changes['board']?.currentValue?.todos || [];
+    const { todos = [], color = 'gray' } = changes['board']?.currentValue;
+    this.className = `board ${color}-bg`;
     this.renderTodos(todos, true);
   }
 

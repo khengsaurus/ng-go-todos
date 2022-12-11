@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Apollo, MutationResult } from 'apollo-angular';
-import { BehaviorSubject, firstValueFrom, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { NewBoardDialog } from 'src/app/components/dialogs';
 import { IBoard, ITodo, IUser, Nullable } from 'src/types';
 import { TodosService, UserService } from '.';
-import { NewBoardDialog } from 'src/app/components/dialogs';
 import {
   ADD_RM_BOARD_TODO,
   CREATE_BOARD,
@@ -34,7 +34,9 @@ export class BoardsService {
   ) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
     const _boardsObserver$ = this.userService.currentUser$.pipe(
-      tap((user) => this.getBoards(user))
+      tap((user) => {
+        this.getBoards(user);
+      })
     );
     _boardsObserver$.subscribe();
   }
@@ -48,11 +50,21 @@ export class BoardsService {
           variables: { userId: id, fresh: true },
         })
         .valueChanges.pipe(
-          map(({ data }) => data?.getBoards?.boards || []),
-          tap((_boards) => {
-            if (!_boards.length) return;
+          map(({ data }) => {
+            return { boards: data?.getBoards?.boards || [], userId: id };
+          }),
+          /* 
+          FIXME: create new board -> re-order boards -> newly created board disappears
+          Seems like this watchQuery is returning the `old` response
+           */
+          // distinctUntilChanged((prev, curr) => {
+          //   return prev.userId !== curr.userId;
+          // }),
+          tap((data) => {
             const boards = boardIds
-              .map((boardId) => _boards.find((board) => board.id === boardId))
+              .map((boardId) =>
+                data.boards.find((board) => board.id === boardId)
+              )
               .filter((board) => board) as IBoard[];
             this.updateBoards(boards);
           })
@@ -61,11 +73,11 @@ export class BoardsService {
     }
   }
 
-  createBoard$(userId: string, name: string) {
+  createBoard$(userId: string, name: string, color: string) {
     return this.apollo
       .mutate<ICREATE_BOARD>({
         mutation: CREATE_BOARD,
-        variables: { newBoard: { userId, name } },
+        variables: { newBoard: { userId, name, color } },
       })
       .pipe(
         map((res) => res.data?.createBoard),
@@ -80,14 +92,17 @@ export class BoardsService {
     const dialogRef = this.dialog.open(NewBoardDialog, {
       autoFocus: false,
       width: '244px',
-      data: {},
+      data: { color: 'gray' },
     });
 
     return new Promise(async (resolve) => {
-      dialogRef.afterClosed().subscribe((inputName) => {
-        if (inputName && this.userService.currentUser) {
+      dialogRef.afterClosed().subscribe((input) => {
+        if (!input) return resolve(undefined);
+
+        const { name, color } = input;
+        if (name && this.userService.currentUser) {
           firstValueFrom(
-            this.createBoard$(this.userService.currentUser.id, inputName)
+            this.createBoard$(this.userService.currentUser.id, name, color)
           )
             .then(resolve)
             .catch((err) => {
@@ -98,8 +113,6 @@ export class BoardsService {
           resolve(undefined);
         }
       });
-
-      return of(undefined);
     });
   }
 
@@ -220,13 +233,6 @@ export class BoardsService {
         break;
       }
     }
-  }
-
-  reorderBoards(boardIds: string[]) {
-    const boards = boardIds
-      .map((id) => this._boardsCopy.find((b) => b.id === id))
-      .filter((board) => board) as IBoard[];
-    this.updateBoards(boards);
   }
 
   private updateBoards(boards: IBoard[]) {

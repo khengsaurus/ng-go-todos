@@ -30,7 +30,6 @@ export interface ITodo {
   userId: string;
   text: string;
   priority: number;
-  tag: string;
   markdown: boolean;
   done: boolean;
   boardId: string;
@@ -43,6 +42,7 @@ export interface IBoard {
   id: string;
   userId: string;
   name: string;
+  color: string;
   todos: ITodo[];
   createdAt: any;
   updatedAt: any;
