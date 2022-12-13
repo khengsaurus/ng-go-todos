@@ -16,9 +16,8 @@
 .new-board {
   @include flex-(center);
   @include center;
-  height: $board-min-height;
-  width: $board-width !important;
-  min-width: $board-width;
+  height: calc($board-min-height + 2px);
+  min-width: calc($board-width + 2px);
   border: 3px $gray-66 dashed;
   border-radius: 6px;
   padding: 7px;

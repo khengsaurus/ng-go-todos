@@ -1,6 +1,6 @@
-$black-0: rgba(0, 0, 0, 0.5);
 $black-33: rgb(33, 33, 33);
 $gray-66: rgb(66, 66, 66);
+$gray-50: rgb(50, 50, 50);
 $gray-48: rgb(48, 48, 48);
 
 // Angular colors
@@ -174,54 +174,54 @@ $custom-red: (
   color: #b3688d;
 }
 
-.purple-bg {
-  background-color: #b3688d !important;
+.purple-border {
+  box-shadow: 0 0 0 2px #b3688d !important;
 }
 
 .blue-c {
   color: #2f72b9;
 }
 
-.blue-bg {
-  background-color: #2f72b9 !important;
+.blue-border {
+  box-shadow: 0 0 0 2px #2f72b9 !important;
 }
 
 .green-c {
   color: #6aa84f;
 }
 
-.green-bg {
-  background-color: #6aa84f !important;
+.green-border {
+  box-shadow: 0 0 0 2px #6aa84f !important;
 }
 
 .yellow-c {
   color: #ffcf44;
 }
 
-.yellow-bg {
-  background-color: #ffcf44 !important;
+.yellow-border {
+  box-shadow: 0 0 0 2px #ffcf44 !important;
 }
 
 .gray-c {
   color: $gray-66;
 }
 
-.gray-bg {
-  background-color: $gray-66 !important;
+.gray-border {
+  box-shadow: 0 0 0 2px $gray-66 !important;
 }
 
 .orange-c {
   color: #ef8a3c;
 }
 
-.orange-bg {
-  background-color: #ef8a3c !important;
+.orange-border {
+  box-shadow: 0 0 0 2px #ef8a3c !important;
 }
 
 .red-c {
   color: #d34949;
 }
 
-.red-bg {
-  background-color: #d34949 !important;
+.red-border {
+  box-shadow: 0 0 0 2px #d34949 !important;
 }

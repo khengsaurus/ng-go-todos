@@ -17,4 +17,8 @@
     width: 100%;
   }
   margin-bottom: $gap-m;
+
+  mat-button-toggle:not(.mat-button-toggle-checked) {
+    background-color: $gray-50;
+  }
 }

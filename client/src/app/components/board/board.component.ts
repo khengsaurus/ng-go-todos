@@ -41,7 +41,7 @@ export class Board implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const { todos = [], color = 'gray' } = changes['board']?.currentValue;
-    this.className = `board ${color}-bg`;
+    this.className = `board ${color}-border`;
     this.renderTodos(todos, true);
   }
 

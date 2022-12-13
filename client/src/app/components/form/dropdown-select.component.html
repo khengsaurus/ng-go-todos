@@ -1,7 +1,7 @@
 <div class="btn-m dropdown-select">
   <p class="label">{{ label }}</p>
   <mat-form-field appearance="standard" [ngStyle]="{ width: '30px' }">
-    <mat-select formControlName="{{ formControlName }}">
+    <mat-select [formControlName]="formControlName">
       <mat-option *ngFor="let val of options" [value]="val">{{
         val
       }}</mat-option>

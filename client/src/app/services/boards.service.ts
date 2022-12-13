@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Apollo, MutationResult } from 'apollo-angular';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { NewBoardDialog } from 'src/app/components/dialogs';
 import { IBoard, ITodo, IUser, Nullable } from 'src/types';
 import { TodosService, UserService } from '.';
@@ -34,9 +34,9 @@ export class BoardsService {
   ) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
     const _boardsObserver$ = this.userService.currentUser$.pipe(
-      tap((user) => {
-        this.getBoards(user);
-      })
+      // to prevent getBoards being called multiple times and updating state with outdated data 🤷‍♂️
+      distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
+      tap((user) => this.getBoards(user))
     );
     _boardsObserver$.subscribe();
   }
@@ -53,13 +53,6 @@ export class BoardsService {
           map(({ data }) => {
             return { boards: data?.getBoards?.boards || [], userId: id };
           }),
-          /* 
-          FIXME: create new board -> re-order boards -> newly created board disappears
-          Seems like this watchQuery is returning the `old` response
-           */
-          // distinctUntilChanged((prev, curr) => {
-          //   return prev.userId !== curr.userId;
-          // }),
           tap((data) => {
             const boards = boardIds
               .map((boardId) =>
