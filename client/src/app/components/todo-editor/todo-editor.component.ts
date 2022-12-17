@@ -1,16 +1,15 @@
 import { Component, Input } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, of, switchMap, tap } from 'rxjs';
 import { EditTodoDirective } from 'src/app/directives/edit-todo.directive';
 import {
   BoardsService,
   FilesService,
+  MixedService,
   TodosService,
   UserService,
 } from 'src/app/services';
 import { scrollEle } from 'src/app/utils';
 import { ITodo, Nullable } from 'src/types';
-import { SelectBoardDialog } from '../dialogs/select-board.component';
 
 @Component({
   selector: 'todo-editor',
@@ -26,7 +25,7 @@ export class TodoEditor extends EditTodoDirective {
     protected override todosService: TodosService,
     private filesService: FilesService,
     private boardsService: BoardsService,
-    private dialog: MatDialog
+    private mixedService: MixedService
   ) {
     super(
       userService,
@@ -52,22 +51,9 @@ export class TodoEditor extends EditTodoDirective {
     }
   }
 
-  addToBoard() {
+  moveToBoard() {
     if (!this.todo) return;
-    const dialogRef = this.dialog.open(SelectBoardDialog, {
-      autoFocus: false,
-      width: '244px',
-      data: {},
-    });
-    dialogRef.componentInstance.todo = this.todo;
-    dialogRef.componentInstance.selector.subscribe((boardId: string) => {
-      if (this.todo && boardId) {
-        this.boardsService.addTodoToBoard$(this.todo, boardId).subscribe();
-        const updatedTodo = { ...this.todo, boardId };
-        this.todosService.addTodoToBoardCB(updatedTodo);
-        this.todo = updatedTodo;
-      }
-    });
+    this.mixedService.moveTodoToBoard(this.todo);
   }
 
   handleAttachFile(event: any) {
@@ -115,8 +101,4 @@ export class TodoEditor extends EditTodoDirective {
       )
       .subscribe();
   }).bind(this);
-
-  get notOnBoard() {
-    return !this.todo?.boardId;
-  }
 }

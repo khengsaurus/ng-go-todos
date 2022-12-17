@@ -42,6 +42,7 @@
           [todo]="todo"
           [active]="todo.id === todosService.selectedTodo?.id"
           (click)="todosService.selectTodo(todo)"
+          [colorTag]="true"
         ></todo-card>
       </div>
     </div>

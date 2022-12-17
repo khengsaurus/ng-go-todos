@@ -344,7 +344,7 @@ func RmTodoFromBoard[R bool](
 /* ----------------------------------- Shift todo between boards -----------------------------------*/
 // Remove todoId from fromBoard and add to toBoard at toIndex
 
-func ShiftTodoBwBoards[R bool](
+func MoveTodoBwBoards[R bool](
 	todoID string,
 	fromBoard string,
 	toBoard string,
@@ -366,23 +366,27 @@ func ShiftTodoBwBoards[R bool](
 			return false, err
 		}
 
-		fromBoardId, err := primitive.ObjectIDFromHex(fromBoard)
-		if err != nil {
-			return false, err
-		}
-
 		boardsColl := db.Collection(consts.BoardsCollection)
-		fromBoardFilter := bson.M{"_id": fromBoardId}
-		fromBoardUpdate := bson.M{"$pull": bson.M{
-			"todos":   todoId,
-			"todoIds": todoID,
-		}}
-		if _, err = boardsColl.UpdateOne(
-			ctx,
-			fromBoardFilter,
-			fromBoardUpdate,
-		); err != nil {
-			return false, err
+
+		// Todo is being moved from a board
+		if fromBoard != "" {
+			fromBoardId, err := primitive.ObjectIDFromHex(fromBoard)
+			if err != nil {
+				return false, err
+			}
+
+			fromBoardFilter := bson.M{"_id": fromBoardId}
+			fromBoardUpdate := bson.M{"$pull": bson.M{
+				"todos":   todoId,
+				"todoIds": todoID,
+			}}
+			if _, err = boardsColl.UpdateOne(
+				ctx,
+				fromBoardFilter,
+				fromBoardUpdate,
+			); err != nil {
+				return false, err
+			}
 		}
 
 		toBoardId, err := primitive.ObjectIDFromHex(toBoard)

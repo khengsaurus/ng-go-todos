@@ -3,6 +3,13 @@ $gray-66: rgb(66, 66, 66);
 $gray-50: rgb(50, 50, 50);
 $gray-48: rgb(48, 48, 48);
 
+$purple: #b3688d;
+$blue: #2f72b9;
+$green: #6aa84f;
+$yellow: #ffcf44;
+$orange: #ef8a3c;
+$red: #d34949;
+
 // Angular colors
 
 $custom-blue: (
@@ -13,7 +20,7 @@ $custom-blue: (
   400: #5a97cf,
   500: #3d85c6,
   600: #377dc0,
-  700: #2f72b9,
+  700: $blue,
   800: #2768b1,
   900: #1a55a4,
   A100: #dae9ff,
@@ -44,7 +51,7 @@ $custom-green: (
   200: #b5d4a7,
   300: #97c284,
   400: #80b569,
-  500: #6aa84f,
+  500: $green,
   600: #62a048,
   700: #57973f,
   800: #4d8d36,
@@ -76,7 +83,7 @@ $custom-magenta: (
   100: #e4cad7,
   200: #d3a6bc,
   300: #c182a1,
-  400: #b3688d,
+  400: $purple,
   500: #a64d79,
   600: #9e4671,
   700: #953d66,
@@ -114,7 +121,7 @@ $custom-orange: (
   600: #f5ab63,
   700: #f3a258,
   800: #f2994e,
-  900: #ef8a3c,
+  900: $orange,
   A100: #ffffff,
   A200: #ffffff,
   A400: #ffe7d5,
@@ -146,7 +153,7 @@ $custom-red: (
   500: #e06666,
   600: #dc5e5e,
   700: #d85353,
-  800: #d34949,
+  800: $red,
   900: #cb3838,
   A100: #ffffff,
   A200: #ffe2e2,
@@ -171,39 +178,59 @@ $custom-red: (
 );
 
 .purple-c {
-  color: #b3688d;
+  color: $purple;
+}
+
+.purple-bg {
+  background-color: $purple;
 }
 
 .purple-border {
-  box-shadow: 0 0 0 2px #b3688d !important;
+  box-shadow: 0 0 0 2px $purple !important;
 }
 
 .blue-c {
-  color: #2f72b9;
+  color: $blue;
+}
+
+.blue-bg {
+  background-color: $blue;
 }
 
 .blue-border {
-  box-shadow: 0 0 0 2px #2f72b9 !important;
+  box-shadow: 0 0 0 2px $blue !important;
 }
 
 .green-c {
-  color: #6aa84f;
+  color: $green;
+}
+
+.green-bg {
+  background-color: $green;
 }
 
 .green-border {
-  box-shadow: 0 0 0 2px #6aa84f !important;
+  box-shadow: 0 0 0 2px $green !important;
 }
 
 .yellow-c {
-  color: #ffcf44;
+  color: $yellow;
+}
+
+.yellow-bg {
+  background-color: $yellow;
 }
 
 .yellow-border {
-  box-shadow: 0 0 0 2px #ffcf44 !important;
+  box-shadow: 0 0 0 2px $yellow !important;
 }
 
 .gray-c {
   color: $gray-66;
+}
+
+.gray-bg {
+  background-color: $gray-66;
 }
 
 .gray-border {
@@ -211,17 +238,25 @@ $custom-red: (
 }
 
 .orange-c {
-  color: #ef8a3c;
+  color: $orange;
+}
+
+.orange-bg {
+  background-color: $orange;
 }
 
 .orange-border {
-  box-shadow: 0 0 0 2px #ef8a3c !important;
+  box-shadow: 0 0 0 2px $orange !important;
 }
 
 .red-c {
-  color: #d34949;
+  color: $red;
+}
+
+.red-bg {
+  background-color: $red;
 }
 
 .red-border {
-  box-shadow: 0 0 0 2px #d34949 !important;
+  box-shadow: 0 0 0 2px $red !important;
 }

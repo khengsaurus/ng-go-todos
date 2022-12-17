@@ -1,10 +1,12 @@
 @import "../../../styles";
 
 mat-card.todo {
-  background-color: $black-33;
-  transition: $transition-normal;
-  height: 24px;
   cursor: pointer;
+  background-color: $black-33;
+  height: 24px;
+  transition: $transition-normal;
+  overflow: hidden;
+
   &.active {
     box-shadow: 0 0 0px 1px #f5ab63;
   }
@@ -17,4 +19,15 @@ mat-card.todo {
       }
     }
   }
+}
+
+.tag {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  border-top: 10px solid $black-33;
+  border-right: 10px solid transparent;
+  height: 0;
+  width: 0;
+  border-bottom-right-radius: 3px;
 }

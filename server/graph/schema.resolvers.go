@@ -383,14 +383,14 @@ func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, to
 	return true, nil
 }
 
-// ShiftTodoBetweenBoards is the resolver for the shiftTodoBetweenBoards field.
-func (r *mutationResolver) ShiftTodoBetweenBoards(ctx context.Context, userID string, todoID string, fromBoard string, toBoard string, toIndex int) (bool, error) {
+// MoveTodoBetweenBoards is the resolver for the moveTodoBetweenBoards field.
+func (r *mutationResolver) MoveTodoBetweenBoards(ctx context.Context, userID string, todoID string, fromBoard string, toBoard string, toIndex int) (bool, error) {
 	var err error
-	cb := ShiftTodoBwBoards(todoID, fromBoard, toBoard, toIndex)
+	cb := MoveTodoBwBoards(todoID, fromBoard, toBoard, toIndex)
 	if consts.Local {
-		_, err = AsAsync(ctx, cb, "ShiftTodoBwBoards", false)
+		_, err = AsAsync(ctx, cb, "MoveTodoBwBoards", false)
 	} else {
-		_, err = AsTransaction(ctx, cb, "ShiftTodoBwBoards", false)
+		_, err = AsTransaction(ctx, cb, "MoveTodoBwBoards", false)
 	}
 	if err != nil {
 		return false, err

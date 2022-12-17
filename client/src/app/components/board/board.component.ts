@@ -5,7 +5,12 @@ import {
 } from '@angular/cdk/drag-drop';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { tap } from 'rxjs';
-import { BoardsService, TodosService, UserService } from 'src/app/services';
+import {
+  BoardsService,
+  MixedService,
+  TodosService,
+  UserService,
+} from 'src/app/services';
 import { haltEvent, trackById } from 'src/app/utils';
 import { IBoard, ITodo, Nullable } from 'src/types';
 
@@ -36,7 +41,8 @@ export class Board implements OnChanges {
   constructor(
     private userService: UserService,
     private boardsService: BoardsService,
-    private todosService: TodosService
+    private todosService: TodosService,
+    private mixedService: MixedService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -47,7 +53,7 @@ export class Board implements OnChanges {
 
   handleDelete() {
     if (this.userService.currentUser) {
-      this.boardsService
+      this.mixedService
         .deleteBoard$(this.userService.currentUser.id, this.board.id)
         .subscribe();
     }
@@ -86,7 +92,7 @@ export class Board implements OnChanges {
           : prevTodos[previousIndex];
       if (todo?.id) {
         this.boardsService
-          .shiftTodoBetweenBoards$(
+          .moveTodoBetweenBoards$(
             todo,
             previousContainer.id,
             container.id,

@@ -8,6 +8,7 @@
       <mat-card-subtitle class="todo-title">{{ todoTitle }}</mat-card-subtitle>
       <mat-icon *ngIf="todo?.done" class="check">check</mat-icon>
     </div>
+    <div *ngIf="colorTag" [ngClass]="'tag ' + this.colorTagClass"></div>
     <ng-content></ng-content>
   </div>
 </mat-card>

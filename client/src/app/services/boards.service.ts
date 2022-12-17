@@ -1,24 +1,22 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Apollo, MutationResult } from 'apollo-angular';
-import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
+import { Apollo } from 'apollo-angular';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { NewBoardDialog } from 'src/app/components/dialogs';
 import { IBoard, ITodo, IUser, Nullable } from 'src/types';
-import { TodosService, UserService } from '.';
+import { UserService } from '.';
 import {
   ADD_RM_BOARD_TODO,
   CREATE_BOARD,
-  DELETE_BOARD,
   GET_BOARDS,
   IADD_RM_BOARD_TODO,
   ICREATE_BOARD,
-  IDELETE_BOARD,
   IGET_BOARDS,
   IMOVE_TODOS,
-  ISHIFT_TODO_BETWEEN_BOARDS,
+  IMOVE_TODO_BETWEEN_BOARDS,
   MOVE_TODOS,
-  SHIFT_TODO_BETWEEN_BOARDS,
+  MOVE_TODO_BETWEEN_BOARDS,
 } from './queries';
 
 @Injectable({ providedIn: 'root' })
@@ -28,9 +26,8 @@ export class BoardsService {
 
   constructor(
     private apollo: Apollo,
-    private userService: UserService,
-    private todosService: TodosService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private userService: UserService
   ) {
     this.currentUserBoards$ = new BehaviorSubject<IBoard[]>([]);
     const _boardsObserver$ = this.userService.currentUser$.pipe(
@@ -109,52 +106,12 @@ export class BoardsService {
     });
   }
 
-  deleteBoard$(userId: string, boardId: string) {
-    return this.apollo
-      .mutate<IDELETE_BOARD>({
-        mutation: DELETE_BOARD,
-        variables: { userId, boardId },
-      })
-      .pipe(
-        tap((res) => {
-          if (res.data?.deleteBoard) {
-            this.updateBoards(this._boardsCopy.filter((b) => b.id !== boardId));
-            this.todosService.screen((todo) =>
-              todo.boardId === boardId ? { ...todo, boardId: '' } : todo
-            );
-          }
-        })
-      );
-  }
-
   moveTodos$(todoIds: string[], boardId: string) {
     return this.apollo.mutate<IMOVE_TODOS>({
       mutation: MOVE_TODOS,
       variables: { userId: this.userService.currentUser?.id, boardId, todoIds },
       optimisticResponse: { moveTodos: true },
     });
-  }
-
-  addTodoToBoard$(
-    todo: ITodo,
-    boardId: string
-  ): Observable<MutationResult<IADD_RM_BOARD_TODO>> {
-    return this.apollo
-      .mutate<IADD_RM_BOARD_TODO>({
-        mutation: ADD_RM_BOARD_TODO,
-        variables: {
-          userId: this.userService.currentUser?.id,
-          todoId: todo.id,
-          boardId,
-          rm: false,
-        },
-        optimisticResponse: { addRmBoardTodo: true },
-      })
-      .pipe(
-        tap((res) => {
-          if (res?.data?.addRmBoardTodo) this.addRmTodoOnBoard(todo, boardId);
-        })
-      );
   }
 
   removeTodoFromBoard$(todoId: string, boardId: string) {
@@ -170,15 +127,15 @@ export class BoardsService {
     });
   }
 
-  shiftTodoBetweenBoards$(
+  moveTodoBetweenBoards$(
     todo: ITodo,
     fromBoard: string,
     toBoard: string,
     toIndex: number
   ) {
     return this.apollo
-      .mutate<ISHIFT_TODO_BETWEEN_BOARDS>({
-        mutation: SHIFT_TODO_BETWEEN_BOARDS,
+      .mutate<IMOVE_TODO_BETWEEN_BOARDS>({
+        mutation: MOVE_TODO_BETWEEN_BOARDS,
         variables: {
           userId: this.userService.currentUser?.id,
           todoId: todo.id,
@@ -186,11 +143,11 @@ export class BoardsService {
           toBoard,
           toIndex,
         },
-        optimisticResponse: { shiftTodoBetweenBoards: true },
+        optimisticResponse: { moveTodoBetweenBoards: true },
       })
       .pipe(
         tap((res) => {
-          if (res?.data?.shiftTodoBetweenBoards) {
+          if (res?.data?.moveTodoBetweenBoards) {
             this.addRmTodoOnBoard(todo, fromBoard, false);
             this.addRmTodoOnBoard(todo, toBoard, true, toIndex);
           }
@@ -228,8 +185,18 @@ export class BoardsService {
     }
   }
 
-  private updateBoards(boards: IBoard[]) {
-    this._boardsCopy = boards;
-    this.currentUserBoards$.next(boards);
+  updateBoards(updateVal: IBoard[] | ((board: IBoard) => boolean)) {
+    if (Array.isArray(updateVal)) {
+      this._boardsCopy = updateVal;
+      this.currentUserBoards$.next(updateVal);
+    } else {
+      const updatedBoards = this._boardsCopy.filter(updateVal);
+      this._boardsCopy = updatedBoards;
+      this.currentUserBoards$.next(updatedBoards);
+    }
+  }
+
+  getBoardColor(boardId: string) {
+    return boardId ? this._boardsCopy.find((b) => b.id === boardId)?.color : '';
   }
 }

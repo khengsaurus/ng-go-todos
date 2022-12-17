@@ -128,7 +128,7 @@ type Mutation {
     boardId: String!
     rm: Boolean!
   ): Boolean!
-  shiftTodoBetweenBoards(
+  moveTodoBetweenBoards(
     userId: String!
     todoId: String!
     fromBoard: String!

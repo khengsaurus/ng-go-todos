@@ -259,19 +259,19 @@ export const MOVE_TODOS = gql`
   }
 `;
 
-export interface ISHIFT_TODO_BETWEEN_BOARDS {
-  shiftTodoBetweenBoards: boolean;
+export interface IMOVE_TODO_BETWEEN_BOARDS {
+  moveTodoBetweenBoards: boolean;
 }
 
-export const SHIFT_TODO_BETWEEN_BOARDS = gql`
-  mutation ShiftTodoBetweenBoards(
+export const MOVE_TODO_BETWEEN_BOARDS = gql`
+  mutation MoveTodoBetweenBoards(
     $userId: String!
     $todoId: String!
     $fromBoard: String!
     $toBoard: String!
     $toIndex: Int!
   ) {
-    shiftTodoBetweenBoards(
+    moveTodoBetweenBoards(
       userId: $userId
       todoId: $todoId
       fromBoard: $fromBoard

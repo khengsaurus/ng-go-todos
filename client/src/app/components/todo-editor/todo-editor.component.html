@@ -27,11 +27,10 @@
     </div>
     <div class="right">
       <button
-        *ngIf="notOnBoard"
         mat-button
         class="btn mat-icon-s"
-        matTooltip="Add to board"
-        (click)="addToBoard()"
+        matTooltip="Move to board"
+        (click)="moveToBoard()"
       >
         <mat-icon>unarchive</mat-icon>
       </button>

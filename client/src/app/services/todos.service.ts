@@ -151,7 +151,7 @@ export class TodosService {
       );
   }
 
-  addTodoToBoardCB(todo: ITodo) {
+  updateTodo(todo: ITodo) {
     const todos = [];
     for (const t of this._todosCopy) {
       if (t.id === todo.id) todos.push(todo);
@@ -183,7 +183,7 @@ export class TodosService {
     this.updateTodosSub(this._todosCopy.map(update));
   }
 
-  private updateTodosSub(todos: ITodo[]) {
+  updateTodosSub(todos: ITodo[]) {
     this._todosCopy = todos;
     this.currentUserTodos$.next({
       todos,
