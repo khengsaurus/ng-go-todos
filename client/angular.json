@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ng-gql-todos": {
+    "ng-go-todos": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@ngx-env/builder:browser",
           "options": {
-            "outputPath": "dist/ng-gql-todos",
+            "outputPath": "dist/ng-go-todos",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -78,14 +78,14 @@
           "builder": "@ngx-env/builder:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "ng-gql-todos:build:production"
+              "browserTarget": "ng-go-todos:build:production"
             },
             "development": {
-              "browserTarget": "ng-gql-todos:build:development",
+              "browserTarget": "ng-go-todos:build:development",
               "proxyConfig": "proxy.conf.json"
             },
             "prodEnv": {
-              "browserTarget": "ng-gql-todos:build:prodEnv"
+              "browserTarget": "ng-go-todos:build:prodEnv"
             }
           },
           "defaultConfiguration": "development"
@@ -93,7 +93,7 @@
         "extract-i18n": {
           "builder": "@ngx-env/builder:extract-i18n",
           "options": {
-            "browserTarget": "ng-gql-todos:build"
+            "browserTarget": "ng-go-todos:build"
           }
         },
         "test": {

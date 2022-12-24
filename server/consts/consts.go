@@ -14,7 +14,7 @@ var (
 	RedisClientKey   = ContextKey("redis_client")
 	RedisKeyPrefix   = "NGGT"
 	RedisTTL         = time.Second * 600
-	MongoDatabase    = "ng-gql-go"
+	MongoDatabase    = "ng-gql-go" // do not change
 	UsersCollection  = "users"
 	TodosCollection  = "todos"
 	BoardsCollection = "boards"
