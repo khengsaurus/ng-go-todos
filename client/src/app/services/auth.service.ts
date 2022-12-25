@@ -2,11 +2,10 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { map, Observable } from 'rxjs';
-import { Nullable } from 'src/types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  currentFbUser$: Observable<Nullable<firebase.default.User>>;
+  currentFbUser$: Observable<firebase.default.User | undefined>;
   userLoggedIn: boolean;
 
   constructor(public afAuth: AngularFireAuth) {
@@ -15,7 +14,7 @@ export class AuthService {
       map((user) => {
         const email = user?.email || '';
         this.userLoggedIn = Boolean(email);
-        return user;
+        return user || undefined;
       })
     );
     this.currentFbUser$.subscribe();

@@ -12,7 +12,7 @@ import {
   UserService,
 } from 'src/app/services';
 import { haltEvent, trackById } from 'src/app/utils';
-import { IBoard, ITodo, Nullable } from 'src/types';
+import { IBoard, ITodo } from 'src/types';
 
 const initBoard: IBoard = {
   id: '',
@@ -98,6 +98,14 @@ export class Board implements OnChanges {
             container.id,
             currentIndex
           )
+          .pipe(
+            tap((res) => {
+              if (res?.data?.moveTodoBetweenBoards) {
+                const updatedTodo = { ...todo, boardId: container.id };
+                this.todosService.updateTodo(updatedTodo);
+              }
+            })
+          )
           .subscribe();
       }
     }
@@ -146,7 +154,7 @@ export class Board implements OnChanges {
     this.minHeight = `${todos.length * 66 - 10}px`;
   }
 
-  editCallback = ((todo?: Nullable<ITodo>) => {
+  editCallback = ((todo?: ITodo) => {
     this.todos = this.todos?.map((t) => (t.id === todo?.id ? todo : t));
   }).bind(this);
 

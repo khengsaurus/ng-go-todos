@@ -9,7 +9,7 @@ import {
   UserService,
 } from 'src/app/services';
 import { scrollEle } from 'src/app/utils';
-import { ITodo, Nullable } from 'src/types';
+import { ITodo } from 'src/types';
 
 @Component({
   selector: 'todo-editor',
@@ -17,7 +17,7 @@ import { ITodo, Nullable } from 'src/types';
   styleUrls: ['./todo-editor.component.scss'],
 })
 export class TodoEditor extends EditTodoDirective {
-  @Input() override todo: Nullable<ITodo> = null;
+  @Input() override todo: ITodo | undefined;
   @Input() size: number = 2;
 
   constructor(
@@ -53,7 +53,10 @@ export class TodoEditor extends EditTodoDirective {
 
   moveToBoard() {
     if (!this.todo) return;
-    this.mixedService.moveTodoToBoard(this.todo);
+    this.mixedService.moveTodoToBoard(
+      this.todo,
+      (boardId) => (this.todo = { ...this.todo!, boardId })
+    );
   }
 
   handleAttachFile(event: any) {

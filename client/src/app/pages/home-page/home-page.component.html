@@ -1,8 +1,10 @@
-<div *ngIf="!currentUser">
-  <h2>Hello</h2>
-  <h3>Log in to use this website's features</h3>
-</div>
+<div class="center-content">
+  <div *ngIf="!currentUser">
+    <h2>Hello</h2>
+    <h3>Log in to use this website's features</h3>
+  </div>
 
-<div *ngIf="currentUser as user">
-  <h2>Welcome, {{ user.username }}</h2>
+  <div *ngIf="currentUser as user">
+    <h2>Welcome, {{ user.username }}</h2>
+  </div>
 </div>

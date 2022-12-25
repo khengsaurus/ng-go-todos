@@ -32,6 +32,11 @@
       </button>
     </mat-toolbar>
 
+    <!-- <div class="center-content" *ngIf="authLoading | async">
+      <mat-spinner diameter="40" class="spinner"></mat-spinner>
+    </div> -->
+    <!-- <ng-content *ngIf="!(authLoading | async)"> </ng-content> -->
+
     <ng-content> </ng-content>
   </mat-sidenav-content>
 </mat-sidenav-container>

@@ -4,7 +4,7 @@ import { Apollo } from 'apollo-angular';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { NewBoardDialog } from 'src/app/components/dialogs';
-import { IBoard, ITodo, IUser, Nullable } from 'src/types';
+import { IBoard, ITodo, IUser } from 'src/types';
 import { UserService } from '.';
 import {
   ADD_RM_BOARD_TODO,
@@ -38,7 +38,7 @@ export class BoardsService {
     _boardsObserver$.subscribe();
   }
 
-  getBoards(user: Nullable<IUser>) {
+  getBoards(user: IUser | undefined) {
     const { id = '', boardIds } = user || {};
     if (id && boardIds?.length) {
       this.apollo
@@ -175,14 +175,19 @@ export class BoardsService {
   }
 
   rmTodoFromBoards(todo: ITodo) {
-    const boards = [...this._boardsCopy];
-    for (const board of boards) {
-      if (board.todos?.some((t) => t.id === todo.id)) {
-        board.todos = board.todos.filter((t) => t.id !== todo.id);
-        this.currentUserBoards$.next(boards);
-        break;
-      }
+    if (!todo.boardId) return;
+    const boards = [];
+    for (const board of this._boardsCopy) {
+      boards.push(
+        board.id === todo.boardId
+          ? {
+              ...board,
+              todos: board.todos.filter((t) => t.id !== todo.id),
+            }
+          : board
+      );
     }
+    this.currentUserBoards$.next(boards);
   }
 
   updateBoards(updateVal: IBoard[] | ((board: IBoard) => boolean)) {

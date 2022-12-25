@@ -39,8 +39,5 @@ const sideLinksLoggedIn: Array<ILink> = [
 ];
 
 const sideLinksLoggedOut: Array<ILink> = [
-  {
-    route: Route.USER_PROFILE,
-    label: 'Login',
-  },
+  { route: Route.USER_PROFILE, label: 'Login' },
 ];

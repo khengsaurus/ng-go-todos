@@ -19,7 +19,7 @@
     <div class="left">
       <div *ngFor="let file of todo?.files">
         <file
-          [todo]="todo"
+          [todo]="todo!"
           [file]="file"
           [removeCallback]="removeCallback"
         ></file>

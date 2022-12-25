@@ -33,7 +33,7 @@ export class TodosPage implements OnInit {
   }
   handleNewTodo() {
     this.todosService.resetTodoEditor();
-    this.todosService.selectTodo(null);
+    this.todosService.selectTodo(undefined);
   }
 
   transform(index: number) {

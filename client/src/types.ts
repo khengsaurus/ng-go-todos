@@ -1,7 +1,5 @@
 import { Route } from './enums';
 
-export type Nullable<T> = T | null;
-
 export interface ITypedObject<T = any> {
   [key: string]: T;
 }

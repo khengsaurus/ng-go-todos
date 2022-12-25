@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { debounce, interval, Subscription, tap } from 'rxjs';
-import { ITodo, ITypedObject, Nullable } from 'src/types';
+import { ITodo, ITypedObject } from 'src/types';
 import { TodosService, UserService } from '../services';
 
 const autoSaveDelay = 1000;
@@ -25,15 +25,15 @@ const initTodo = {
 @Inject('scrollEditor')
 @Inject('focusEditor')
 export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
-  @Input() todo: Nullable<ITodo> = null;
+  @Input() todo: ITodo | undefined;
   updateCallback: (todo: ITodo) => void;
   scrollEditor: () => void;
   focusEditor: () => void;
   todoForm: FormGroup;
   showMarkdown: boolean = false;
   text: string = '';
-  private formSub: Nullable<Subscription> = null;
-  private resetSub: Nullable<Subscription> = null;
+  private formSub: Subscription | undefined;
+  private resetSub: Subscription | undefined;
 
   constructor(
     protected userService: UserService,
@@ -141,7 +141,7 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
   }
 
   resetTodo() {
-    this.todo = null;
+    this.todo = undefined;
     this.todoForm.patchValue(initTodo);
   }
 }

@@ -32,24 +32,6 @@ $ng-go-todos-theme: mat.define-dark-theme(
 // that you are using.
 @include mat.all-component-themes($ng-go-todos-theme);
 
-@mixin hover-orange {
-  &:hover {
-    // color: $custom-orange(800);
-    color: #f2994e;
-    cursor: pointer;
-  }
-  &:active {
-    // color: $custom-orange(900);
-    color: #ef8a3c;
-  }
-}
-
-@mixin btn-orange {
-  @include hover-orange;
-  // color: $custom-orange(600);
-  color: #f5ab63;
-}
-
 :root {
   background-color: $black-33;
 }
@@ -115,4 +97,10 @@ body {
 
 .no-scrollbar {
   @include no-scrollbar;
+}
+
+.center-content {
+  @include flex-(column);
+  align-items: center;
+  margin-top: 30vh;
 }

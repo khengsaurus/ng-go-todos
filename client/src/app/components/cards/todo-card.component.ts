@@ -1,8 +1,8 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { pipe, tap } from 'rxjs';
-import { BoardsService, MixedService } from 'src/app/services';
-import { ITodo, Nullable } from 'src/types';
+import { tap } from 'rxjs';
+import { BoardsService } from 'src/app/services';
+import { ITodo } from 'src/types';
 import { PreviewTodoDialog } from '../dialogs';
 
 @Component({
@@ -11,10 +11,10 @@ import { PreviewTodoDialog } from '../dialogs';
   styleUrls: ['./cards.scss'],
 })
 export class TodoCard implements OnChanges {
-  @Input() todo: Nullable<ITodo> = null;
+  @Input() todo: ITodo | undefined;
   @Input() active = false;
   @Input() triggerModal = false;
-  @Input() editCallback = (_: Nullable<ITodo>) => {};
+  @Input() editCallback = (_: ITodo | undefined) => {};
   @Input() colorTag = false;
   todoTitle: string = '';
   colorTagClass: string = '';

@@ -22,6 +22,21 @@
   transform: translateY(-1px);
 }
 
+@mixin hover-orange {
+  &:hover {
+    cursor: pointer;
+    color: $orange-light;
+  }
+  &:active {
+    color: $orange;
+  }
+}
+
+@mixin btn-orange {
+  @include hover-orange;
+  color: $orange;
+}
+
 @mixin hover-($color) {
   transition: $transition-normal;
   &:hover {

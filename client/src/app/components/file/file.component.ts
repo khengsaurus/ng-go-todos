@@ -26,9 +26,8 @@ export class FileComponent {
       height: '150px',
       width: '250px',
     });
-
     dialogRef.componentInstance.prompt = `Are you sure you want to delete this file?`;
     dialogRef.componentInstance.callback = () =>
-      this.removeCallback(this.file.key);
+      this.removeCallback(this.file!.key);
   }
 }

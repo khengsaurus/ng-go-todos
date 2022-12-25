@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo, MutationResult } from 'apollo-angular';
 import { BehaviorSubject, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { map, share, switchMap, tap } from 'rxjs/operators';
-import { IUser, Nullable } from 'src/types';
+import { IUser } from 'src/types';
 import { AuthService } from './auth.service';
 import {
   CREATE_USER,
@@ -15,15 +15,15 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  currentUser: Nullable<IUser> = null;
-  currentUser$: Subject<Nullable<IUser>>;
+  currentUser: IUser | undefined;
+  currentUser$: Subject<IUser | undefined>;
 
   constructor(private apollo: Apollo, private authService: AuthService) {
-    this.currentUser$ = new BehaviorSubject<Nullable<IUser>>(null);
+    this.currentUser$ = new BehaviorSubject<IUser | undefined>(undefined);
     const _userObserver$ = this.authService.currentFbUser$.pipe(
       map((firebaseUser) => firebaseUser?.email || ''),
       switchMap(async (email) => {
-        let user: Nullable<IUser> = null;
+        let user: IUser | undefined;
         if (email) {
           user = await this.getUserPromise(email);
           if (user?.email !== email) {
@@ -37,8 +37,7 @@ export class UserService {
     );
     _userObserver$.subscribe(this.currentUser$);
   }
-
-  createUserPromise(email: string, username = ''): Promise<Nullable<IUser>> {
+  createUserPromise(email: string, username = ''): Promise<IUser | undefined> {
     return new Promise((resolve) => {
       firstValueFrom(
         this.apollo.mutate<ICREATE_USER>({
@@ -46,15 +45,15 @@ export class UserService {
           variables: { newUser: { email, username: username || email } },
         })
       )
-        .then((res) => resolve(res?.data?.createUser || null))
+        .then((res) => resolve(res?.data?.createUser))
         .catch((err) => {
           console.error(err);
-          resolve(null);
+          resolve(undefined);
         });
     });
   }
 
-  getUserPromise(email: string): Promise<Nullable<IUser>> {
+  getUserPromise(email: string): Promise<IUser | undefined> {
     return new Promise((resolve) => {
       firstValueFrom(
         this.apollo.query<IGET_USER>({
@@ -66,7 +65,7 @@ export class UserService {
         .catch((err) => {
           if (err?.message !== 'mongo: no documents in result')
             console.error(err);
-          resolve(null);
+          resolve(undefined);
         });
     });
   }

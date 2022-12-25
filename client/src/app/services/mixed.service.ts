@@ -17,7 +17,8 @@ export class MixedService {
     private todosService: TodosService
   ) {}
 
-  moveTodoToBoard(todo?: ITodo) {
+  // TODO: possible to create Observable from EventEmitter ?
+  moveTodoToBoard(todo: ITodo, callback: (boardId: string) => void) {
     if (!todo) return;
     const dialogRef = this.dialog.open(SelectBoardDialog, {
       autoFocus: false,
@@ -33,6 +34,7 @@ export class MixedService {
             tap((res) => {
               if (res.data?.moveTodoBetweenBoards) {
                 this.todosService.updateTodo({ ...todo, boardId });
+                callback(boardId);
               }
             })
           )

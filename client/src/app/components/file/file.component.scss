@@ -23,7 +23,8 @@ $file-w: 80px;
     transition: $transition-normal;
     pointer-events: none;
     mat-icon {
-      @include btn-orange;
+      @include hover-orange;
+      color: $orange;
     }
     &:hover {
       pointer-events: all;

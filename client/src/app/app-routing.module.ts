@@ -7,8 +7,16 @@ import { TodosPage } from './pages/todos-page/todos-page.component';
 
 const routes: Routes = [
   { path: Route.HOME, component: HomePage },
-  { path: Route.TODOS, component: TodosPage },
-  { path: Route.BOARDS, component: BoardsPage },
+  {
+    path: Route.TODOS,
+    component: TodosPage,
+    // canActivate: [AuthGuard]
+  },
+  {
+    path: Route.BOARDS,
+    component: BoardsPage,
+    // canActivate: [AuthGuard]
+  },
   {
     path: Route.USER,
     loadChildren: () =>

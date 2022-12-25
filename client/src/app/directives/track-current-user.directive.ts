@@ -1,12 +1,12 @@
 import { Directive, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, tap } from 'rxjs';
-import { IUser, Nullable } from 'src/types';
+import { IUser } from 'src/types';
 import { UserService } from '../services';
 
 @Directive({ selector: '[appTrackCurrentUser]' })
 export class TrackCurrentUserDirective implements OnInit, OnDestroy {
-  currentUser: Nullable<IUser> = null;
-  private userSub: Nullable<Subscription> = null;
+  currentUser: IUser | undefined;
+  private userSub: Subscription | undefined;
 
   constructor(public userService: UserService) {}
 
