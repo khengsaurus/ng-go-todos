@@ -10,7 +10,7 @@
 > python3 scripts/ls_s3_create_bucket.py
 
 # Run as background process and init LocalStack S3:
-> bash scripts/init_local.sh
+> bash scripts/init_dev.sh
 ```
 
 <hr/>

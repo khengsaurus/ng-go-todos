@@ -62,7 +62,6 @@ func (mongoClient *MongoClient) Connect(ctx context.Context) error {
 func (mongoClient *MongoClient) Ping(ctx context.Context) {
 	err := mongoClient.instance.Ping(ctx, nil)
 	if err != nil {
-		fmt.Printf("MongoClient.Ping failed: %v\n", err)
 		mongoClient.Connect(ctx)
 	}
 }
@@ -80,7 +79,6 @@ func GetCollection(ctx context.Context, name string) (*mongo.Collection, error) 
 	if !ok {
 		return nil, fmt.Errorf("couldn't find %s in request context", consts.MongoClientKey)
 	}
-	mongoClient.Ping(ctx)
 
 	database := mongoClient.instance.Database(consts.MongoDatabase)
 	if database == nil {
@@ -94,7 +92,7 @@ func GetSession(ctx context.Context) (mongo.Session, *mongo.Database, error) {
 	if !ok {
 		return nil, nil, fmt.Errorf("couldn't find %s in request context", consts.MongoClientKey)
 	}
-	mongoClient.Ping(ctx)
+
 	database := mongoClient.instance.Database(consts.MongoDatabase)
 	session, err := mongoClient.instance.StartSession()
 	if err != nil {
@@ -108,7 +106,7 @@ func GetMongoDb(ctx context.Context) (*mongo.Database, error) {
 	if !ok {
 		return nil, fmt.Errorf("couldn't find %s in request context", consts.MongoClientKey)
 	}
-	mongoClient.Ping(ctx)
+
 	return mongoClient.instance.Database(consts.MongoDatabase), nil
 }
 

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -36,11 +35,8 @@ func AdminDelete(w http.ResponseWriter, r *http.Request) {
 
 func HandleDeleteFiles(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("AdminDelete called - HandleDeleteFiles")
-	mongoClient := database.InitMongoClient()
-	ctx := context.WithValue(r.Context(), consts.MongoClientKey, mongoClient)
-	defer mongoClient.Disconnect(ctx, "AdminDelete")
+	todosColl, err := database.GetCollection(r.Context(), consts.TodosCollection)
 
-	todosColl, err := database.GetCollection(ctx, consts.TodosCollection)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -80,7 +76,11 @@ func HandleDeleteFiles(w http.ResponseWriter, r *http.Request) {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// }
 
-	_, err = todosColl.UpdateMany(ctx, bson.D{{}}, bson.M{"$set": bson.M{"files": []*model.File{}}})
+	_, err = todosColl.UpdateMany(
+		r.Context(),
+		bson.D{{}},
+		bson.M{"$set": bson.M{"files": []*model.File{}}},
+	)
 	if err != nil {
 		fmt.Printf("Failed to clear all todos' Files field: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

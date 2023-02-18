@@ -33,9 +33,9 @@ func main() {
 		panic(envErr)
 	}
 
-	mongoClient := database.InitMongoClient()
 	s3Client := database.InitS3Client()
 	redisClient := database.InitRedisClient()
+	mongoClient := database.InitMongoClient()
 
 	router := chi.NewRouter()
 	router.Use(middlewares.EnableCors)
@@ -56,11 +56,11 @@ func main() {
 	})
 
 	// Dev
-	router.HandleFunc(route_test, test)
-	router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
-
 	if consts.Local {
+		router.HandleFunc(route_test, test)
+		router.Handle(route_gql_pg, playground.Handler("GraphQL playground", route_gql))
 		router.Route(route_admin, func(adminRouter chi.Router) {
+			adminRouter.Use(middlewares.WithContext(consts.MongoClientKey, mongoClient))
 			adminRouter.Use(middlewares.AdminValidation)
 			controllers.AdminRouter(adminRouter)
 		})
