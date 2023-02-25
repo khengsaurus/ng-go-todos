@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { firstValueFrom, of, switchMap, tap } from 'rxjs';
-import { EditTodoDirective } from 'src/app/directives/edit-todo.directive';
+import { EditTodoDirective, TodoEditorId } from 'src/app/directives';
 import {
   BoardsService,
   FilesService,
@@ -8,17 +8,17 @@ import {
   TodosService,
   UserService,
 } from 'src/app/services';
-import { scrollEle } from 'src/app/utils';
 import { ITodo } from 'src/types';
 
 @Component({
-  selector: 'todo-editor',
+  selector: TodoEditorId,
   templateUrl: './todo-editor.component.html',
   styleUrls: ['./todo-editor.component.scss'],
 })
 export class TodoEditor extends EditTodoDirective {
   @Input() override todo: ITodo | undefined;
   @Input() size: number = 2;
+  public todoEditorId = TodoEditorId;
 
   constructor(
     protected override userService: UserService,
@@ -27,12 +27,7 @@ export class TodoEditor extends EditTodoDirective {
     private boardsService: BoardsService,
     private mixedService: MixedService
   ) {
-    super(
-      userService,
-      todosService,
-      () => scrollEle('todo-editor'),
-      () => document.getElementById('todo-editor')?.focus()
-    );
+    super(userService, todosService);
   }
 
   deleteTodo() {

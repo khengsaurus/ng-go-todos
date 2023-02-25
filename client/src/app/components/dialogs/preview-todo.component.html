@@ -8,7 +8,7 @@
     ></markdown-viewer>
     <div *ngIf="!todo?.markdown">{{ todo?.text }}</div>
   </div>
-  <form [formGroup]="todoForm" class="footer baseline-end">
+  <form [formGroup]="todoForm" class="footer baseline-end" [class.show]="show">
     <dropdown-select
       label="Priority"
       formControlName="priority"

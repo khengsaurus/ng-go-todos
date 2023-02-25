@@ -51,7 +51,7 @@ textarea.todo-editor {
   @include no-scrollbar;
   height: calc($content-height - $gap-l - $toolbar-h);
   width: calc(50% - 2 * $gap-l);
-  padding: 0px $gap-l;
+  padding: $gap-l;
   transition: $transition-slow;
   &.hide {
     width: 0px;

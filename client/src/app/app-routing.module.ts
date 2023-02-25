@@ -1,9 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Route } from 'src/enums';
-import { BoardsPage } from './pages/boards-page/boards-page.component';
-import { HomePage } from './pages/home-page/home-page.component';
-import { TodosPage } from './pages/todos-page/todos-page.component';
+import { BoardsPage, HomePage, TodosPage } from './pages';
 
 const routes: Routes = [
   { path: Route.HOME, component: HomePage },

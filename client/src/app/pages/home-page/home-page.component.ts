@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TrackCurrentUserDirective } from 'src/app/directives/track-current-user.directive';
+import { TrackCurrentUserDirective } from 'src/app/directives';
 import { UserService } from 'src/app/services';
 
 @Component({

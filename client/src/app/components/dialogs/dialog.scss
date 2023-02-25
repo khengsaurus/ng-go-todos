@@ -32,10 +32,17 @@ h3 {
     left: 0px;
     width: 100vw;
     border-top: 1px solid gainsboro;
+    opacity: 0;
 
     background-color: $black-33;
     border-radius: 4px;
     height: $dialog-footer-h;
+
+    &.show {
+      transition: 300ms;
+      opacity: 1;
+    }
+
     &.baseline-end {
       align-items: baseline;
       justify-content: flex-end;
@@ -48,8 +55,8 @@ h3 {
 
   .todo-text {
     @include no-scrollbar;
-    padding-top: $gap-l;
     overflow-y: scroll;
+    white-space: pre-line;
   }
 }
 

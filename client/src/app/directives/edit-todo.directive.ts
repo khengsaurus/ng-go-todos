@@ -1,5 +1,7 @@
 import {
+  Directive,
   Inject,
+  Injectable,
   Input,
   OnChanges,
   OnDestroy,
@@ -10,6 +12,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { debounce, interval, Subscription, tap } from 'rxjs';
 import { ITodo, ITypedObject } from 'src/types';
 import { TodosService, UserService } from '../services';
+import { scrollEle } from '../utils';
 
 const autoSaveDelay = 1000;
 const updateKeys = ['text', 'markdown', 'priority', 'done'];
@@ -22,13 +25,14 @@ const initTodo = {
   done: false,
 };
 
-@Inject('scrollEditor')
-@Inject('focusEditor')
-export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
+export const TodoEditorId = 'todo-editor';
+
+@Directive()
+export abstract class EditTodoDirective
+  implements OnInit, OnChanges, OnDestroy
+{
   @Input() todo: ITodo | undefined;
   updateCallback: (todo: ITodo) => void;
-  scrollEditor: () => void;
-  focusEditor: () => void;
   todoForm: FormGroup;
   showMarkdown: boolean = false;
   text: string = '';
@@ -38,13 +42,9 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
   constructor(
     protected userService: UserService,
     protected todosService: TodosService,
-    updateCallback = () => {},
-    scrollEditor = () => {},
-    focusEditor = () => {}
+    updateCallback = () => {}
   ) {
     this.updateCallback = updateCallback;
-    this.scrollEditor = scrollEditor;
-    this.focusEditor = focusEditor;
     this.todoForm = new FormGroup({
       text: new FormControl(initTodo.text),
       priority: new FormControl(initTodo.priority),
@@ -85,17 +85,18 @@ export class EditTodoDirective implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const newTodo = changes['todo']?.currentValue;
-    if (newTodo) {
+    const existingTodo = changes['todo']?.currentValue;
+    if (existingTodo) {
       this.todoForm.patchValue({
-        text: newTodo.text,
-        priority: newTodo.priority,
-        markdown: newTodo.markdown,
-        done: newTodo.done,
+        text: existingTodo.text,
+        priority: existingTodo.priority,
+        markdown: existingTodo.markdown,
+        done: existingTodo.done,
       });
-      this.scrollEditor();
+      scrollEle(TodoEditorId);
+    } else {
+      document.getElementById(TodoEditorId)?.focus();
     }
-    this.focusEditor();
   }
 
   ngOnDestroy() {

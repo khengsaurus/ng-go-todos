@@ -13,9 +13,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ComponentsModule } from './components/components.module';
 import { GraphQLModule } from './graphql.module';
-import { HomePage } from './pages/home-page/home-page.component';
-import { TodosPage } from './pages/todos-page/todos-page.component';
-import { BoardsPage } from './pages/boards-page/boards-page.component';
+import { BoardsPage, HomePage, TodosPage } from './pages';
 
 @NgModule({
   declarations: [

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { TrackCurrentUserDirective } from 'src/app/directives/track-current-user.directive';
+import { TrackCurrentUserDirective } from 'src/app/directives';
 import { AuthService, UserService } from 'src/app/services';
 
 @Component({
