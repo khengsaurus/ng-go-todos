@@ -1,23 +1,34 @@
 @import "../../../styles";
 
-mat-card.todo {
+mat-card.todo,
+mat-card.nav {
   cursor: pointer;
   background-color: $black-33;
   height: 24px;
   transition: $transition-normal;
   overflow: hidden;
+}
 
+mat-card.todo {
   &.active {
     box-shadow: 0 0 0px 1px #f5ab63;
   }
   .content {
     @include flex-(row);
     max-width: calc(100% - 30px);
-    mat-icon {
-      &.check {
-        min-width: 21px;
-      }
+    mat-icon.check {
+      min-width: 21px;
+      transform: scale(0.8);
     }
+  }
+}
+
+mat-card.nav {
+  &:hover {
+    box-shadow: 0 0 0px 1.5px #f5ab63;
+  }
+  .row {
+    justify-content: center;
   }
 }
 

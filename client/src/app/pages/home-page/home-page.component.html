@@ -4,7 +4,14 @@
     <h3>Log in to use this website's features</h3>
   </div>
 
-  <div *ngIf="currentUser as user">
-    <h2>Welcome, {{ user.username }}</h2>
+  <div *ngIf="currentUser as user" class="welcome">
+    <h2>Hello, vist your work via the links below</h2>
+    <div class="nav-cards">
+      <nav-card
+        *ngFor="let link of sideLinks"
+        [title]="link.label"
+        [href]="link.route"
+      ></nav-card>
+    </div>
   </div>
 </div>

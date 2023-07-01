@@ -37,6 +37,7 @@ export class Board implements OnChanges {
   toDelete: ITodo[] = [];
   className = 'board';
   haltEvent = haltEvent;
+  trackById = trackById;
 
   constructor(
     private userService: UserService,
@@ -44,6 +45,11 @@ export class Board implements OnChanges {
     private todosService: TodosService,
     private mixedService: MixedService
   ) {}
+
+  private renderTodos(todos: ITodo[], duplicate = false) {
+    this.todos = duplicate ? [...todos] : todos;
+    this.minHeight = `${todos.length * 66 - 10}px`;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     const { todos = [], color = 'gray' } = changes['board']?.currentValue;
@@ -149,14 +155,11 @@ export class Board implements OnChanges {
     }
   }
 
-  private renderTodos(todos: ITodo[], duplicate = false) {
-    this.todos = duplicate ? [...todos] : todos;
-    this.minHeight = `${todos.length * 66 - 10}px`;
-  }
-
-  editCallback = ((todo?: ITodo) => {
+  updateTodoCallback = ((todo?: ITodo) => {
     this.todos = this.todos?.map((t) => (t.id === todo?.id ? todo : t));
   }).bind(this);
 
-  trackById = trackById;
+  updateBoard = () => {
+    this.boardsService.openBoardDialog(this.board);
+  };
 }

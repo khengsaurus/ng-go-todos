@@ -1,5 +1,5 @@
 <div>
-  <h3>Create a new Board</h3>
+  <h3>{{ this.data.isEdit ? "Edit board" : "Create a new Board" }}</h3>
   <div class="dialog-content">
     <board-form [data]="this.data"></board-form>
   </div>
@@ -11,7 +11,7 @@
       [mat-dialog-close]="data"
       disabled="{{ !data.name }}"
     >
-      Create
+      {{ this.data.isEdit ? "Save" : "Create" }}
     </button>
   </div>
 </div>

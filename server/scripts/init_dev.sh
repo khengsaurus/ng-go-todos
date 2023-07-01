@@ -4,6 +4,6 @@
 
 docker compose down && docker compose up -d
 
-sleep 10
+sleep 5
 
 bash scripts/ls_s3_init.sh

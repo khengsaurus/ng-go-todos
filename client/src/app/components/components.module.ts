@@ -21,16 +21,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { Board } from './board/board.component';
-import { TodoCard } from './cards/todo-card.component';
-import { BoardForm, DropdownSelect } from './form';
+import { NavCard, TodoCard } from './cards';
 import { ConfirmButton } from './confirm-button.component';
 import {
+  BoardFormDialog,
   ConfirmDialog,
-  NewBoardDialog,
   PreviewTodoDialog,
   SelectBoardDialog,
 } from './dialogs';
 import { FileComponent } from './file/file.component';
+import { BoardForm, DropdownSelect } from './form';
 import { MarkdownViewer } from './markdown-viewer/markdown-viewer.component';
 import { AppShell } from './shell/shell.component';
 import { TodoEditor } from './todo-editor/todo-editor.component';
@@ -64,13 +64,14 @@ const declarations = [
   AppShell,
   Board,
   BoardForm,
+  BoardFormDialog,
   ConfirmButton,
   ConfirmDialog,
+  DropdownSelect,
   FileComponent,
   MarkdownViewer,
-  NewBoardDialog,
+  NavCard,
   PreviewTodoDialog,
-  DropdownSelect,
   SelectBoardDialog,
   TodoCard,
   TodoEditor,

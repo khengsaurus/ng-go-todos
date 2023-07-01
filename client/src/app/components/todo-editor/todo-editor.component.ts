@@ -84,11 +84,11 @@ export class TodoEditor extends EditTodoDirective {
     this.todosService
       .addRmTodoFile$(this.todo!, fileKey, '', true)
       .pipe(
-        switchMap((res) => {
-          return res === '-1'
+        switchMap((res) =>
+          res === -1
             ? this.filesService.deleteFile$(this.todo!, fileKey)
-            : of(true);
-        }),
+            : of(true)
+        ),
         tap((err) => {
           if (!err) {
             const files =

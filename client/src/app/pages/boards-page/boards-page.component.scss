@@ -13,7 +13,7 @@
   }
 }
 
-.new-board {
+.board-form {
   @include flex-(center);
   @include center;
   height: calc($board-min-height + 2px);

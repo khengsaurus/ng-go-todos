@@ -264,22 +264,36 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 	}
 
 	filter := bson.D{{Key: "_id", Value: boardId}}
-	update := bson.D{{
-		Key:   "$set",
-		Value: bson.D{{Key: "updatedAt", Value: time.Now()}},
-	}}
-	if updateBoard.Todos != nil {
-		update = append(update, bson.E{Key: "todos", Value: updateBoard.Todos})
+	// add filter for userId if present
+	if updateBoard.UserID != "" {
+		userId, err := primitive.ObjectIDFromHex(updateBoard.UserID)
+		if err != nil {
+			return false, err
+		}
+		filter = append(filter, bson.E{Key: "userId", Value: userId})
 	}
+
+	fmt.Printf("%v\n", updateBoard)
+	fmt.Println(updateBoard.Color)
+
+	updateVals := bson.D{{Key: "updatedAt", Value: time.Now()}}
 	if updateBoard.Name != nil {
-		update = append(update, bson.E{Key: "name", Value: updateBoard.Name})
+		updateVals = append(updateVals, bson.E{Key: "name", Value: updateBoard.Name})
 	}
 	if updateBoard.Color != nil {
-		update = append(update, bson.E{Key: "color", Value: updateBoard.Color})
+		updateVals = append(updateVals, bson.E{Key: "color", Value: updateBoard.Color})
 	}
-	_, err = boardsColl.UpdateOne(ctx, filter, update)
+	if updateBoard.Todos != nil {
+		updateVals = append(updateVals, bson.E{Key: "todos", Value: updateBoard.Todos})
+	}
+
+	update := bson.M{"$set": updateVals}
+	res, err := boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
+	}
+	if res.ModifiedCount != 1 {
+		return false, fmt.Errorf("failed to update board with id %s", updateBoard.ID)
 	}
 	database.RemoveKeyFromRedis(ctx, utils.GetUserTodosKey(updateBoard.UserID))
 
@@ -317,9 +331,7 @@ func (r *mutationResolver) MoveTodos(ctx context.Context, userID string, boardID
 	}
 
 	filter := bson.M{"_id": boardId}
-	update := bson.M{"$set": bson.M{
-		"todoIds": todoIds,
-	}}
+	update := bson.M{"$set": bson.M{"todoIds": todoIds}}
 	_, err = boardsColl.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return false, err
@@ -507,7 +519,7 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 		err := cursor.Decode(&todo)
 		if err != nil {
 			fmt.Println("Failed to decode todo document:")
-			fmt.Println(fmt.Printf("%v", err))
+			fmt.Println(fmt.Printf("%v\n", err))
 		} else {
 			todos = append(todos, &todo)
 		}

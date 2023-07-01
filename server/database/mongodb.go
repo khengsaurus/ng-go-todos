@@ -59,10 +59,13 @@ func (mongoClient *MongoClient) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (mongoClient *MongoClient) Ping(ctx context.Context) {
+func (mongoClient *MongoClient) Ping(ctx context.Context) error {
 	err := mongoClient.instance.Ping(ctx, nil)
 	if err != nil {
+		return fmt.Errorf("MongoClient.Ping failed: %v", err)
+	} else {
 		mongoClient.Connect(ctx)
+		return nil
 	}
 }
 
@@ -70,7 +73,7 @@ func (mongoClient *MongoClient) Disconnect(ctx context.Context, trace string) {
 	fmt.Printf("MongoClient.Disconnect called by: %v\n", trace)
 	if err := mongoClient.instance.Disconnect(ctx); err != nil {
 		fmt.Printf("MongoClient.Disconnect failed: %v\n", trace)
-		fmt.Println(fmt.Printf("%v", err))
+		fmt.Println(fmt.Printf("%v\n", err))
 	}
 }
 

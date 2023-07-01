@@ -14,8 +14,8 @@ export class TodoCard implements OnChanges {
   @Input() todo: ITodo | undefined;
   @Input() active = false;
   @Input() triggerModal = false;
-  @Input() editCallback = (_: ITodo | undefined) => {};
   @Input() colorTag = false;
+  @Input() updateCallback = (_: ITodo | undefined) => {};
   todoTitle: string = '';
   colorTagClass: string = '';
 
@@ -61,6 +61,6 @@ export class TodoCard implements OnChanges {
     });
 
     dialogRef.componentInstance.todo = this.todo;
-    dialogRef.componentInstance.onDestory = this.editCallback;
+    dialogRef.componentInstance.onDestory = this.updateCallback;
   }
 }

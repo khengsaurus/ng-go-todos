@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Apollo } from 'apollo-angular';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { distinctUntilChanged, map, tap } from 'rxjs/operators';
-import { NewBoardDialog } from 'src/app/components/dialogs';
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { BoardFormDialog } from 'src/app/components/dialogs';
 import { IBoard, ITodo, IUser } from 'src/types';
 import { UserService } from '.';
 import {
@@ -15,8 +15,10 @@ import {
   IGET_BOARDS,
   IMOVE_TODOS,
   IMOVE_TODO_BETWEEN_BOARDS,
+  IUPDATE_BOARD,
   MOVE_TODOS,
   MOVE_TODO_BETWEEN_BOARDS,
+  UPDATE_BOARD,
 } from './queries';
 
 @Injectable({ providedIn: 'root' })
@@ -78,21 +80,52 @@ export class BoardsService {
       );
   }
 
-  openBoardDialog() {
-    const dialogRef = this.dialog.open(NewBoardDialog, {
+  updateBoard$(updatedBoard: IBoard): Observable<string> {
+    const { userId, id, name, color } = updatedBoard;
+    return this.apollo
+      .mutate<IUPDATE_BOARD>({
+        mutation: UPDATE_BOARD,
+        variables: { updateBoard: { userId, id, name, color } },
+      })
+      .pipe(
+        tap((res) => {
+          if (res.data?.updateBoard) {
+            const updatedBoards = [...this._boardsCopy];
+            let i = 0;
+            while (i < this._boardsCopy.length) {
+              const board = updatedBoards[i];
+              if (updatedBoard.id === board.id) {
+                updatedBoards[i] = updatedBoard;
+                break;
+              }
+              i++;
+            }
+            this.updateBoards(updatedBoards);
+          }
+        }),
+        switchMap((res) => (res.data?.updateBoard ? id : ''))
+      );
+  }
+
+  openBoardDialog(board?: IBoard) {
+    const dialogRef = this.dialog.open(BoardFormDialog, {
       autoFocus: false,
       width: '244px',
-      data: { color: 'gray' },
+      data: board
+        ? { color: board.color, name: board.name, isEdit: true }
+        : { color: 'gray' },
     });
 
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve) =>
       dialogRef.afterClosed().subscribe((input) => {
         if (!input) return resolve(undefined);
 
         const { name, color } = input;
         if (name && this.userService.currentUser) {
           firstValueFrom(
-            this.createBoard$(this.userService.currentUser.id, name, color)
+            board
+              ? this.updateBoard$({ ...board, name, color })
+              : this.createBoard$(this.userService.currentUser.id, name, color)
           )
             .then(resolve)
             .catch((err) => {
@@ -102,8 +135,8 @@ export class BoardsService {
         } else {
           resolve(undefined);
         }
-      });
-    });
+      })
+    );
   }
 
   moveTodos$(todoIds: string[], boardId: string) {

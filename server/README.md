@@ -3,8 +3,14 @@
 ## Running with Docker
 
 ```bash
-# Run as foreground process:
-> docker compose down && docker compose up
+# Run app + services in docker:
+> docker compose up
+
+# Run services only in docker:
+> docker compose -f docker-compose-services.yml up
+
+# Run app (with services running locally in docker):
+> LOCAL=true go run main.go
 
 # Init LocalStack S3:
 > python3 scripts/ls_s3_create_bucket.py

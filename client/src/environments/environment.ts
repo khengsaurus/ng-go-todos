@@ -5,8 +5,8 @@ import { firebase } from './firebaseConfig';
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
   firebase,
+  production: false,
   gqlApi: `${process.env.NG_APP_SERVER_DEV}/${process.env.NG_APP_GQL_API}`,
   restApi: `${process.env.NG_APP_SERVER_DEV}/${process.env.NG_APP_REST_API}`,
 };

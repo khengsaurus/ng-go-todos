@@ -9,3 +9,20 @@ h3 {
   margin: 0px 16px;
   text-align: center;
 }
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+}
+
+.nav-cards {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+
+  > * {
+    margin: 0px 6px;
+    flex: 1;
+  }
+}

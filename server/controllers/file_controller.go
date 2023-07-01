@@ -28,6 +28,7 @@ func GetSignedPutURL(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -55,6 +56,7 @@ func GetSignedGetURL(w http.ResponseWriter, r *http.Request) {
 
 	url, err := database.GetSignedGetURL(r.Context(), fmt.Sprintf("%s/%s", userId, key))
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -74,6 +76,7 @@ func DeleteFile(w http.ResponseWriter, r *http.Request) {
 
 	_, err := database.DeleteObject(r.Context(), fmt.Sprintf("%s/%s", userId, key))
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

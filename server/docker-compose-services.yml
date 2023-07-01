@@ -1,9 +1,11 @@
 version: "3.3"
-name: ng-go-todos
+name:  ng-go-todos-services
 
 services:
   redis:
     image: redis:alpine
+    ports:
+      - 6379:6379
 
   mongo:
     image: mongo:latest
@@ -26,21 +28,6 @@ services:
       - HOSTNAME_EXTERNAL=127.0.0.1
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-
-  server:
-    build: .
-    ports:
-      - 8080:8080
-    depends_on:
-      - redis
-      - mongo
-      - localstack
-    environment:
-      - PORT=8080
-      - LOCAL=true
-      - REDIS_URI_C=redis
-      - MONGODB_URI_C=mongodb://mongo:27017
-      - AWS_URI_C=http://127.0.0.1:4566
 
 volumes:
   mongodata: {}

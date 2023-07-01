@@ -15,9 +15,7 @@ import (
 /* ---------------------------------------- Delete user ----------------------------------------*/
 // Delete a user's doc and all user's todos and boards
 
-func DeleteUser[R bool](
-	userID string,
-) callback[R] {
+func DeleteUser[R bool](userID string) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
@@ -50,9 +48,7 @@ func DeleteUser[R bool](
 /* ---------------------------------------- Create board ----------------------------------------*/
 // Create a new board and append its id to user's boardIds
 
-func CreateBoard[R *model.Board](
-	newBoard model.NewBoard,
-) callback[R] {
+func CreateBoard[R *model.Board](newBoard model.NewBoard) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
@@ -108,10 +104,7 @@ func CreateBoard[R *model.Board](
 
 /* ---------------------------------------- Delete board ----------------------------------------*/
 
-func DeleteBoard[R bool](
-	userID string,
-	boardID string,
-) callback[R] {
+func DeleteBoard[R bool](userID string, boardID string) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
@@ -187,10 +180,7 @@ func AddFileToTodo[R bool](
 
 /* ------------------------------------ Remove file from todo ------------------------------------*/
 
-func RmFileFromFromTodo[R bool](
-	todoID string,
-	fileKey string,
-) callback[R] {
+func RmFileFromFromTodo[R bool](todoID string, fileKey string) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
@@ -213,10 +203,7 @@ func RmFileFromFromTodo[R bool](
 
 /* ---------------------------------------- Delete todo ----------------------------------------*/
 
-func DeleteTodo[R bool](
-	userID string,
-	todoID string,
-) callback[R] {
+func DeleteTodo[R bool](userID string, todoID string) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
@@ -253,10 +240,7 @@ func DeleteTodo[R bool](
 /* -------------------------------------- Add todo to board --------------------------------------*/
 // Set boardId on todo & add todo to board
 
-func AddTodoToBoard[R bool](
-	todoID string,
-	boardID string,
-) callback[R] {
+func AddTodoToBoard[R bool](todoID string, boardID string) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,
@@ -302,10 +286,7 @@ func AddTodoToBoard[R bool](
 
 /* ------------------------------------ Remove todo from board ------------------------------------*/
 
-func RmTodoFromBoard[R bool](
-	todoID string,
-	boardID string,
-) callback[R] {
+func RmTodoFromBoard[R bool](todoID string, boardID string) callback[R] {
 	return func(
 		ctx context.Context,
 		db mongo.Database,

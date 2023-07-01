@@ -24,9 +24,9 @@
     >
       <todo-card
         [todo]="todo"
-        [triggerModal]="true"
-        [editCallback]="editCallback"
         [colorTag]="false"
+        [triggerModal]="true"
+        [updateCallback]="updateTodoCallback"
       >
         <mat-icon cdkDragHandle halt-event (click)="haltEvent($event)"
           >drag_indicator</mat-icon
@@ -47,7 +47,9 @@
     </div>
   </div>
   <div class="board-actions">
-    <div></div>
+    <button mat-button class="btn-s" (click)="updateBoard()">
+      <mat-icon class="mat-icon-s">edit</mat-icon>
+    </button>
     <confirm-button
       (action)="handleDelete()"
       [icon]="'delete'"

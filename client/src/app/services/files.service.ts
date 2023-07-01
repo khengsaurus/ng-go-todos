@@ -37,6 +37,7 @@ export class FilesService {
       ? presignReq.pipe(
           switchMap((presignRes: any) => {
             if (presignRes?.key && presignRes?.url) {
+              console.log(presignRes.url);
               return fetch(presignRes.url, {
                 method: 'put',
                 headers: environment.production
@@ -45,7 +46,6 @@ export class FilesService {
                       'Content-Type': 'application/json',
                       'x-amz-acl': 'public-read-write',
                     },
-                // headers: { 'Content-Type': 'multipart/form-data' }, // <- remote AWS
                 body: file,
               })
                 .then((uploadRes) => {

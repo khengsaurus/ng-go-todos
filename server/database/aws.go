@@ -55,8 +55,9 @@ func GetSignedPutURL(ctx context.Context, key string) (string, error) {
 
 	req, _ := s3Client.instance.PutObjectRequest(
 		&s3.PutObjectInput{
-			Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
-			Key:    aws.String(key),
+			Bucket:      aws.String(os.Getenv("AWS_BUCKET_NAME")),
+			Key:         aws.String(key),
+			ContentType: aws.String("multipart/form-data"),
 		},
 	)
 

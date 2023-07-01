@@ -91,7 +91,7 @@ func SetRedisValue[M model.Todo | model.Board](
 		consts.RedisTTL,
 	).Err()
 	if err != nil {
-		fmt.Printf("Failed to cache value for key %s\n", cacheKey)
+		fmt.Printf("Failed to cache value for key %s, error: %v\n", cacheKey, err)
 	}
 }
 
