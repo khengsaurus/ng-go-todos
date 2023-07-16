@@ -17,7 +17,7 @@ import { ITodo } from 'src/types';
 })
 export class TodoEditor extends EditTodoDirective {
   @Input() override todo: ITodo | undefined;
-  @Input() size: number = 2;
+  @Input() size: 'half' | 'full' = 'full';
   public todoEditorId = TodoEditorId;
 
   constructor(

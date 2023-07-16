@@ -1,5 +1,5 @@
-version: "3.3"
-name:  ng-go-todos-services
+version: "3.7"
+name: ls-m-r
 
 services:
   redis:
@@ -20,7 +20,7 @@ services:
     image: localstack/localstack
     ports:
       - 4566:4566
-      - "4510-4559:4510-4559"
+      - 4510-4559:4510-4559
     environment:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=ap-southeast-1

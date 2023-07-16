@@ -16,7 +16,7 @@
   </div>
 
   <div *ngIf="todo !== null" class="todo-footer">
-    <div class="left">
+    <div class="left {{ size === 'full' ? 'ml' : '' }}">
       <div *ngFor="let file of todo?.files">
         <file
           [todo]="todo!"

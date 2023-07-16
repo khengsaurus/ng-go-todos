@@ -13,11 +13,12 @@ $toolbar-h: 48px;
 
 form.todo-container {
   transition: 300ms ease-out;
-  &.size-2 {
-    padding: 0px;
-  }
-  &.size-3 {
+
+  &.size-full {
     padding-left: 30px;
+  }
+  &.size-half {
+    padding: 0px;
   }
 }
 
@@ -53,6 +54,7 @@ textarea.todo-editor {
   width: calc(50% - 2 * $gap-l);
   padding: $gap-l;
   transition: $transition-slow;
+
   &.hide {
     width: 0px;
     padding: 0px;
@@ -70,6 +72,7 @@ textarea.todo-editor {
   background-color: $gray-66;
   border-top: $default-border;
   width: 100%;
+
   .pt-2px,
   .mat-checkbox {
     padding-top: 2px;
@@ -80,6 +83,10 @@ textarea.todo-editor {
   }
   .left {
     @include flex-(row);
+
+    &.ml {
+      margin-left: 30px;
+    }
   }
 }
 
