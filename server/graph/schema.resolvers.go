@@ -20,7 +20,10 @@ import (
 )
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser) (*model.User, error) {
+func (r *mutationResolver) CreateUser(
+	ctx context.Context,
+	newUser model.NewUser,
+) (*model.User, error) {
 	fmt.Println("CreateUser called")
 	usersColl, err := database.GetCollection(ctx, consts.UsersCollection)
 	if err != nil {
@@ -57,7 +60,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, newUser model.NewUser
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool, error) {
+func (r *mutationResolver) DeleteUser(
+	ctx context.Context,
+	userID string,
+) (bool, error) {
 	var err error
 	cb := DeleteUser(userID)
 	if consts.Local {
@@ -75,7 +81,10 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (bool,
 }
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateTodo(
+	ctx context.Context,
+	newTodo model.NewTodo,
+) (*model.Todo, error) {
 	fmt.Println("CreateTodo called")
 	todosColl, err := database.GetCollection(ctx, consts.TodosCollection)
 	if err != nil {
@@ -117,7 +126,10 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, newTodo model.NewTodo
 }
 
 // UpdateTodo is the resolver for the updateTodo field.
-func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.UpdateTodo) (bool, error) {
+func (r *mutationResolver) UpdateTodo(
+	ctx context.Context,
+	updateTodo model.UpdateTodo,
+) (bool, error) {
 	fmt.Println("UpdateTodo called")
 	todosColl, err := database.GetCollection(ctx, consts.TodosCollection)
 	if err != nil {
@@ -166,7 +178,11 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, updateTodo model.Upda
 }
 
 // DeleteTodo is the resolver for the deleteTodo field.
-func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID string) (bool, error) {
+func (r *mutationResolver) DeleteTodo(
+	ctx context.Context,
+	userID string,
+	todoID string,
+) (bool, error) {
 	var err error
 	cb := DeleteTodo(userID, todoID)
 	if consts.Local {
@@ -184,7 +200,14 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, userID string, todoID
 }
 
 // AddRmTodoFile is the resolver for the addRmTodoFile field.
-func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fileKey string, fileName string, uploaded string, rm bool) (bool, error) {
+func (r *mutationResolver) AddRmTodoFile(
+	ctx context.Context,
+	todoID string,
+	fileKey string,
+	fileName string,
+	uploaded string,
+	rm bool,
+) (bool, error) {
 	var err error
 	if rm {
 		cb := RmFileFromFromTodo(todoID, fileKey)
@@ -211,7 +234,10 @@ func (r *mutationResolver) AddRmTodoFile(ctx context.Context, todoID string, fil
 }
 
 // RmTodoFiles is the resolver for the rmTodoFiles field.
-func (r *mutationResolver) RmTodoFiles(ctx context.Context, todoID string) (bool, error) {
+func (r *mutationResolver) RmTodoFiles(
+	ctx context.Context,
+	todoID string,
+) (bool, error) {
 	db, err := database.GetMongoDb(ctx)
 	if err != nil {
 		return false, err
@@ -233,7 +259,10 @@ func (r *mutationResolver) RmTodoFiles(ctx context.Context, todoID string) (bool
 }
 
 // CreateBoard is the resolver for the createBoard field.
-func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBoard) (*model.Board, error) {
+func (r *mutationResolver) CreateBoard(
+	ctx context.Context,
+	newBoard model.NewBoard,
+) (*model.Board, error) {
 	var board *model.Board
 	var err error
 	cb := CreateBoard(newBoard)
@@ -251,7 +280,10 @@ func (r *mutationResolver) CreateBoard(ctx context.Context, newBoard model.NewBo
 }
 
 // UpdateBoard is the resolver for the updateBoard field.
-func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.UpdateBoard) (bool, error) {
+func (r *mutationResolver) UpdateBoard(
+	ctx context.Context,
+	updateBoard model.UpdateBoard,
+) (bool, error) {
 	fmt.Println("UpdateBoard called")
 	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
 	if err != nil {
@@ -301,7 +333,11 @@ func (r *mutationResolver) UpdateBoard(ctx context.Context, updateBoard model.Up
 }
 
 // DeleteBoard is the resolver for the deleteBoard field.
-func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, boardID string) (bool, error) {
+func (r *mutationResolver) DeleteBoard(
+	ctx context.Context,
+	userID string,
+	boardID string,
+) (bool, error) {
 	var err error
 	cb := DeleteBoard(userID, boardID)
 	if consts.Local {
@@ -318,7 +354,12 @@ func (r *mutationResolver) DeleteBoard(ctx context.Context, userID string, board
 }
 
 // MoveTodos is the resolver for the moveTodos field.
-func (r *mutationResolver) MoveTodos(ctx context.Context, userID string, boardID string, todoIds []string) (bool, error) {
+func (r *mutationResolver) MoveTodos(
+	ctx context.Context,
+	userID string,
+	boardID string,
+	todoIds []string,
+) (bool, error) {
 	fmt.Println("MoveTodos called")
 	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
 	if err != nil {
@@ -343,7 +384,11 @@ func (r *mutationResolver) MoveTodos(ctx context.Context, userID string, boardID
 }
 
 // MoveBoards is the resolver for the moveBoards field.
-func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardIds []string) (bool, error) {
+func (r *mutationResolver) MoveBoards(
+	ctx context.Context,
+	userID string,
+	boardIds []string,
+) (bool, error) {
 	fmt.Println("MoveBoards called")
 	usersColl, err := database.GetCollection(ctx, consts.UsersCollection)
 	if err != nil {
@@ -368,7 +413,13 @@ func (r *mutationResolver) MoveBoards(ctx context.Context, userID string, boardI
 }
 
 // AddRmBoardTodo is the resolver for the addRmBoardTodo field.
-func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, todoID string, boardID string, rm bool) (bool, error) {
+func (r *mutationResolver) AddRmBoardTodo(
+	ctx context.Context,
+	userID string,
+	todoID string,
+	boardID string,
+	rm bool,
+) (bool, error) {
 	var err error
 
 	if rm {
@@ -396,7 +447,14 @@ func (r *mutationResolver) AddRmBoardTodo(ctx context.Context, userID string, to
 }
 
 // MoveTodoBetweenBoards is the resolver for the moveTodoBetweenBoards field.
-func (r *mutationResolver) MoveTodoBetweenBoards(ctx context.Context, userID string, todoID string, fromBoard string, toBoard string, toIndex int) (bool, error) {
+func (r *mutationResolver) MoveTodoBetweenBoards(
+	ctx context.Context,
+	userID string,
+	todoID string,
+	fromBoard string,
+	toBoard string,
+	toIndex int,
+) (bool, error) {
 	var err error
 	cb := MoveTodoBwBoards(todoID, fromBoard, toBoard, toIndex)
 	if consts.Local {
@@ -413,7 +471,10 @@ func (r *mutationResolver) MoveTodoBetweenBoards(ctx context.Context, userID str
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
+func (r *queryResolver) GetUser(
+	ctx context.Context,
+	email string,
+) (*model.User, error) {
 	fmt.Println("GetUser called")
 	usersColl, err := database.GetCollection(ctx, consts.UsersCollection)
 	if err != nil {
@@ -459,7 +520,10 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 // GetTodo is the resolver for the getTodo field.
-func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo, error) {
+func (r *queryResolver) GetTodo(
+	ctx context.Context,
+	todoID string,
+) (*model.Todo, error) {
 	fmt.Println("GetTodo called")
 	todosColl, err := database.GetCollection(ctx, consts.TodosCollection)
 	if err != nil {
@@ -480,7 +544,11 @@ func (r *queryResolver) GetTodo(ctx context.Context, todoID string) (*model.Todo
 }
 
 // GetTodos is the resolver for the getTodos field.
-func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool) (*model.GetTodosRes, error) {
+func (r *queryResolver) GetTodos(
+	ctx context.Context,
+	userID string,
+	fresh bool,
+) (*model.GetTodosRes, error) {
 	fmt.Println("GetTodos called")
 	redisClient, redisClientErr := database.GetRedisClient(ctx)
 	if !fresh && redisClient != nil {
@@ -536,7 +604,10 @@ func (r *queryResolver) GetTodos(ctx context.Context, userID string, fresh bool)
 }
 
 // GetBoard is the resolver for the getBoard field.
-func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Board, error) {
+func (r *queryResolver) GetBoard(
+	ctx context.Context,
+	boardID string,
+) (*model.Board, error) {
 	fmt.Println("GetBoard called")
 	boardsColl, err := database.GetCollection(ctx, consts.BoardsCollection)
 	if err != nil {
@@ -576,7 +647,11 @@ func (r *queryResolver) GetBoard(ctx context.Context, boardID string) (*model.Bo
 }
 
 // GetBoards is the resolver for the getBoards field.
-func (r *queryResolver) GetBoards(ctx context.Context, userID string, fresh bool) (*model.GetBoardsRes, error) {
+func (r *queryResolver) GetBoards(
+	ctx context.Context,
+	userID string,
+	fresh bool,
+) (*model.GetBoardsRes, error) {
 	fmt.Println("GetBoards called")
 	redisClient, redisClientErr := database.GetRedisClient(ctx)
 	if !fresh && redisClient != nil {

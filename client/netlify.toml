@@ -1,0 +1,5 @@
+[build]
+command = "ng build --configuration production"
+
+[context.proxy]
+command = "ng build --configuration production --base-href /todos/"
