@@ -5,7 +5,7 @@ import { UserService } from '../services';
 
 @Directive({ selector: '[appTrackCurrentUser]' })
 export class TrackCurrentUserDirective implements OnInit, OnDestroy {
-  currentUser: IUser | undefined;
+  currentUser: IUser | null | undefined;
   private userSub: Subscription | undefined;
 
   constructor(public userService: UserService) {}

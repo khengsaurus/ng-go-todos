@@ -37,7 +37,6 @@ export class FilesService {
       ? presignReq.pipe(
           switchMap((presignRes: any) => {
             if (presignRes?.key && presignRes?.url) {
-              console.log(presignRes.url);
               return fetch(presignRes.url, {
                 method: 'put',
                 headers: environment.production

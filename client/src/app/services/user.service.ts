@@ -15,24 +15,28 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  currentUser: IUser | undefined;
-  currentUser$: Subject<IUser | undefined>;
+  /** @value null = loading */
+  currentUser: IUser | null | undefined;
+  currentUser$: Subject<IUser | null | undefined>;
 
   constructor(private apollo: Apollo, private authService: AuthService) {
-    this.currentUser$ = new BehaviorSubject<IUser | undefined>(undefined);
+    this.currentUser$ = new BehaviorSubject<IUser | null | undefined>(
+      undefined
+    );
     const _userObserver$ = this.authService.currentFbUser$.pipe(
       map((firebaseUser) => firebaseUser?.email || ''),
       switchMap(async (email) => {
-        let user: IUser | undefined;
         if (email) {
-          user = await this.getUserPromise(email);
+          let user = await this.getUserPromise(email);
           if (user?.email !== email) {
             user = await this.createUserPromise(email);
           }
+          return user;
+        } else {
+          return null;
         }
-        return user;
       }),
-      tap((user) => (this.currentUser = user)),
+      tap((user) => (this.currentUser = user || null)),
       share() // required to 'flatten' async to one output
     );
     _userObserver$.subscribe(this.currentUser$);

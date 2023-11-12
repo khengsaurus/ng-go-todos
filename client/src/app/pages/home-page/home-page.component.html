@@ -1,5 +1,9 @@
 <div class="center-content">
-  <div *ngIf="!currentUser">
+  <div *ngIf="currentUser === undefined">
+    <h2>Loading...</h2>
+  </div>
+
+  <div *ngIf="currentUser === null">
     <h2>Hello</h2>
     <h3>Log in to use this website's features</h3>
   </div>

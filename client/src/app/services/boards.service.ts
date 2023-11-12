@@ -35,7 +35,9 @@ export class BoardsService {
     const _boardsObserver$ = this.userService.currentUser$.pipe(
       // to prevent getBoards being called multiple times and updating state with outdated data 🤷‍♂️
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
-      tap((user) => this.getBoards(user))
+      tap((user) => {
+        if (user) this.getBoards(user);
+      })
     );
     _boardsObserver$.subscribe();
   }
