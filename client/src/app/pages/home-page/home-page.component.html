@@ -5,7 +5,12 @@
 
   <div *ngIf="currentUser === null">
     <h2>Hello</h2>
-    <h3>Log in to use this website's features</h3>
+    <h3>
+      <span class="dark">
+        To use this website's features, please
+        <a href="/user/profile">log in</a>
+      </span>
+    </h3>
   </div>
 
   <div *ngIf="currentUser as user" class="welcome">
@@ -18,4 +23,19 @@
       ></nav-card>
     </div>
   </div>
+
+  <br />
+  <br />
+  <h2>About</h2>
+  <span class="dark" style="width: 460px">
+    The frontend for this app is adapted from Fireship.io's
+    <a
+      href="https://fireship.io/courses/angular"
+      rel="noreferrer"
+      target="_blank"
+      >Angular course</a
+    >, but the use of Firebase is limited to user authentication. For all other
+    services, this app uses both GraphQL and REST APIs, with the server written
+    in Go.
+  </span>
 </div>
